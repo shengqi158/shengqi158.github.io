@@ -1,0 +1,1355 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="burpsuite,extention,插件,RSA,加解密,encryption,decryption," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="burpsuit extention 插件 RSA encryption decryption  #1，简介  burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见github代码，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据">
+<meta name="keywords" content="burpsuite,extention,插件,RSA,加解密,encryption,decryption">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Burpsuite 插件开发之RSA加解密">
+<meta property="og:url" content="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/index.html">
+<meta property="og:site_name" content="xxlegend">
+<meta property="og:description" content="burpsuit extention 插件 RSA encryption decryption  #1，简介  burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见github代码，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据">
+<meta property="og:image" content="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/burp_rsa.png">
+<meta property="og:image" content="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/burp-active-scan.png">
+<meta property="og:updated_time" content="2017-05-01T08:15:01.149Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Burpsuite 插件开发之RSA加解密">
+<meta name="twitter:description" content="burpsuit extention 插件 RSA encryption decryption  #1，简介  burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见github代码，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据">
+<meta name="twitter:image" content="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/burp_rsa.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/"/>
+
+
+
+
+
+  <title>Burpsuite 插件开发之RSA加解密 | xxlegend</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ae110488ae3a7a2872b00e735070cfbc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xxlegend</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Burpsuite 插件开发之RSA加解密
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
+                2017-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Burp/" itemprop="url" rel="index">
+                    <span itemprop="name">Burp</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/04/01/Burpsuite插件开发之RSA加解密/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/04/01/Burpsuite插件开发之RSA加解密/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/04/01/Burpsuite插件开发之RSA加解密/" class="leancloud_visitors" data-flag-title="Burpsuite 插件开发之RSA加解密">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>burpsuit extention 插件 RSA encryption decryption</p>
+<hr>
+<p>#1，简介</p>
+<p> burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见<a href="https://github.com/shengqi158/RSA-Crypto-Burp-Extention" target="_blank" rel="external">github代码</a>，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据首先是以rsa方式加密des的key得到encryptKey，然后使用des的key加密数据包得到data，再组装成一个JSON格式串，这是加密过程，当然解密过程就是逆向的。插件应用场景主要是用于通过分析apk的实现，或者泄露的密钥，获取其加解密算法，在解密后的数据包中插入payload，发现注入问题等。如下则是加密后的数据包：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">c=&#123;</div><div class="line">&quot;data&quot;:&quot;21BhviedgtbwK6rdlK7vzltqxOLxUmU2g5qaO5LWPYTha5fXslmL6jrMkFnJBwpZPZMNl5foxTUHw2Mae++zkWwtzWkKXI9WJ/CJqxO9uORT5I6iUmIG7bBcgnHpmlSNKfFwBvnr9vj3v5ByvW2s2/pL9rSaeD+/8XsX01NA96mC4g5pVBeU5IY9F4tdxH9yobXfN6GzEVhLeiEd30xzMA\u003d\u003d&quot;,</div><div class="line">&quot;encryptKey&quot;:&quot;bjWZgigAW/ZaAA55v7Yi9AGt2qsP7BfZZISu70qc/xVUVfh5L/Mw/mMbzxkcZ6uXb1vvgXvF7hHYwjsVzvEkRK0rIfIwkcYzn160fvQ/8+F8YBMDLzTEhf8r0KjOLlJV+HgOsS4QG/G9lOU5mnupfrVA9sf54b3OvXHU0TQVG7U\u003d&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p> 从数据库包能看到大的数据是一个json格式，里面有data，和encryptKey值，encryptKey就是使用RSA加密des 的key得到的，RSA的工作方式和pem文件可通过界面设置，再接着用这个key采用des方式解密data中的内容。操作界面如下：<br><img src="burp_rsa.png" alt="操作界面图"></p>
+<p>#2，InsertPoint 接口</p>
+<p>InsertPoint顾名思义就是注入点，就是payload插入的地方，比如request中的cookie，参数等位置。为了对一些burpsuit不支持的参数格式进行支持就必须实现该接口，可以用在Active Scanner和Intruder中.</p>
+<p>##2.1 基础开发知识</p>
+<p>最好的方式就是在原有插件的基础上修改，这样能省很多精力，当然如果要一步一步来的话，步骤如下：<br>（1）包含burp的接口文件<br>（2）创建一个包名为burp，在里面创建BurpExtender类，实现IBurpExtender接口，这个BurpExtender类是所有接口的心脏，注意这里涉及到名字都不能改动，burp插件就这么规定的。<br>（3）实现唯一的接口函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public void registerExtenderCallbacks(final IBurpExtenderCallbacks callbacks) &#123;</div><div class="line">        this. callbacks = callbacks ;</div><div class="line">       &#125;</div></pre></td></tr></table></figure></p>
+<p>通过callbacks获取核心基础库能力,像日志，请求，返回值修改等。<br>（4）日志接口</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">PrintWriter stdout = new PrintWriter(callbacks.getStdout(), true);</div><div class="line">PrintWriter stderr = new PrintWriter(callbacks.getStderr(), true);</div><div class="line">//输出到插件的output</div><div class="line">stdout.println(&quot;Hello output&quot;);</div><div class="line">// 输出到alerts tab</div><div class="line">callbacks.issueAlert(&quot;Hello alerts&quot;);</div><div class="line">//打印调用栈</div><div class="line">e.printStackTrace(stderr)</div><div class="line">```    </div><div class="line">有了这些日志接口就能比较好的调试代码了，如果要很好的跟踪请求的，可以在BApp Store中添加&quot;Custom Logger&quot;这个插件，能够记录所有的请求和返回信息。</div><div class="line"></div><div class="line">##2.2 getInsertionPoints</div><div class="line"></div><div class="line">下面我们就来讲讲如何实现一个`InsertionPoints`接口。</div><div class="line">第一步继承`IScannerInsertionPointProvider`接口，实现getInsertionPoints()方法，同时通过`callbacks.registerScannerInsertionPointProvider(this)`方法注册成为insertion point provider。下面我们就来看看`getInsertionPoints()`的实现。</div></pre></td></tr></table></figure>
+<pre><code> @Override
+public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestResponse baseRequestResponse)
+{
+    // 生成insertPoints数组
+    List&lt;IScannerInsertionPoint&gt; insertionPoints = new ArrayList&lt;IScannerInsertionPoint&gt;();
+    // 获取请求参数
+    IRequestInfo requestInfo = helpers.analyzeRequest(baseRequestResponse.getRequest());
+    List&lt;IParameter&gt; requestParams = requestInfo.getParameters();
+
+
+    for (IParameter parameter : requestParams) {
+        String value = parameter.getValue();
+        value = helpers.urlDecode(value).trim();
+        EncryptBean encryptBean = new EncryptBean();
+        if (parameter.getName().trim().equals(&quot;c&quot;)){//参数中含有c参数表示要加密的内容
+            encryptBean = JSON.parseObject(value, EncryptBean.class);
+            stdout.println(&quot;private key: &quot; + key.privateKey + &quot; public key &quot; + key.publicKey);
+            try {
+                value = decryptRSAAndDES(key, encryptBean);
+                stdout.println(&quot;after decrypted:Will scan  data at parameter &quot; + parameter + &quot; with value decrypted &quot; + value);
+
+            } catch (Exception e) {
+                e.printStackTrace(stderr);
+            }
+
+            if (value.isEmpty()) continue;
+
+            try {
+                String basename = parameter.getName();
+                //insertionPoints.add(new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value));
+                JSONObject jsonObj = JSON.parseObject(value);
+                String basevalue = &quot;&quot;;
+                for(Map.Entry&lt;String, Object&gt; entry: jsonObj.entrySet()){
+                    basename = entry.getKey();
+                    basevalue = entry.getValue().toString();
+                    //在这里传入总的value值以便在InsertionPoint进行分解，构造加密后的request请求，构造InsertionPoint时传入的value为总的value值
+                    insertionPoints.add(0,new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value));
+                    stdout.println(&quot;in for:Will scan AES encrypted data at parameter &quot; + basename + &quot; with value &quot; + value);
+                }
+
+            } catch(Exception e) {
+            }
+
+        }
+
+    }
+
+    return insertionPoints;
+}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">这一段代码的大体意思就是通过helper.analyzeRequest方法获取所有请求信息，遍历其中的参数信息，当发现参数名等于&quot;c&quot;时就会调用解密过程，这块的代码需要根据参数格式自定义解析参数过程。调用解密的过程大体就是先解析JSON格式，然后解密，得到解密数据的内容后调用`new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value)`实例化一个注入点。一般情况下basename和value是一一对应的，如param1=phoneNum，但是这里我们basename传入param1，value值则是解密后的值如`&#123;&quot;userid&quot;:&quot;51ba27cb-514d-3d86-0000-2f7515a40613&quot;,&quot;task_id&quot;:&quot;1450147269&quot;,&quot;param1&quot;:&quot;000000000000000&quot;,&quot;m&quot;:&quot;https&quot;&#125;`，这么传递是为了方便实例化插入点。接着我们看下InsertionPoint的参数构造。</div><div class="line"></div><div class="line">##2.3 InsertionPoint</div></pre></td></tr></table></figure>
+<p>InsertionPoint(BurpExtender newParent, byte[] baseRequest, String basename, String basevalue)<br>    {<br>        this.parent = newParent;<br>        this.baseRequest = baseRequest;<br>        this.baseName = basename;<br>        //this.baseValue = basevalue;<br>        this.value = basevalue;<br>        this.baseValue = JSON.parseObject(basevalue).getString(basename);</p>
+<pre><code>}
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">在InsertionPoint的代码中有一个很重要的接口就是buildRequest，这个函数就是用来添加payload。</div></pre></td></tr></table></figure>
+<p>  @Override<br>    public byte[] buildRequest(byte[] payload)<br>    {<br>        String payloadPlain = parent.helpers.bytesToString(payload);<br>        String payloadEncrypted = “”;<br>        String tmpAESKey = “0123456789abcdef”;<br>        parent.stdout.println(“payloadPlain:” + payloadPlain);<br>        parent.callbacks.issueAlert(“payloadPlain:” + payloadPlain);<br>        try {<br>            Map<string,string> map = JSON.parseObject(this.value, new TypeReference<map<string, string="">&gt;(){}.getType());<br>            map.put(this.baseName, getBaseValue() + payloadPlain );<br>            String allPayloadPlain = JSON.toJSONString(map);<br>            payloadEncrypted = parent.encryptRSAAndDES(allPayloadPlain, tmpAESKey, parent.key);<br>        } catch(Exception e) {<br>            parent.callbacks.issueAlert(e.toString());<br>        }<br>        parent.stdout.println(“Inserting “ + payloadPlain + “ [“ + payloadEncrypted + “] in parameter “ + baseName);<br>        // TODO: Only URL parameters, must change to support POST parameters, cookies, etc.<br>        //“c” 解密数据格式包一致<br>        return parent.helpers.updateParameter(baseRequest, parent.helpers.buildParameter(“c”, payloadEncrypted, IParameter.PARAM_BODY));<br>    }<br><code>``
+这段代码就是获取payload，然后嵌入到解密后的请求包，然后将请求加密，最后调用updateParameter更新参数信息。在这里要注意</code>parent.helpers.buildParameter(“c”, payloadEncrypted, IParameter.PARAM_BODY)<code>c是body中的请求参数，和我们的数据格式对应，</code>IParameter.PARAM_BODY<code>这个参数则表明是Body中的请求参数，如果是URl中的则是</code>PARAM_URL`</map<string,></string,string></p>
+<p>##2.4 接口关系</p>
+<p>知道了上述接口的作用，感觉还糊里糊涂的。那就是这些接口是怎么串起来的，数据包是如何流动的，下面我们来看下active scanning的流程。<br><img src="burp-active-scan.png" alt="active scan流程"><br>ActiveScanner引擎从InsertionPoints Provider获取Insertion Points，然后调用BuildRequest发送Request，Requst再经过HttpListener的处理到达webServer。</p>
+<p>参考文献：</p>
+<p><a href="http://drops.wooyun.org/papers/3962" target="_blank" rel="external">http://drops.wooyun.org/papers/3962</a></p>
+<p><a href="http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf" target="_blank" rel="external">http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf</a></p>
+<p><a href="https://github.com/lgrangeia/aesburp" target="_blank" rel="external">https://github.com/lgrangeia/aesburp</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/burpsuite/" rel="tag"># burpsuite</a>
+          
+            <a href="/tags/extention/" rel="tag"># extention</a>
+          
+            <a href="/tags/插件/" rel="tag"># 插件</a>
+          
+            <a href="/tags/RSA/" rel="tag"># RSA</a>
+          
+            <a href="/tags/加解密/" rel="tag"># 加解密</a>
+          
+            <a href="/tags/encryption/" rel="tag"># encryption</a>
+          
+            <a href="/tags/decryption/" rel="tag"># decryption</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/01/Python安全编码&代码审计/" rel="next" title="Python安全编码&代码审计">
+                <i class="fa fa-chevron-left"></i> Python安全编码&代码审计
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/04/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" rel="prev" title="Phpwind利用hash长度扩展攻击修改后台密码getshell">
+                Phpwind利用hash长度扩展攻击修改后台密码getshell <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="xxlegend" />
+          <p class="site-author-name" itemprop="name">xxlegend</p>
+           
+              <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">65</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/shengqi158" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/shengqi158" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/1900013681" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xxlegend</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://yoursite.com/2017/04/01/Burpsuite插件开发之RSA加解密/';
+          this.page.identifier = '2017/04/01/Burpsuite插件开发之RSA加解密/';
+          this.page.title = 'Burpsuite 插件开发之RSA加解密';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      $('#local-search-input').focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("rAO8AHWqEz3IlgcuNBzFXyK3-gzGzoHsz", "LI2NyeVIf9NiHynChn0UrBCl");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
