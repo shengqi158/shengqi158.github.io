@@ -111,7 +111,7 @@
   var CONFIG = {
     root: '/',
     scheme: 'Mist',
-    sidebar: {"position":"right","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    sidebar: {"position":"right","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
     fancybox: true,
     motion: true,
     duoshuo: {
@@ -331,10 +331,10 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/PHP比较操作符带来的安全问题/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/07/30/Python安全编码&代码审计/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="name" content="廖新喜">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.png">
     </span>
@@ -353,8 +353,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/04/01/PHP比较操作符带来的安全问题/" itemprop="url">
-                  Php比较操作符带来的安全问题
+                <a class="post-title-link" href="/2015/07/30/Python安全编码&代码审计/" itemprop="url">
+                  Python安全编码&代码审计
                 </a>
               
             
@@ -370,8 +370,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-30T15:38:36+08:00">
+                2015-07-30
               </time>
             
 
@@ -393,8 +393,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Php/" itemprop="url" rel="index">
-                    <span itemprop="name">Php</span>
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
                   </a>
                 </span>
 
@@ -411,9 +411,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/04/01/PHP比较操作符带来的安全问题/#comments" itemprop="discussionUrl">
+                <a href="/2015/07/30/Python安全编码&代码审计/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/PHP比较操作符带来的安全问题/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2015/07/30/Python安全编码&代码审计/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -421,7 +421,7 @@
 
           
           
-             <span id="/2017/04/01/PHP比较操作符带来的安全问题/" class="leancloud_visitors" data-flag-title="Php比较操作符带来的安全问题">
+             <span id="/2015/07/30/Python安全编码&代码审计/" class="leancloud_visitors" data-flag-title="Python安全编码&代码审计">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -451,23 +451,36 @@
       
         
           
-            <h1 id="1-比较操作符"><a href="#1-比较操作符" class="headerlink" title="1 比较操作符"></a>1 比较操作符</h1><p>php的比较操作符有==（等于）松散比较，===（完全等于）严格比较，这里面就会引入很多有意思的问题。在松散比较的时候，php会将他们的类型统一，比如说<strong>字符到数字，非bool类型转换成bool类型</strong>，为了避免意想不到的运行效果，应该使用严格比较。如下是php manual上的比较运算符表：  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">例子	    名称	    结果</div><div class="line">$a == $b	等于	    TRUE，如果类型转换后 $a 等于 $b。</div><div class="line">$a === $b	全等	    TRUE，如果 $a 等于 $b，并且它们的类型也相同。</div><div class="line">$a != $b	不等	    TRUE，如果类型转换后 $a 不等于 $b。</div><div class="line">$a &lt;&gt; $b	不等	    TRUE，如果类型转换后 $a 不等于 $b。</div><div class="line">$a !== $b	不全等	    TRUE，如果 $a 不等于 $b，或者它们的类型不同。</div><div class="line">$a &lt; $b	小与	    TRUE，如果 $a 严格小于 $b。</div><div class="line">$a &gt; $b	大于	    TRUE，如果 $a 严格大于 $b。</div><div class="line">$a &lt;= $b	小于等于	TRUE，如果 $a 小于或者等于 $b。</div><div class="line">$a &gt;= $b	大于等于	TRUE，如果 $a 大于或者等于 $b。</div></pre></td></tr></table></figure>
-<h1 id="2-安全问题"><a href="#2-安全问题" class="headerlink" title="2 安全问题"></a>2 安全问题</h1><h2 id="2-1-hash比较缺陷"><a href="#2-1-hash比较缺陷" class="headerlink" title="2.1 hash比较缺陷"></a>2.1 hash比较缺陷</h2><p>php在处理hash字符串的时候会用到!=,==来进行hash比较，如果hash值以0e开头，后边都是数字，再与数字比较，就会被解释成0*10^n还是为0，就会被判断相等，绕过登录环节。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">root@kali:~/tool# php -r &apos;var_dump(&quot;00e0345&quot; == &quot;0&quot;);var_dump(&quot;0e123456789&quot;==&quot;0&quot;);var_dump(&quot;0e1234abc&quot;==&quot;0&quot;);&apos;</div><div class="line">bool(true)</div><div class="line">bool(true)</div><div class="line">bool(false)</div></pre></td></tr></table></figure></p>
-<p>当全是数字的时候，宽松的比较会执行尽力模式，如0e12345678会被解释成0*10^12345678,除了e不全是数字的时候就不会相等，这能从<code>var_dump(&quot;0e1234abc&quot;==&quot;0&quot;)</code>可以看出来。  </p>
-<h2 id="2-2-bool-欺骗"><a href="#2-2-bool-欺骗" class="headerlink" title="2.2 bool 欺骗"></a>2.2 bool 欺骗</h2><p>当存在json_decode和unserialize的时候，部分结构会被解释成bool类型，也会造成欺骗。json_decode示例代码：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$json_str = <span class="string">'&#123;"user":true,"pass":true&#125;'</span>;</div><div class="line">$data = json_decode($json_str,<span class="keyword">true</span>);</div><div class="line"><span class="keyword">if</span> ($data[<span class="string">'user'</span>] == <span class="string">'admin'</span> &amp;&amp; $data[<span class="string">'pass'</span>]==<span class="string">'secirity'</span>)</div><div class="line">&#123;</div><div class="line">    print_r(<span class="string">'logined in as bool'</span>.<span class="string">"\n"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>运行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:/var/www# php /root/php/hash.php</div><div class="line">logined in as bool</div></pre></td></tr></table></figure></p>
-<p>unserialize示例代码：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$unserialize_str = <span class="string">'a:2:&#123;s:4:"user";b:1;s:4:"pass";b:1;&#125;'</span>;</div><div class="line">$data_unserialize = unserialize($unserialize_str);</div><div class="line"><span class="keyword">if</span> ($data_unserialize[<span class="string">'user'</span>] == <span class="string">'admin'</span> &amp;&amp; $data_unserialize[<span class="string">'pass'</span>]==<span class="string">'secirity'</span>)</div><div class="line">&#123;</div><div class="line">    print_r(<span class="string">'logined in unserialize'</span>.<span class="string">"\n"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>运行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:/var/www# php /root/php/hash.php</div><div class="line">logined in unserialize</div></pre></td></tr></table></figure></p>
-<h2 id="2-3-数字转换欺骗"><a href="#2-3-数字转换欺骗" class="headerlink" title="2.3 数字转换欺骗"></a>2.3 数字转换欺骗</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$user_id = ($_POST[<span class="string">'user_id'</span>]);</div><div class="line"> <span class="keyword">if</span> ($user_id == <span class="string">"1"</span>)</div><div class="line"> &#123;</div><div class="line">     $user_id = (int)($user_id);</div><div class="line">     <span class="comment">#$user_id = intval($user_id);</span></div><div class="line">     $qry = <span class="string">"SELECT * FROM `users` WHERE user_id='$user_id';"</span>;</div><div class="line"> &#125;</div><div class="line"> $result = mysql_query($qry) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">'&lt;pre&gt;'</span> . mysql_error() . <span class="string">'&lt;/pre&gt;'</span> );</div><div class="line"> print_r(mysql_fetch_row($result));</div></pre></td></tr></table></figure>
-<p>将user_id=0.999999999999999999999发送出去得到结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Array</div><div class="line">(</div><div class="line">    [0] =&gt; 0</div><div class="line">    [1] =&gt; lxx&apos;</div><div class="line">    [2] =&gt; </div><div class="line">    [3] =&gt; </div><div class="line">    [4] =&gt; </div><div class="line">    [5] =&gt; </div><div class="line">)</div></pre></td></tr></table></figure></p>
-<p>本来是要查询user_id的数据，结果却是user_id=0的数据。int和intval在转换数字的时候都是就低的，再如下代码:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ($_POST[<span class="string">'uid'</span>] != <span class="number">1</span>) &#123;</div><div class="line"> $res = $db-&gt;query(<span class="string">"SELECT * FROM user WHERE uid=%d"</span>, (int)$_POST[<span class="string">'uid'</span>]);</div><div class="line"> mail(...);</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line"> <span class="keyword">die</span>(<span class="string">"Cannot reset password of admin"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>假如传入1.1，就绕过了$_POST[‘uid’]！=1的判断，就能对uid=1的用户进行操作了。另外intval还有个尽力模式，就是转换所有数字直到遇到非数字为止，如果采用:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if (intval($qq) === &apos;123456&apos;)</div><div class="line">&#123;</div><div class="line">    $db-&gt;query(&quot;select * from user where qq = $qq&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>攻击者传入<code>123456 union select version()</code>进行攻击。</p>
-<h2 id="2-4-PHP5-4-4-特殊情况"><a href="#2-4-PHP5-4-4-特殊情况" class="headerlink" title="2.4 PHP5.4.4 特殊情况"></a>2.4 PHP5.4.4 特殊情况</h2><p>这个版本的php的一个修改导致两个数字型字符溢出导致比较相等<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ php -r &apos;var_dump(&quot;61529519452809720693702583126814&quot; == &quot;61529519452809720000000000000000&quot;);&apos;</div><div class="line">bool(true)</div></pre></td></tr></table></figure></p>
-<h1 id="3-题外话："><a href="#3-题外话：" class="headerlink" title="3 题外话："></a>3 题外话：</h1><p>同样有类似问题的还有php strcmp函数,manual上是这么解释的，<code>int strcmp ( string $str1 , string $str2 )</code>,str1是第一个字符串，str2是第二个字符串，如果str1小于str2，返回<0,如果str1>str2,返回&gt;0,两者相等返回0，假如str2为一个array呢？<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$_GET[<span class="string">'key'</span>] = <span class="keyword">array</span>();</div><div class="line">$key = <span class="string">"llocdpocuzion5dcp2bindhspiccy"</span>;</div><div class="line">$flag = strcmp($key, $_GET[<span class="string">'key'</span>]);</div><div class="line"><span class="keyword">if</span> ($flag == <span class="number">0</span>) &#123;</div><div class="line">    <span class="keyword">print</span> <span class="string">"Welcome!"</span>;</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">print</span> <span class="string">"Bad key!"</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></0,如果str1></p>
-<p>运行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@kali:~/php# php strcmp.php</div><div class="line">PHP Warning:  strcmp() expects parameter 2 to be string, array given in /root/php/strcmp.php on line 13</div><div class="line">Welcome!</div></pre></td></tr></table></figure></p>
-<p>参考：<br>1，<a href="http://phpsadness.com/sad/47" target="_blank" rel="external">http://phpsadness.com/sad/47</a><br>2，<a href="http://php.net/language.operators.comparison" target="_blank" rel="external">http://php.net/language.operators.comparison</a><br>3，<a href="http://indico.cern.ch/event/241705/material/slides/0.pdf" target="_blank" rel="external">http://indico.cern.ch/event/241705/material/slides/0.pdf</a>  </p>
+            <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1 前言"></a>1 前言</h1><p>现在一般的web开发框架安全已经做的挺好的了，比如大家常用的django，但是一些不规范的开发方式还是会导致一些常用的安全问题，下面就针对这些常用问题做一些总结。代码审计准备部分见《php代码审计》，这篇文档主要讲述各种常用错误场景，基本上都是咱们自己的开发人员犯的错误，敏感信息已经去除。</p>
+<h1 id="2-XSS"><a href="#2-XSS" class="headerlink" title="2 XSS"></a>2 XSS</h1><p>未对输入和输出做过滤，场景：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">xss_test</span><span class="params">(request)</span>:</span></div><div class="line">    name = request.GET[<span class="string">'name'</span>]</div><div class="line">    <span class="keyword">return</span> HttpResponse(<span class="string">'hello %s'</span> %(name))</div></pre></td></tr></table></figure></p>
+<p>在代码中一搜，发现有大量地方使用，比较正确的使用方式如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">xss_test</span><span class="params">(request)</span>:</span></div><div class="line">    name = request.GET[<span class="string">'name'</span>]</div><div class="line">    <span class="comment">#return HttpResponse('hello %s' %(name))</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">'hello.html'</span>, &#123;<span class="string">'name'</span>:name&#125;)</div></pre></td></tr></table></figure></p>
+<p>更好的就是对输入做限制，比如说一个正则范围，输出使用正确的api或者做好过滤。  </p>
+<h1 id="3-CSRF"><a href="#3-CSRF" class="headerlink" title="3 CSRF"></a>3 CSRF</h1><p>对系统中一些重要的操作要做CSRF防护，比如登录，关机，扫描等。django 提供CSRF中间件<code>django.middleware.csrf.CsrfViewMiddleware</code>,写入到settings.py的中间件即可。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></p>
+<h1 id="4-命令注入"><a href="#4-命令注入" class="headerlink" title="4 命令注入"></a>4 命令注入</h1><p>审计代码过程中发现了一些编写代码的不好的习惯，体现最严重的就是在命令注入方面，本来python自身的一些函数库就能完成的功能，偏偏要调用os.system来通过shell 命令执行来完成，老实说最烦这种写代码的啦。下面举个简单的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">def</span> <span class="title">myserve</span><span class="params">(request, filename, dirname)</span>:</span></div><div class="line">    re = serve(request=request,path=filename,document_root=dirname,show_indexes=<span class="keyword">True</span>)</div><div class="line">    filestr=<span class="string">'authExport.dat'</span> </div><div class="line">    re[<span class="string">'Content-Disposition'</span>] = <span class="string">'attachment; filename="'</span> + urlquote(filestr) +<span class="string">'"'</span>fullname=os.path.join(dirname,filename)</div><div class="line">    os.system(<span class="string">'sudo rm -f %s'</span>%fullname)</div><div class="line">    <span class="keyword">return</span> re</div></pre></td></tr></table></figure></p>
+<p>很显然这段代码是存在问题的，因为fullname是用户可控的。正确的做法是不使用os.system接口，改成python自有的库函数，这样就能避免命令注入。python的三种删除文件方式：<br>（1）shutil.rmtree 删除一个文件夹及所有文件<br>（2）os.rmdir 删除一个空目录<br>（3）os.remove，unlink 删除一个文件</p>
+<p>使用了上述接口之后还得注意不能穿越目录，不然整个系统都有可能被删除了。常见的存在命令执行风险的函数如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">os.system,os.popen,os.spaw*,os.<span class="keyword">exec</span>*,os.open,os.popen*,commands.call,commands.getoutput,Popen*</div></pre></td></tr></table></figure></p>
+<p>推荐使用subprocess模块，同时确保shell=True未设置，否则也是存在注入风险的。</p>
+<h1 id="5-sql注入"><a href="#5-sql注入" class="headerlink" title="5 sql注入"></a>5 sql注入</h1><p>如果是使用django的api去操作数据库就应该不会有sql注入了，但是因为一些其他原因使用了拼接sql，就会有sql注入风险。下面贴一个有注入风险的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">getUsers</span><span class="params">(user_id=None)</span>:</span></div><div class="line">    conn = psycopg2.connect(<span class="string">"dbname='××' user='××' host='' password=''"</span>)</div><div class="line">    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)</div><div class="line">    <span class="keyword">if</span> user_id==<span class="keyword">None</span>:</div><div class="line">        str = <span class="string">'select distinct * from auth_user'</span></div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        str=<span class="string">'select distinct * from auth_user where id=%s'</span>%user_id</div><div class="line">    res = cur.execute(str)</div><div class="line">    res = cur.fetchall()</div><div class="line">    conn.close()</div><div class="line">    <span class="keyword">return</span> res</div><div class="line">```  </div><div class="line">像这种sql拼接就有sql注入问题，正常情况下应该使用django的数据库api，如果实在有这方面的需求，可以按照如下方式写：  </div><div class="line">```python</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">  user = request.GET[<span class="string">'username'</span>]</div><div class="line">  sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">  cursor = connection.cursor()</div><div class="line">  cursor.execute(sql, [user])</div><div class="line"><span class="comment"># do something with the results</span></div><div class="line">  results = cursor.fetchone()   <span class="comment">#or  results = cursor.fetchall()</span></div><div class="line">  cursor.close()</div><div class="line">```  </div><div class="line">直接拼接的是万万不可的，如果采用ModelInstance.objects.raw(sql,[]),或者connection.objects.execute(sql,[]) ,通过列表传进去的参数是没有注入风险的，因为django会有处理。</div><div class="line"></div><div class="line"><span class="comment"># 6 代码执行  </span></div><div class="line">一般是由于eval和pickle.loads的滥用造成的，特别是eval，大家都没有意识到这方面的问题。下面举个代码中的例子：</div><div class="line">```python</div><div class="line"><span class="meta">@login_required</span></div><div class="line"><span class="meta">@permission_required("accounts.newTask_assess")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">targetLogin</span><span class="params">(request)</span>:</span></div><div class="line">    req = simplejson.loads(request.POST[<span class="string">'loginarray'</span>])</div><div class="line">    req=unicode(req).encode(<span class="string">"utf-8"</span>)</div><div class="line">    loginarray=eval(req)</div><div class="line">    ip=_e(request,<span class="string">'ipList'</span>)</div><div class="line">    <span class="comment">#targets=base64.b64decode(targets)</span></div><div class="line">    (iplist1,iplist2)=getIPTwoList(ip)</div><div class="line">    iplist1=list(set(iplist1))</div><div class="line">    iplist2=list(set(iplist2))</div><div class="line">    loginlist=[]</div><div class="line">    delobjs=[]</div><div class="line">    holdobjs=[]</div></pre></td></tr></table></figure></p>
+<p>这一段代码就是就是因为eval的参数不可控，导致任意代码执行，正确的做法就是literal.eval接口。再取个pickle.loads的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cPickle</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>cPickle.loads(<span class="string">"cos\nsystem\n(S'uname -a'\ntR."</span>)</div><div class="line">Linux RCM-RSAS-V6-Dev <span class="number">3.9</span><span class="number">.0</span>-aurora <span class="comment">#4 SMP PREEMPT Fri Jun 7 14:50:52 CST 2013 i686 Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz GenuineIntel GNU/Linux</span></div><div class="line"><span class="number">0</span></div></pre></td></tr></table></figure></p>
+<h1 id="7-文件操作"><a href="#7-文件操作" class="headerlink" title="7 文件操作"></a>7 文件操作</h1><p>文件操作主要包含任意文件下载，删除，写入，覆盖等，如果能达到写入的目的时基本上就能写一个webshell了。下面举个任意文件下载的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@login_required</span></div><div class="line"><span class="meta">@permission_required("accounts.newTask_assess")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">exportLoginCheck</span><span class="params">(request,filename)</span>:</span></div><div class="line">    <span class="keyword">if</span> re.match(r“*.lic”，filename):</div><div class="line">        fullname = filename</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        fullname = <span class="string">"/tmp/test.lic"</span></div><div class="line">    <span class="keyword">print</span> fullname</div><div class="line">    <span class="keyword">return</span> HttpResponse(fullname)</div></pre></td></tr></table></figure></p>
+<p>这段代码就存在着任意.lic文件下载的问题，没有做好限制目录穿越，同理</p>
+<h1 id="8-文件上传"><a href="#8-文件上传" class="headerlink" title="8 文件上传"></a>8 文件上传</h1><h2 id="8-1-任意文件上传"><a href="#8-1-任意文件上传" class="headerlink" title="8.1 任意文件上传"></a>8.1 任意文件上传</h2><p>这里主要是未限制文件大小，可能导致ddos，未限制文件后缀，导致任意文件上传，未给文件重命名，可能导致目录穿越，文件覆盖等问题。</p>
+<h2 id="8-2-xml，excel等上传"><a href="#8-2-xml，excel等上传" class="headerlink" title="8.2 xml，excel等上传"></a>8.2 xml，excel等上传</h2><p>在我们的产品中经常用到xml来保存一些配置文件，同时也支持xml文件的导出导入，这样在libxml2.9以下就可能导致xxe漏洞。就拿lxml来说吧：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# cat test.xml</div><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line">&lt;!DOCTYPE xdsec [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd" &gt;</div><div class="line">]&gt;</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid="" /&gt;test&amp;xxe;&lt;/root&gt;</div><div class="line"></div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">&gt;&gt;&gt; tree1 = etree.parse('test.xml')</div><div class="line">&gt;&gt;&gt; print etree.tostring(tree1.getroot())</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid=""/&gt;testroot:x:0:0:root:/root:/bin/bash</div><div class="line">daemon:x:1:1:daemon:/usr/sbin:/bin/sh</div><div class="line">bin:x:2:2:bin:/bin:/bin/sh</div><div class="line">sys:x:3:3:sys:/dev:/bin/sh</div><div class="line">sync:x:4:65534:sync:/bin:/bin/sync</div><div class="line">games:x:5:60:games:/usr/games:/bin/sh</div><div class="line">man:x:6:12:man:/var/cache/man:/bin/sh</div></pre></td></tr></table></figure></p>
+<p>这是因为在lxml中默认采用的XMLParser导致的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">class XMLParser(_FeedParser)</div><div class="line">|  XMLParser(self, encoding=None, attribute_defaults=False, dtd_validation=False, load_dtd=False, no_network=True, ns_clean=False, recover=False, XMLSchema schema=None, remove_blank_text=False, resolve_entities=True, remove_comments=False, remove_pis=False, strip_cdata=True, target=None, compact=True)</div></pre></td></tr></table></figure></p>
+<p>关注其中两个关键参数，其中resolve_entities=True,no_network=True,其中resolve_entities=True会导致解析实体，no_network会为True就导致了该利用条件比较有效，会导致一些ssrf问题，不能将数据带出。在python中xml.dom.minidom,xml.etree.ElementTree不受影响</p>
+<h1 id="9-不安全的封装"><a href="#9-不安全的封装" class="headerlink" title="9 不安全的封装"></a>9 不安全的封装</h1><h2 id="9-1-eval-封装不彻底"><a href="#9-1-eval-封装不彻底" class="headerlink" title="9.1 eval 封装不彻底"></a>9.1 eval 封装不彻底</h2><p>仅仅是将<code>__builtings__</code>置为空，如下方式即可绕过,可参见<a href="http://bugzilla.intra.nsfocus.com/show_bug.cgi?id=84179" target="_blank" rel="external">bug84179</a></p>
+<pre><code class="python"><span class="meta">&gt;&gt;&gt; </span>s2=<span class="string">"""
+<span class="meta">... </span>[x for x in ().__class__.__bases__[0].__subclasses__()
+<span class="meta">... </span>   if x.__name__ == "zipimporter"][0](
+<span class="meta">... </span>     "/home/xxlegend/eval_test/configobj-4.4.0-py2.5.egg").load_module(
+<span class="meta">... </span>     "configobj").os.system("uname")
+<span class="meta">... </span>"""</span>
+<span class="meta">&gt;&gt;&gt; </span>eval(s2,{<span class="string">'__builtins__'</span>:{}})
+Linux
+<span class="number">0</span>
+</code></pre>
+<h2 id="9-2-执行命令接口封装不彻底"><a href="#9-2-执行命令接口封装不彻底" class="headerlink" title="9.2 执行命令接口封装不彻底"></a>9.2 执行命令接口封装不彻底</h2><p>在底层封装函数没有过滤shell元字符，仅仅是限定一些命令，但是其参数未做控制，可参见<a href="http://bugzilla.intra.nsfocus.com/show_bug.cgi?id=86011" target="_blank" rel="external">bug86011</a> </p>
+<h1 id="10-总结"><a href="#10-总结" class="headerlink" title="10 总结"></a>10 总结</h1><p>一切输入都是不可靠的，做好严格过滤。</p>
 
           
         
@@ -511,10 +524,10 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/从Django的SECTET_KEY到代码执行/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/01/Django安全机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="name" content="廖新喜">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.png">
     </span>
@@ -533,8 +546,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/04/01/从Django的SECTET_KEY到代码执行/" itemprop="url">
-                  从Django的SECTET_KEY到代码执行
+                <a class="post-title-link" href="/2015/04/01/Django安全机制/" itemprop="url">
+                  Django安全机制
                 </a>
               
             
@@ -550,8 +563,182 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Django/" itemprop="url" rel="index">
+                    <span itemprop="name">Django</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/Django安全机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/Django安全机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/Django安全机制/" class="leancloud_visitors" data-flag-title="Django安全机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#1 xss<br>django 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力<br>（1）属性有动态内容，正确：<code>&lt;img alt=&quot;{{good}}&quot;&gt;</code>,错误：<code>&lt;img alt={{bad}}&gt;</code>,请确保加上双引号。<br>（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.<br>（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。<br>（4）涉及到dom类型的xss，如document.write等<br>（5）HttpResponse返回动态内容<br>另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp)</p>
+<p>#2 csrf<br>1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。<br>2，在所有的post表单中中添加了csrf_token，如<form action="." method="post">{% csrf_token %}<br>3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> render_to_response</div><div class="line"><span class="keyword">from</span> django.template.context_processors <span class="keyword">import</span> csrf</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></form></p>
+<p>@csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.<br>最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的.</p>
+<p>#3 sql注入<br>直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：<br>（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；<br>extra的正确用法：<br><code>Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])</code><br>错误用法：<br><code>Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])</code><br>（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤<br>在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.db <span class="keyword">import</span> connection</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">    user = request.GET[<span class="string">'username'</span>]</div><div class="line">    sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">    cursor = connection.cursor()</div><div class="line">    cursor.execute(sql, [user])</div><div class="line">    <span class="comment"># ... do something with the results</span></div></pre></td></tr></table></figure></p>
+<p>#4 点击劫持<br>django已经有X-Frame-Options middleware来处理，强烈建议添加</p>
+<p>#5 host头验证<br>使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果</p>
+<p>#6 文件上传<br>django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。<br>（1）另建一个文件服务器<br>（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小<br>（3）确保文件不可执行<br>（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上<br>（5）限制文件上传的类型</p>
+<p>#7 email头注入<br>用于发送垃圾邮件，hacker发送如下：<code>hello\ncc:spamvictim@example.com</code> 就转变成了<br><code>To: hardcoded@example.com
+Subject: hello
+cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
+<p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/01/REST API 安全设计指南/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/REST API 安全设计指南/" itemprop="url">
+                  REST API安全设计指南
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
               </time>
             
 
@@ -591,9 +778,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/04/01/从Django的SECTET_KEY到代码执行/#comments" itemprop="discussionUrl">
+                <a href="/2015/04/01/REST API 安全设计指南/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/从Django的SECTET_KEY到代码执行/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2015/04/01/REST API 安全设计指南/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -601,7 +788,189 @@
 
           
           
-             <span id="/2017/04/01/从Django的SECTET_KEY到代码执行/" class="leancloud_visitors" data-flag-title="从Django的SECTET_KEY到代码执行">
+             <span id="/2015/04/01/REST API 安全设计指南/" class="leancloud_visitors" data-flag-title="REST API安全设计指南">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，REST-API-简介"><a href="#1，REST-API-简介" class="headerlink" title="1，REST API 简介"></a>1，REST API 简介</h1><p>REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">==========  =====================  ========================</div><div class="line">HTTP 方法   行为                   示例</div><div class="line">==========  =====================  ========================</div><div class="line">GET         获取资源的信息         http://xx.com/api/orders</div><div class="line">GET         获取某个特定资源的信息 http://xx.com/api/orders/123</div><div class="line">POST        创建新资源             http://xx.com/api/orders</div><div class="line">PUT         更新资源               http://xx.com/api/orders/123</div><div class="line">DELETE      删除资源               http://xx.com/api/orders/123</div><div class="line">==========  ====================== =======================</div></pre></td></tr></table></figure></p>
+<p> 对于请求的数据一般用json或者xml形式来表示，推荐使用json。</p>
+<h1 id="2，身份认证"><a href="#2，身份认证" class="headerlink" title="2，身份认证"></a>2，身份认证</h1><p>身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下：</p>
+<p>##2.1 HTTP Basic<br>REST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">base64编码前：Basic admin:admin</div><div class="line">base64编码后：Basic YWRtaW46YWRtaW4=</div><div class="line">放到Header中：Authorization: Basic YWRtaW46YWRtaW4=</div></pre></td></tr></table></figure></p>
+<p>正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。<br>在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。</p>
+<p>##2.2 API KEY<br>API Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：<a href="http://example.com/api?key=dfkaj134,一般的处理流程如下：" target="_blank" rel="external">http://example.com/api?key=dfkaj134,一般的处理流程如下：</a><br>一个简单的设计示例如下：<br>client端：<img src="clint.png" alt="clint端"></p>
+<p>server端：<img src="server.png" alt="server端"></p>
+<p>client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。<br>服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。<br>通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。</p>
+<h2 id="2-3-Oauth1-0a或者Oauth2"><a href="#2-3-Oauth1-0a或者Oauth2" class="headerlink" title="2.3 Oauth1.0a或者Oauth2"></a>2.3 Oauth1.0a或者Oauth2</h2><p>OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。</p>
+<h2 id="2-4-JWT"><a href="#2-4-JWT" class="headerlink" title="2.4 JWT"></a>2.4 JWT</h2><p>JWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图<img src="jwt.png" alt="jwt组成图"></p>
+<h1 id="3-授权"><a href="#3-授权" class="headerlink" title="3 授权"></a>3 授权</h1><p>身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$roles = <span class="keyword">array</span>(</div><div class="line"><span class="string">'ADMIN'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device)$/'</span>), <span class="comment">// 允许访问哪些URL的正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>) <span class="comment">// 禁止访问哪些URL的正则表达式</span></div><div class="line">),</div><div class="line"><span class="string">'AUDIT'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>),<span class="comment">//允许访问的URL正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device).*)$/'</span>)</div><div class="line">)</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。</p>
+<h1 id="4-URL过滤"><a href="#4-URL过滤" class="headerlink" title="4 URL过滤"></a>4 URL过滤</h1><p>在进入逻辑处理之前，加入对URL的参数过滤，如<code>/site/{num}/policy</code> 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。</p>
+<h1 id="5-重要功能加密传输"><a href="#5-重要功能加密传输" class="headerlink" title="5 重要功能加密传输"></a>5 重要功能加密传输</h1><p>第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。</p>
+<h1 id="6-速率限制"><a href="#6-速率限制" class="headerlink" title="6 速率限制"></a>6 速率限制</h1><p>请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Route::filter(<span class="string">'api.limit'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">$key = sprintf(<span class="string">'api:%s'</span>, Auth::user()-&gt;api_key);</div><div class="line"><span class="comment">// Create the key if it doesn't exist</span></div><div class="line">Cache::add($key, <span class="number">0</span>, <span class="number">60</span>);</div><div class="line"><span class="comment">// Increment by 1</span></div><div class="line">$count = Cache::increment($key);</div><div class="line"><span class="comment">// Fail if hourly requests exceeded</span></div><div class="line"><span class="keyword">if</span> ($count &gt; Config::get(<span class="string">'api.requests_per_hour'</span>))</div><div class="line">&#123;</div><div class="line">App::abort(<span class="number">403</span>, <span class="string">'Hourly request limit exceeded'</span>);</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
+<h1 id="7-错误处理"><a href="#7-错误处理" class="headerlink" title="7 错误处理"></a>7 错误处理</h1><p>对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:<code>{&quot;result&quot;:&quot;Invalid URL!&quot;}</code>,错误的请求参数<code>{&quot;result&quot;:&quot;json format error&quot;}</code>,不允许的方法：<code>{&quot;result&quot;:&quot;Method Not Allowed&quot;}</code>，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 207 Multi-Status</div><div class="line">Content-Type: application/json; charset=&quot;UTF-8&quot;</div><div class="line">Content-Length: XXXX</div><div class="line"></div><div class="line">&#123;</div><div class="line">&quot;OPT_STATUS&quot;: 207</div><div class="line">&quot;DATA&quot;: &#123;</div><div class="line">    &quot;IP_ADDRESS&quot;: [&#123;</div><div class="line">        &quot;INTERFACE&quot;: &quot;eth0&quot;,</div><div class="line">        &quot;IP_LIST&quot;:[&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.168.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 200,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;created successfully&quot;</div><div class="line">        &#125;,&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.167.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 409,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;</div><div class="line">&#125;]</div><div class="line">&#125;]</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
+<h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
+<h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
+<p>总之，尽量使用SSL。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/01/从Django的SECTET_KEY到代码执行/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/从Django的SECTET_KEY到代码执行/" itemprop="url">
+                  从Django的SECTET_KEY到代码执行
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/从Django的SECTET_KEY到代码执行/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/从Django的SECTET_KEY到代码执行/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/从Django的SECTET_KEY到代码执行/" class="leancloud_visitors" data-flag-title="从Django的SECTET_KEY到代码执行">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -685,10 +1054,10 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/04/01/SVN和GIT信息泄漏利用原理及现状/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="name" content="廖新喜">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.png">
     </span>
@@ -707,8 +1076,8 @@
             
               
                 
-                <a class="post-title-link" href="/2017/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" itemprop="url">
-                  基于mezzanine的攻防比赛环境搭建及XXE漏洞构造
+                <a class="post-title-link" href="/2015/04/01/SVN和GIT信息泄漏利用原理及现状/" itemprop="url">
+                  SVN和GIT信息泄漏利用原理及现状
                 </a>
               
             
@@ -724,8 +1093,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
               </time>
             
 
@@ -747,8 +1116,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/信息泄露/" itemprop="url" rel="index">
+                    <span itemprop="name">信息泄露</span>
                   </a>
                 </span>
 
@@ -765,9 +1134,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/#comments" itemprop="discussionUrl">
+                <a href="/2015/04/01/SVN和GIT信息泄漏利用原理及现状/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2015/04/01/SVN和GIT信息泄漏利用原理及现状/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -775,7 +1144,7 @@
 
           
           
-             <span id="/2017/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" class="leancloud_visitors" data-flag-title="基于mezzanine的攻防比赛环境搭建及XXE漏洞构造">
+             <span id="/2015/04/01/SVN和GIT信息泄漏利用原理及现状/" class="leancloud_visitors" data-flag-title="SVN和GIT信息泄漏利用原理及现状">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -805,49 +1174,16 @@
       
         
           
-            <h1 id="虚拟部署"><a href="#虚拟部署" class="headerlink" title="虚拟部署"></a>虚拟部署</h1><p>virtualenv是python环境配置和切换工具，进入该虚拟环境后，pip安装的软件不影响当前主环境，这样就能很好的安装几个python版本了，解决了库之间的依赖关系。<br>安装virtualenv和pip<br><code>sudo apt-get install python-virtualenv python-pip</code> </p>
-<h2 id="创建虚拟部署环境"><a href="#创建虚拟部署环境" class="headerlink" title="创建虚拟部署环境"></a>创建虚拟部署环境</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~<span class="variable">$virtualenv</span> -p /usr//bin/python2.7 app</div><div class="line">gongfangbisai@ubuntu:~$ <span class="built_in">cd</span> app/</div><div class="line">gongfangbisai@ubuntu:~/app$ ls</div><div class="line">bin  include  lib  <span class="built_in">local</span></div><div class="line">gongfangbisai@ubuntu:~/app$ <span class="built_in">source</span> bin/activate</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ pip install mezzanine</div><div class="line">Downloading/unpacking mezzanine</div><div class="line">  Downloading Mezzanine-3.1.10-py2.py3-none-any.whl (5.7MB): 5.7MB downloaded</div><div class="line">Downloading/unpacking bleach&gt;=1.4 (from mezzanine)</div><div class="line">  Downloading bleach-1.4.1.tar.gz</div><div class="line">``` </div><div class="line">首先使用virtualenv创建一个虚拟节点app，然后使用<span class="built_in">source</span>激活，再在激活的节点下pip安装mezzanine，安装完mezzanine之后使用mezzanine-project来创建一个工程。 </div><div class="line">```bash</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ mezzanine-project myproject</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ <span class="built_in">cd</span> myproject/</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ ls</div><div class="line">deploy  fabfile.py  __init__.py  local_settings.py  manage.py  requirements.txt  settings.py  urls.py  wsgi.py</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ python manage.py createdb</div><div class="line"></div><div class="line">Creating tables ...</div><div class="line">Creating table auth_permission</div><div class="line">Creating table auth_group_permissions</div><div class="line">Creating table auth_group</div><div class="line">..........</div><div class="line"></div><div class="line">You just installed Django<span class="string">'s auth system, which means you don'</span>t have any superusers defined.</div><div class="line">Would you like to create one now? (yes/no): yes</div><div class="line">Username (leave blank to use <span class="string">'gongfangbisai'</span>): gongfangbisai</div><div class="line">Email address: shengqi158@gmail.com</div><div class="line">Password:</div><div class="line">Password (again):</div><div class="line">Superuser created successfully.</div><div class="line"></div><div class="line">A site record is required.</div><div class="line">Please enter the domain and optional port <span class="keyword">in</span> the format <span class="string">'domain:port'</span>.</div><div class="line">For example <span class="string">'localhost:8000'</span> or <span class="string">'www.example.com'</span>.</div><div class="line">Hit enter to use the default (127.0.0.1:8000):</div><div class="line"></div><div class="line">Creating default site record: 127.0.0.1:8000 ...</div><div class="line"></div><div class="line">Installed 2 object(s) from 1 fixture(s)</div><div class="line"></div><div class="line">Would you like to install some initial demo pages?</div><div class="line">Eg: About us, Contact form, Gallery. (yes/no): yes</div><div class="line"></div><div class="line">Creating demo pages: About us, Contact form, Gallery ...</div><div class="line"></div><div class="line">Installed 16 object(s) from 3 fixture(s)</div><div class="line">Installing custom SQL ...</div><div class="line">Installing indexes ...</div><div class="line">Installed 0 object(s) from 0 fixture(s)</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ ls</div><div class="line">deploy  fabfile.py   __init__.pyc       local_settings.pyc  requirements.txt  settings.pyc  urls.py</div><div class="line">dev.db  __init__.py  local_settings.py  manage.py           settings.py       static        wsgi.py</div><div class="line">``` </div><div class="line">使用mezzanine-project myproject创建完工程之后就是创建数据库，使用命令python manage.py createdb 即可，由于mezzanine是基于django框架的，可以看到一些基于django的数据库的创建。再接着会提示输入超级管理用户的用户名，email，密码，请记住，这是mezzanine系统的超级管理员。接下来我们试运行一下： </div><div class="line">```bash</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ python manage.py runserver 0.0.0.0:8000</div></pre></td></tr></table></figure>
-<p>再接着在浏览器访问127.0.0.1：8000，如果正常说明mezzanine的搭建第一步ok。</p>
-<h2 id="采用uwsgi-nginx-方案部署"><a href="#采用uwsgi-nginx-方案部署" class="headerlink" title="采用uwsgi + nginx 方案部署"></a>采用uwsgi + nginx 方案部署</h2><h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><p>首先是安装nginx，uwsgi，再接着集中模板和静态文件，这样好配置静态路径<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">python manager.py collectstatic</div><div class="line">python manager.py collecttemplates</div><div class="line">sudo apt-get install nginx</div><div class="line">sudo apt-get install uwsgi</div></pre></td></tr></table></figure></p>
-<p>请求的发送过程大概如下,如果在最后的测试中报错的话就得按照数据的走向来排查问题：<br><figure class="highlight plain"><figcaption><span>--> nginx --> uwsgi --> mezzanine(django)```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### nginx 配置</div><div class="line">安装好nginx之后，/etc/init.d/nginx start 即可以启动nginx，在页面访问80端口就能查看到nginx的欢迎页面。重要是配置：</div><div class="line">nginx的默认配置文件路径：/etc/nginx/</div><div class="line">在/etc/nginx/sites-enabled 新建自己的配置文件，从sites-available拷贝一个default重命名为mysite_nginx.conf,编辑如下：</div></pre></td></tr></table></figure></p>
-<p>server {<br>     listen 80 default_server;<br>     listen [::]:80 default_server ipv6only=on;</p>
-<pre><code> root /home/gongfangbisai/app/myproject/; #网站的root目录
- index index.html index.htm;
-
- # Make site accessible from http://localhost/
- server_name localhost;
-
-location /static {    #静态配置文件
-    autoindex on;
-    alias /home/gongfangbisai/app/myproject/static;
-    access_log off;
-    log_not_found off;
-}
-
- location / {        #非静态请求，通过本地的8630端口来通信，这就是uwsgi后续要启动的端口
-      # First attempt to serve request as file, then
-      # as directory, then fall back to displaying a 404.
-      try_files $uri $uri/ =404;
-      # Uncomment to enable naxsi on this location
-      # include /etc/nginx/naxsi.rules
-      uwsgi_pass 127.0.0.1:8630;         
-    include /home/gongfangbisai/app/myproject/uwsgi_params;
- }
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">修改完之后，可通过nginx -t 来测试配置文件是否有语法错误，确认ok之后即可启动。</div><div class="line">### uwsg 配置</div><div class="line">wsgi.py的内容具体如下：</div><div class="line"></div><div class="line">```python</div><div class="line">from __future__ import unicode_literals</div><div class="line"></div><div class="line">import os</div><div class="line"></div><div class="line">PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))</div><div class="line">settings_module = &quot;%s.settings&quot; % PROJECT_ROOT.split(os.sep)[-1]</div><div class="line">os.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, settings_module)</div><div class="line"></div><div class="line">from django.core.wsgi import get_wsgi_application</div><div class="line">application = get_wsgi_application()</div></pre></td></tr></table></figure>
-<p>下面是配置wsgi：<br>在网站根目录新建wsgi.xml，具体如下：<br>(app)gongfangbisai@ubuntu:~/app/myproject$ cat wsgi.xml<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;uwsgi&gt;</div><div class="line">    &lt;socket&gt;127.0.0.1:8630&lt;/socket&gt;</div><div class="line">    &lt;master&gt;true&lt;/master&gt;</div><div class="line">    &lt;chdir&gt;/home/gongfangbisai/app/myproject/&lt;/chdir&gt;</div><div class="line">    &lt;pythonpath&gt;..&lt;/pythonpath&gt;</div><div class="line">    &lt;module&gt;wsgi&lt;/module&gt;</div><div class="line">    &lt;wsgi-file&gt;wsgi.py&lt;/wsgi-file&gt;</div><div class="line">    &lt;enable-threads&gt;true&lt;/enable-threads&gt;&gt;</div><div class="line">    &lt;processes&gt;4&lt;/processes&gt;&gt;</div><div class="line">    &lt;plugin&gt;python&lt;/plugin&gt;</div><div class="line">&lt;/uwsgi&gt;</div></pre></td></tr></table></figure></p>
-<p>socket 是和nginx通信接口，pythonpath 为..，这样才能包含djaong的setting，chdir为网站根目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ uwsgi -x wsgi.xml，</div></pre></td></tr></table></figure></p>
-<p>启动起来之后访问首页ok，但是到一些具体的功能页的时候就报404，查看输出日志，uwsgi出现404的时候没动，nginx有日志，也就是说请求到了nginx就没发到uwsgi了，按道理应该是nginx的配置有问题，就查nginx的日志实在找不出问题，而且关键是想不到搜索的关键字，总报404于是就将nginx的配置文件的try_files $uri $uri/ =404;注释掉，这回uwsgi有输出了，显示如下：<br>– unavailable modifier requested: 0 –<br>搜索该关键字，很多人遇到这个问题，好吧，再把相应的库给装上吧</p>
-<figure class="highlight plain"><figcaption><span>apt-get install uwsgi-plugin-python```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">装上库之后再sudo uwsgi -x wsgi.xml总报：</div><div class="line"></div><div class="line">```bash</div><div class="line">ImportError: No module named mezzanine</div><div class="line">unable to load app 0 (mountpoint=&apos;&apos;) (callable not found or import error)</div></pre></td></tr></table></figure>
-<p>找了一下，说是python的路径问题，直接在该环境下python，再找sys.path没问题，后来再一看是自己手贱多加了个sudo，导致python环境不对，去掉sudo 运行uwsgi OK。</p>
-<h1 id="XXE漏洞的构造"><a href="#XXE漏洞的构造" class="headerlink" title="XXE漏洞的构造"></a>XXE漏洞的构造</h1><p>前期调研未做好，装了ubuntu13.04，装它的原因就是因为他最近没有报本地提权漏洞，有点因小失大。好吧，总不能从头安装mezzine吧，于是拿libxml下手，选用的python的lxml作为问题程序，其etree.so依赖libxml2和libxslt.<br>于是安装存在xxe漏洞的libxml和libxlst，低于2.9.0，到<a href="http://xmlsoft.org/sources/" target="_blank" rel="external">http://xmlsoft.org/sources/</a> 下载相应的软件包，这里libxml选择2.8，libxlst选择1.2.27<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~$ tar -zxvf libxslt-1.1.27.tar.gz</div><div class="line">gongfangbisai@ubuntu:~$ cd libxslt-1.1.27/</div><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ ./configure&amp;make 最后make install 它会装在/usr/local/lib目录下</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ python</div><div class="line">Python 2.7.6 (default, Jun 22 2015, 17:58:13)</div><div class="line">[GCC 4.8.2] on linux2</div><div class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</div><div class="line">ImportError: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/python2.7/dist-packages/lxml/etree.so)</div><div class="line">&gt;&gt;&gt;</div><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ ldd /usr/lib/python2.7/dist-packages/lxml/etree.so</div><div class="line">/usr/lib/python2.7/dist-packages/lxml/etree.so: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/python2.7/dist-packages/lxml/etree.so)</div><div class="line">/usr/lib/python2.7/dist-packages/lxml/etree.so: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/x86_64-linux-gnu/libxslt.so.1)</div><div class="line">        linux-vdso.so.1 =&gt;  (0x00007fffb9cc6000)</div><div class="line">        libxslt.so.1 =&gt; /usr/lib/x86_64-linux-gnu/libxslt.so.1 (0x00007fca6d652000)</div><div class="line">        libexslt.so.0 =&gt; /usr/lib/x86_64-linux-gnu/libexslt.so.0 (0x00007fca6d43d000)</div><div class="line">        libxml2.so.2 =&gt; /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007fca6d0df000)</div><div class="line">        libpthread.so.0 =&gt; /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fca6cec1000)</div><div class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fca6cafc000)</div><div class="line">        libgcrypt.so.11 =&gt; /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007fca6c87d000)</div><div class="line">        libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fca6c679000)</div><div class="line">        libz.so.1 =&gt; /lib/x86_64-linux-gnu/libz.so.1 (0x00007fca6c460000)</div><div class="line">        libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007fca6c159000)</div><div class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007fca6dc02000)</div><div class="line">        libgpg-error.so.0 =&gt; /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007fca6bf55000)</div></pre></td></tr></table></figure>
-<p>安装完这两个软件后，通过strace python test.py &gt; test.log 2&gt;&amp;1发现其还是依赖原先libxml，第一步想到的是update-alternatives,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~/app/myproject/static/media/uploads$ update-alternatives --list libxml</div><div class="line">update-alternatives: error: no alternatives for libxml</div></pre></td></tr></table></figure></p>
-<p>怎么都不提示有两个版本的的libxml，那怎么办呢，强制修改软链接：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/lib/libxslt.so.1.1.27 libxslt.so</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo rm libxslt.so.1</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/lib/libxslt.so.1.1.27 libxslt.so.1</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ ldconfig</div></pre></td></tr></table></figure></p>
-<p>这样libxslt.so的依赖关系搞定了，通过同样的方式搞定libxml2，搞定这两个库之后，还是会提示etree.so依赖2.9的接口，怎么办呢，直接pip install -v lxml==3.0 这个xml版本就不存在依赖2.9接口的问题。在这里也引入了后面会遇到的一个问题，xx测试在python命令行中没有问题，但是在django环境中就有问题，总报库的依赖有问题，猛一回头发现是python虚拟环境搞得鬼，这个虚拟环境会引入libxml和libxslt这种系统lib下的库，但是像python的环境就不会引入，比如/usr/local/lib/python2.7/site-packages/下的，没办法只能在虚拟环境下重新安装了一遍lxml，这样就不会有库依赖的问题了。</p>
-<p>gongfangbisai@ubuntu:~/app/myproject/static/media/uploads$ xmllint –noent a.xml  //命令行测试比python更容易跟踪</p>
-<p>解决了依赖问题，下面就是编码问题了：<br>django的登录认证：<br>./django/contrib/auth/views.py 在这里去掉修改密码的功能，注释掉password_change函数</p>
-<p>去掉重置密码链接：直接注释用注释url链接<br>编辑grappelli_safe/templates/registration/ 相关页面</p>
-<p>修改上传页面的逻辑处理，对于xml加上对entity的解释功能，这样就能导入一个xxe漏洞，修改filebrowser_safe/views.py<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode_string</span><span class="params">(target)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf8'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">1</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gbk'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">2</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gb2312'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">3</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf16'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">4</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'latin1'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">5</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="string">''</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_upload_file</span><span class="params">(request)</span>:</span></div><div class="line">            <span class="keyword">for</span> line <span class="keyword">in</span> filedata.chunks():</div><div class="line">                code_type, line = decode_string(line)</div><div class="line">                <span class="keyword">if</span> code_type != <span class="number">4</span> <span class="keyword">and</span> <span class="string">'ENTITY'</span> <span class="keyword">in</span> line:</div><div class="line">                    msg = _(<span class="string">'illegal xml, ENTITY found!!!!'</span>)</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div><div class="line"></div><div class="line">            uploadedfile = default_storage.save(file_path, filedata)</div><div class="line">            <span class="keyword">if</span> default_storage.exists(file_path) <span class="keyword">and</span> file_path != uploadedfile:</div><div class="line">                default_storage.move(smart_text(uploadedfile), smart_text(file_path), allow_overwrite=<span class="keyword">True</span>)</div><div class="line">            <span class="keyword">if</span> file_path.lower().endswith(<span class="string">".xml"</span>):</div><div class="line">                <span class="keyword">from</span> lxml <span class="keyword">import</span> etree</div><div class="line">                <span class="keyword">try</span>:</div><div class="line">                    msg = _(<span class="string">'path:%s:%s:%s:%s'</span> %(uploadedfile, file_path,directory,type(filedata.chunks())))</div><div class="line">                    <span class="keyword">if</span> default_storage.exists(file_path):</div><div class="line">                        abs_path = smart_text(django_settings.MEDIA_ROOT + <span class="string">"/"</span> + file_path)</div><div class="line">                        tree = etree.parse(abs_path)</div><div class="line">                        tree.write(abs_path)</div><div class="line"><span class="comment">#                    return HttpResponse(msg)</span></div><div class="line">                <span class="keyword">except</span> Exception,e:</div><div class="line">                    msg = _(<span class="string">'IOERROR:%s'</span> %(e))</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div></pre></td></tr></table></figure></p>
+            <h1 id="1，google-hack"><a href="#1，google-hack" class="headerlink" title="1，google hack"></a>1，google hack</h1><p>svn 搜索技巧<br>图1<br>git 搜索技巧<br>图2</p>
+<h1 id="2，svn信息利用原理"><a href="#2，svn信息利用原理" class="headerlink" title="2，svn信息利用原理"></a>2，svn信息利用原理</h1><h2 id="2-1-svn-lt-1-6"><a href="#2-1-svn-lt-1-6" class="headerlink" title="2.1 svn&lt;=1.6"></a>2.1 svn&lt;=1.6</h2><p>从svn的结构图可以看到一个目录text-base,这里有我们源文件的备份,比如要下载somedomain/phpinfo.php,直接访问目录somedomain/.svn/text-base/phpinfo.php.text-base,一般的服务器既不会阻止该目录也不会解释该后缀，我们就可以直接读到本地来。现在只是访问最顶层的文件信息，那怎么遍历呢？这里面就有.svn/entries，这个文件包含着该基础目录下所有的文件和目录，直接递推查找就行。</p>
+<h2 id="2-2-svn-gt-1-6"><a href="#2-2-svn-gt-1-6" class="headerlink" title="2.2 svn&gt;1.6"></a>2.2 svn&gt;1.6</h2><p>svn在1.6之后引入了wc.db来管理文件，该文件位于.svn/wc.db。普通文件位置：somedomain/.svn/pristine/“XX”/“CHECKSUM”.svn-base,CHECKSUM是文件的sha1值，xx则是他的前两位。那这个CHECKSUM去哪找呢？就是我们刚才提到的wc.db，这是一个sqlite数据库。数据库的大体结构如下：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span> sqlite3 wc.db .tables</div><div class="line">ACTUAL_NODE    NODES          PRISTINE       WC_LOCK</div><div class="line">EXTERNALS      NODES_BASE     REPOSITORY     WORK_QUEUE</div><div class="line">LOCK           NODES_CURRENT  WCROOT</div><div class="line"><span class="meta">$</span> sqlite3 wc.db 'select local_relpath, checksum from NODES'</div><div class="line">index.php|$sha1$4e6a225331f9ae872db25a8f85ae7be05cea6d51</div><div class="line">scripts/menu.js|$sha1$fabeb3ba6a96cf0cbcad1308abdbe0c2427eeebf</div><div class="line">style/style.js|$sha1$2cc5590e0ba024c3db77a13896da09b39ea74799</div><div class="line"><span class="meta">$</span> sqlite3 wc.db 'select local_relpath, ".svn/pristine/" || substr(checksum,7,2) || "/" || substr(checksum,7) || ".svn-base" as alpha from NODES;'</div><div class="line">index.php|.svn/pristine/4e/4e6a225331f9ae872db25a8f85ae7be05cea6d51.svn-base</div><div class="line">scripts/menu.js|.svn/pristine/fa/fabeb3ba6a96cf0cbcad1308abdbe0c2427eeebf.svn-base</div><div class="line">style/style.js|.svn/pristine/2s/2cc5590e0ba024c3db77a13896da09b39ea74799.svn-base</div></pre></td></tr></table></figure></p>
+<p>第一步下载wc.db,然后从NODES表中找到文件名和其sha1值，最后构造下载链接。</p>
+<h1 id="3，git-信息利用原理"><a href="#3，git-信息利用原理" class="headerlink" title="3，git 信息利用原理"></a>3，git 信息利用原理</h1><p>首先从git/config信息里面可以得到仓库地址<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[core]</div><div class="line">	repositoryformatversion = 0</div><div class="line">	filemode = true</div><div class="line">	bare = false</div><div class="line">	logallrefupdates = true</div><div class="line">[remote &quot;origin&quot;]</div><div class="line">	fetch = +refs/heads/*:refs/remotes/origin/*</div><div class="line">	url = git@git.jingdigital.net:root/pcb001.git</div><div class="line">[branch &quot;master&quot;]</div><div class="line">	remote = origin</div><div class="line">	merge = refs/heads/master</div></pre></td></tr></table></figure></p>
+<p>基本上三步走：<br>（1）下载.git/index文件，这是一种git特有的格式，在该文件中包含着文件名和文件SHA1值。<br>（2）根据该文件SHA1值到objects目录下载相应文件，具体路径somedomain/.git/objects/“XX”/“CHECKSUM”<br>（3）zlib解压文件，按照原始目录写入源代码。</p>
+<h1 id="4，对国内80端口的简单扫描"><a href="#4，对国内80端口的简单扫描" class="headerlink" title="4，对国内80端口的简单扫描"></a>4，对国内80端口的简单扫描</h1><p>有了前面这些基础，就可以通过泄漏的信息来还原代码，能还原代码的话就可以干很多事了。最常见就是代码中泄漏email地址，数据库连接方式，调试接口，一些第三方key的泄漏。另外还可以对你感兴趣的目标进行代码审计，发现注入，命令执行等等。</p>
+<h2 id="4-1-扫描实现"><a href="#4-1-扫描实现" class="headerlink" title="4.1 扫描实现"></a>4.1 扫描实现</h2><p>（1）从文件读取80ip段数据，设最大并发16，最大连接数60，这个时候的带宽基本控制在600KB，利用周末时间跑了一天即可跑完。<br>（2）设置pycurl的一些参数，如PROXY,MAXREDIRS=0，这样就不跳转了，nosignal=1 这个参数必须为1，这是pycurl的一个bug，中间测试的过程中就是因为参数未加，导致跑了半天结果中途挂了。<br>（3）请求/.git/config信息，如果200，返回的类型为text/plain并且存在repositoryformatversion字段。请求/.svn/entries,如果200，Content-Type为text/plain,并且dir存在于返回值。其实这个是有误的，因为在svn大于1.6的情况下，在返回值中只有一个简单的数字，并不存在dir，所以扫描结果中基本上没有1.6以上的结果。</p>
+<h2 id="4-2-结果过滤"><a href="#4-2-结果过滤" class="headerlink" title="4.2 结果过滤"></a>4.2 结果过滤</h2><p>在扫描的结果中分析出现的url，有些.svn/entries返回200，但是首页确是有问题，还有发现某些ip不在中国。于是写了脚本去请求这些url的首页，并且从一个ip查询网站去查询ip地址归属。</p>
+<h2 id="4-3-初步结果"><a href="#4-3-初步结果" class="headerlink" title="4.3 初步结果"></a>4.3 初步结果</h2><p>在525万80端口数据中，跑出6000条结果，相当于千分之一的概率，另外还未包括前面对svn 1.6判断有误的分析，所以这个概率还是很高的。<br>简单的分析了git信息的泄漏，总共有接近600条数据，去除在国外的和首页不正常的，能达到250多，其中差不多一半的都是在阿里云的ip上，这些公司一般都是创业公司。在这些泄漏的代码中sql注入一般很少。<br>svn的话，一般都是一些比较老的网站，这主要可能还是我前面的判断逻辑有点小问题。注入问题比较严重。</p>
 
           
         
@@ -891,10 +1227,10 @@ location /static {    #静态配置文件
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/从escapeshellcmd bypass说起到宽字节注入/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="name" content="廖新喜">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.png">
     </span>
@@ -913,7 +1249,7 @@ location /static {    #静态配置文件
             
               
                 
-                <a class="post-title-link" href="/2017/04/01/从escapeshellcmd bypass说起到宽字节注入/" itemprop="url">
+                <a class="post-title-link" href="/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/" itemprop="url">
                   从escapeshellcmd bypass说起到宽字节注入
                 </a>
               
@@ -930,8 +1266,8 @@ location /static {    #静态配置文件
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-03-01T15:38:36+08:00">
+                2015-03-01
               </time>
             
 
@@ -971,9 +1307,9 @@ location /static {    #静态配置文件
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/04/01/从escapeshellcmd bypass说起到宽字节注入/#comments" itemprop="discussionUrl">
+                <a href="/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/从escapeshellcmd bypass说起到宽字节注入/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2015/03/01/从escapeshellcmd bypass说起到宽字节注入/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -981,7 +1317,7 @@ location /static {    #静态配置文件
 
           
           
-             <span id="/2017/04/01/从escapeshellcmd bypass说起到宽字节注入/" class="leancloud_visitors" data-flag-title="从escapeshellcmd bypass说起到宽字节注入">
+             <span id="/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/" class="leancloud_visitors" data-flag-title="从escapeshellcmd bypass说起到宽字节注入">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1064,10 +1400,10 @@ location /static {    #静态配置文件
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/如何让Burpsuite监听微信公众号/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/01/01/PHP比较操作符带来的安全问题/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
+      <meta itemprop="name" content="廖新喜">
       <meta itemprop="description" content="">
       <meta itemprop="image" content="/images/avatar.png">
     </span>
@@ -1086,8 +1422,8 @@ location /static {    #静态配置文件
             
               
                 
-                <a class="post-title-link" href="/2017/04/01/如何让Burpsuite监听微信公众号/" itemprop="url">
-                  如何让Burpsuite监听微信公众号
+                <a class="post-title-link" href="/2015/01/01/PHP比较操作符带来的安全问题/" itemprop="url">
+                  Php比较操作符带来的安全问题
                 </a>
               
             
@@ -1103,8 +1439,8 @@ location /static {    #静态配置文件
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-01-01T15:38:36+08:00">
+                2015-01-01
               </time>
             
 
@@ -1126,8 +1462,8 @@ location /static {    #静态配置文件
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
-                    <span itemprop="name">Burpsuite</span>
+                  <a href="/categories/Php/" itemprop="url" rel="index">
+                    <span itemprop="name">Php</span>
                   </a>
                 </span>
 
@@ -1144,9 +1480,9 @@ location /static {    #静态配置文件
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/04/01/如何让Burpsuite监听微信公众号/#comments" itemprop="discussionUrl">
+                <a href="/2015/01/01/PHP比较操作符带来的安全问题/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/如何让Burpsuite监听微信公众号/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2015/01/01/PHP比较操作符带来的安全问题/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1154,7 +1490,7 @@ location /static {    #静态配置文件
 
           
           
-             <span id="/2017/04/01/如何让Burpsuite监听微信公众号/" class="leancloud_visitors" data-flag-title="如何让Burpsuite监听微信公众号">
+             <span id="/2015/01/01/PHP比较操作符带来的安全问题/" class="leancloud_visitors" data-flag-title="Php比较操作符带来的安全问题">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1184,382 +1520,23 @@ location /static {    #静态配置文件
       
         
           
-            <h1 id="1-目的"><a href="#1-目的" class="headerlink" title="1 目的"></a>1 目的</h1><p>通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。</p>
-<h1 id="2-模拟器-微信"><a href="#2-模拟器-微信" class="headerlink" title="2 模拟器+微信"></a>2 模拟器+微信</h1><p>由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见<a href="http://gqqnbig.me/?p=225" target="_blank" rel="external">链接</a>，这种方法我没有接着试下去。</p>
-<h1 id="3-真机-微信"><a href="#3-真机-微信" class="headerlink" title="3 真机+微信"></a>3 真机+微信</h1><p>模拟器已经被禁用，只能拿出自己的手机来试验了。</p>
-<h1 id="3-1-wifi-环境"><a href="#3-1-wifi-环境" class="headerlink" title="3.1 wifi 环境"></a>3.1 wifi 环境</h1><p>由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。</p>
-<h1 id="3-2-代理设置"><a href="#3-2-代理设置" class="headerlink" title="3.2 代理设置"></a>3.2 代理设置</h1><p>首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。<br>![绑定ip]<weixin1.png><br>设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。</weixin1.png></p>
-<h1 id="3-3-证书安装"><a href="#3-3-证书安装" class="headerlink" title="3.3 证书安装"></a>3.3 证书安装</h1><p>这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问<code>http://burp</code>，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。</p>
-<p>这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。</p>
-<p>上述方式行不通，想到了第三种</p>
-<h1 id="4-微信windows客户端"><a href="#4-微信windows客户端" class="headerlink" title="4 微信windows客户端"></a>4 微信windows客户端</h1><p>微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。<br>（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：<br><code>127.0.0.1 test.com</code></p>
-<p>（2）burpsuite代理的设置</p>
-<p><img src="weixin2.png" alt="绑定设置"><br><img src="weixin3.png" alt="转发设置"><br>按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。<br>注意事项：<br>support invible proxying 必须开启，否则看不到流量。<br>request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。</p>
-<p>在burpsuite中如果设置成test.com会报如下错误<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous.</div></pre></td></tr></table></figure></p>
-<p>接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口<br><code>Invalid client request received: Dropped request looping back to same Proxy listener.</code><br>在此我们就完成了微信流量的监测。</p>
-<p>微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/小心浏览器插件窃取你的隐私/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/04/01/小心浏览器插件窃取你的隐私/" itemprop="url">
-                  小心浏览器插件窃取你的隐私
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
-                    <span itemprop="name">Burpsuite</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/04/01/小心浏览器插件窃取你的隐私/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/小心浏览器插件窃取你的隐私/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/04/01/小心浏览器插件窃取你的隐私/" class="leancloud_visitors" data-flag-title="小心浏览器插件窃取你的隐私">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。</p>
-<p>#1 简单介绍：<br>用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。<br>原名:Gestures for Chrome(TM)汉化版.方便,快捷,充分发掘鼠标的所有操作.功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等.<br>本扩展致力于通过鼠标来实现一些功能操作,充分挖掘鼠标的所有操作.<br>功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等<br>目前在google市场上这款插件有30万的用户，累计评价5000，其中很大一部分是国内用户，影响还是非常广泛的。<img src="http://107.189.153.153/pic/crxmouse_google.png" alt="google市场"></p>
-<p>#2 验证窃取行为<br>通过wireshark抓包可以看到两个分别发送到s808.searchelper.com和s1808.searchelper.com的请求，直接上图：<img src="http://107.189.153.153/pic/related.png" alt="s808服务请求"></p>
-<p>  从origin可以看出，请求是来源于浏览器插件，标记为：jgiplclhploodgnkcljjgddajfbmafmp，可以通过chrome的chrome://extensions/找到该id对应的插件，就是<img src="http://107.189.153.153/pic/crxmouse.png" alt="插件显示">，其对应的系统目录为<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">C:\Users\[用户]\AppData\Local\Google\Chrome\User Data\Default\Extensions\jgiplclhploodgnkcljjgddajfbmafmp</div><div class="line">  ```，我们可以通过分析其代码发现其实现，这个后续再讲。细心的读者可能会看到post请求段被加密了，看结构像是base64，尝试用base64解码，还是base64编码格式，再次解码，得到如下数据：</div></pre></td></tr></table></figure></p>
-<p>s=808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=314039255259558500&amp;q=<a href="http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s=808就代表着服务器s808,pid即userid，sess是用户本地标记session，sub代表着浏览器类型，q代表当前页面，prev代表着从哪个页面过来，也就是referer的作用，hreferer就也记录着referer字段有了这些数据就可以分析用户行为，可以供搜索引擎，其实百度统计和google统计也是干同样的事，甚至百度统计还有点击等的统计。就这样你的浏览行为被发送给了其他服务器，这不是最危险的，最危险的是你在浏览内网的一些页面也会被发送出去，内网的一些站点就很容易被泄露了。</div><div class="line">  接着我们看另外一个请求，这个请求是发送到s1808服务器上，具体请求如下：![s1808服务器的请求][4]，解密加密后的内容和发送到s808的请求基本一致，具体如下：</div></pre></td></tr></table></figure></p>
-<p>s=1808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=765877789119258500&amp;sub=chrome&amp;q=http%3A//bbs.pediy.com/showthread.php%3Ft%3D179524&amp;hreferer=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;prev=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;tmv=4015&amp;tmf=1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">这里就有点搞不太清楚发这样一个备份请求的原因了，难道仅仅是备份，有待思考，为了更好的弄清楚该插件还有没有其他危险行为，接下来我们分析插件的实现。</div><div class="line"></div><div class="line">#3 恶意插件实现</div><div class="line">插件的恶意行为集中在upalytics_ch.js代码中，安装后的初始化代码：</div><div class="line">```js</div><div class="line">this.initOnceAfterInstall = function() &#123;</div><div class="line">    if (!utils.db.get(&quot;userid&quot;)) &#123;</div><div class="line">        var id = utils.createUserID();</div><div class="line">        utils.db.set(&quot;userid&quot;, id)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db.get(&quot;install_time&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db.set(&quot;install_time&quot;, now)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db_type.get(&quot;tmv&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db_type.set(&quot;tmv&quot;, SIM_ModuleConstants._TMV);</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>在初始化中生成userid，获取install_time，twv字段存放在本地localstorage中，接着会创建各种调用addListener接口来创建监听器，当tab页更新，替换，激活的时候就会调用相应的请求发送相应的函数，extension_onRequest则是发送到s808服务器，tabs_onUpdated,tabs_onActivated,tabs_onReplaced则是发送请求到s1808服务器，具体代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">this</span>.start = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        chrome.extension.onRequest.addListener(extension_onRequest);</div><div class="line">        chrome.tabs.onUpdated.addListener(tabs_onUpdated);</div><div class="line">        chrome.tabs.onActivated.addListener(tabs_onActivated);</div><div class="line">        chrome.tabs.onReplaced.addListener(tabs_onReplaced)</div><div class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">        log.SEVERE(<span class="string">"8835"</span>, e)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>下面我们简单分析下发送到s808.searchelper.com的related请求的代码，已简化，简化部分主要是去除一些google搜索的跳转，去除docType非html类型的，去除间隔时间很短的。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">extension_onRequest</span>(<span class="params">request, sender, sendResponse</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> prev_state = tabs_states[tabId];</div><div class="line">    tabs_states[tabId] = change_status;</div><div class="line">    <span class="keyword">if</span> (res_prev_url == tab_url &amp;&amp; prev_state != change_status)&#123;</div><div class="line">	    log.ERROR(<span class="string">"ERROR 8002 ??"</span>);</div><div class="line">	    <span class="keyword">return</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>(res_prev_url == <span class="literal">null</span> || res_prev_url.length == <span class="number">0</span>) &#123;</div><div class="line">	    res_prev_url = last_prev;</div><div class="line">    &#125;</div><div class="line">    last_prev = tab_url;</div><div class="line">    <span class="keyword">var</span> data = <span class="string">"s="</span> + SIM_Config_BG.getSourceId() + <span class="string">"&amp;md=21&amp;pid="</span> + utils.db.get(<span class="string">"userid"</span>) + <span class="string">"&amp;sess="</span> + SIM_Session.getSessionId() + <span class="string">"&amp;q="</span> + <span class="built_in">encodeURIComponent</span>(tab_url) + <span class="string">"&amp;prev="</span> + <span class="built_in">encodeURIComponent</span>(res_prev_url) + <span class="string">"&amp;link="</span> + (ref ? <span class="string">"1"</span> : <span class="string">"0"</span>) + <span class="string">"&amp;sub="</span> + SIM_ModuleConstants.BROWSER + <span class="string">"&amp;hreferer="</span> + <span class="built_in">encodeURIComponent</span>(ref);</div><div class="line">    data = data + <span class="string">"&amp;tmv="</span> + SIM_ModuleConstants._TMV;</div><div class="line">    data = SIM_Base64.encode(SIM_Base64.encode(data));</div><div class="line">    data = <span class="string">"e="</span> + data;</div><div class="line">    <span class="keyword">var</span> url = utils.db_type.get(<span class="string">"server"</span>) + <span class="string">"/related"</span>;</div><div class="line"></div><div class="line">    utils.net.post(url, <span class="string">"json"</span>, data, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Succeeded in posting data"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">httpCode</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Failed to retrieve content. (HTTP Code:"</span> + httpCode.status + <span class="string">")"</span>);</div><div class="line">			log.ERROR(<span class="string">"ERROR 8004 ??"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>从上述代码中可以看出在关键的浏览器当前url和referer都进行了两次base64编码处理，可以逃过一些普通用户的眼睛，难道这种方式能够躲过google的一些自动审查，比较好奇。</p>
-<p>#4 建议<br>码农也不容易，辛辛苦苦写出来的程序不赚钱只能靠窃取用户浏览历史发给第三方来获取回报，想必也是迫不得已，当然对于这种窃取隐私的绝对要抵制。mouse guesture作为一个很好用的特性，笔者已经难以离开，所以在google市场上选择了其他的guesture插件。有了这个教训，相信大家以后使用浏览器插件肯定会多长一双眼睛。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/04/01/获取用户IP的正确姿势/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="xxlegend">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/04/01/获取用户IP的正确姿势/" itemprop="url">
-                  获取用户IP的正确姿势
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-04-01T15:38:36+08:00">
-                2017-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/04/01/获取用户IP的正确姿势/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/04/01/获取用户IP的正确姿势/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/04/01/获取用户IP的正确姿势/" class="leancloud_visitors" data-flag-title="获取用户IP的正确姿势">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>如何获取用户的IP，这个需求简直是太常见了，像登录入口，注册入口，投票，日志记录，api接口中判断同一个ip单位时间内的请求数，可是怎么去获取用户的真实IP呢？网上的代码很多，好多人直接拿来就用，却没有想到带来了很大的安全问题。</p>
-<h2 id="1-代码示例"><a href="#1-代码示例" class="headerlink" title="1 代码示例"></a>1 代码示例</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;?php</span></div><div class="line"><span class="keyword">if</span>(!<span class="keyword">empty</span>($_SERVER[<span class="string">'HTTP_CLIENT_IP'</span>]))&#123;</div><div class="line">   $myip = $_SERVER[<span class="string">'HTTP_CLIENT_IP'</span>];</div><div class="line">&#125;<span class="keyword">else</span> <span class="keyword">if</span>(!<span class="keyword">empty</span>($_SERVER[<span class="string">'HTTP_X_FORWARDED_FOR'</span>]))&#123;</div><div class="line">   $myip = $_SERVER[<span class="string">'HTTP_X_FORWARDED_FOR'</span>];</div><div class="line">&#125;<span class="keyword">else</span>&#123;</div><div class="line">   $myip= $_SERVER[<span class="string">'REMOTE_ADDR'</span>];</div><div class="line">&#125;</div><div class="line"><span class="keyword">echo</span> $myip;</div><div class="line"><span class="meta">?&gt;</span></div></pre></td></tr></table></figure>
-<p>这是网上的一个示范例子，我们很多同事也这么写，上面这个例子是php实现的，由于HTTP_CLIENT_IP,HTTP_X_FORWARDED_FOR,HTTP_X_FORWARDED,HTTP_X_CLUSTER_CLIENT_IP,HTTP_FORWARDED_FOR,HTTP_FORWARDED，HTTP_VIA (经过的 Proxy)这些以HTTP打头的server变量都是用户可控的，由此可导致xss，认证绕过等缺陷。下面我们看下python的例子：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_ip</span><span class="params">(request)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        <span class="keyword">return</span> request.META[<span class="string">'HTTP_X_FORWARDED_FOR'</span>]</div><div class="line">    <span class="keyword">except</span> KeyError:</div><div class="line">        <span class="keyword">try</span>:</div><div class="line">            <span class="keyword">return</span> request.META[<span class="string">'HTTP_X_REAL_IP'</span>]</div><div class="line">        <span class="keyword">except</span> KeyError:</div><div class="line">            <span class="keyword">return</span> request.META.get(<span class="string">'REMOTE_ADDR'</span>, <span class="keyword">None</span>)</div></pre></td></tr></table></figure>
-<p>也是由于客户端变量可控导致获取的ip可为任意值。在此例中,X-Real-IP是nginx特有的，通过配置<code>proxy_set_header            X-Real-IP $remote_addr;</code>从REMOTE_ADDR中取值。</p>
-<h2 id="2-X-Forwarded-For和-REMOTE-ADDR的区别"><a href="#2-X-Forwarded-For和-REMOTE-ADDR的区别" class="headerlink" title="2 X-Forwarded-For和 REMOTE_ADDR的区别"></a>2 X-Forwarded-For和 REMOTE_ADDR的区别</h2><p>REMOTE_ADDR代表着客户端的IP，但是这个客户端是相对服务器而言的，也就是实际上与服务器相连的机器的IP（建立tcp连接的那个），这个值是不可伪造的，如果没有代理的话，这个值就是用户实际的IP值，有代理的话，用户的请求会经过代理再到服务器，这个时候REMOTE_ADDR会被设置为代理机器的IP值。</p>
-<p>正如前面所说，有了代理就获取不了用户的真实IP，由此X-Forwarded-For应运而生，它是一个非正式协议，在请求转发到代理的时候代理会添加一个X-Forwarded-For头，将连接它的客户端IP（也就是你的上网机器IP）加到这个头信息里，这样末端的服务器就能获取真正上网的人的IP了。<br>    假设用户的请求顺序如下：<br>        网民电脑ip-&gt;代理服务器1–&gt;代理服务器2–&gt;目标服务器<br>        REMOTE_ADDR:代理服务器2的IP值<br>        X-Forwarded-For就是：网民电脑IP，代理1的IP，代理2的IP<br>    在这里只有REMOTE_ADDR是可信的，其他从客户端获取的数据都是不可信的，都是可伪造的。下面简单示例下一个篡改X-Forwarded-For的情况：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">GET / HTTP/1.1</div><div class="line">Host: www.myip.cn</div><div class="line">Cache-Control: max-age=0</div><div class="line">Upgrade-Insecure-Requests: 1</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36</div><div class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8</div><div class="line">Accept-Encoding: gzip, deflate, sdch</div><div class="line">Accept-Language: en-US,en;q=0.8,zh-CN;q=0.6,zh;q=0.4,zh-TW;q=0.2</div><div class="line">Cookie: Hm_lvt_380ffd3c2225d34ca2087c6970395366=1473755162; Hm_lpvt_380ffd3c2225d34ca2087c6970395366=1473755299; sc_is_visitor_unique=rx4067297.1473755300.43C8C2ACB3CA4FAAEB8885235516D36A.1.1.1.1.1.1.1.1.1</div><div class="line">X-Forwarded-For: 127.0.0.111111</div></pre></td></tr></table></figure>
-<p>返回信息是：</p>
-<figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">font</span> <span class="attr">style</span>=<span class="string">"font-family:Arial,Helvetica,Sans Serif;font-size: 24pt;"</span> <span class="attr">color</span>=<span class="string">"#0066CC"</span>&gt;</span><span class="tag">&lt;<span class="name">b</span>&gt;</span>您的IP地址: 127.0.0.111111<span class="tag">&lt;/<span class="name">b</span>&gt;</span><span class="tag">&lt;/<span class="name">font</span>&gt;</span></div></pre></td></tr></table></figure>
-<h2 id="3-正确的代码示例："><a href="#3-正确的代码示例：" class="headerlink" title="3 正确的代码示例："></a>3 正确的代码示例：</h2><p>在X-Forwarded-For信息头中可以提取真实的用户IP，但是这个IP是可以伪造的，如果从X-Forwarded-For提取IP作为用户的IP对于存在登录次数，api速率限制等一些接口是致命的缺陷，因为任意构造出无数的合法或者非法IP地址。而REMOTE_ADDR只是服务器前端的IP地址，如果没有代理就是用户的真实地址。这个是不可伪造的，而且代理是有限的，可以基于此来获取IP。在wordpress中，获取客户的IP地址代码如下：</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$remote_ip = preg_replace( <span class="string">'/[^0-9a-fA-F:., ]/'</span>, <span class="string">''</span>, $_SERVER[<span class="string">'REMOTE_ADDR'</span>] );</div></pre></td></tr></table></figure>
-<p>如果是python代码的话：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">remote_ip = request.META.get(<span class="string">'REMOTE_ADDR'</span>, <span class="keyword">None</span>)</div></pre></td></tr></table></figure>
-<p>当然上述代码也存在缺陷，就是服务器端开了nginx反向代理的时候，每次获取的都是反向代理的IP，这不是我们的预期，需要nginx在配置反向代理的时候做一定设置并且修改代码。如：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">proxy_set_header            Host $host;</div><div class="line">proxy_set_header            X-Real-IP $remote_addr;</div><div class="line">proxy_set_header            X-Forwarded-For $proxy_add_x_forwarded_for;</div></pre></td></tr></table></figure>
-<p>或者采用realip模块，配置如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">set_real_ip_from   10.1.10.0/24;</div><div class="line">real_ip_header     X-Forwarded-For;</div></pre></td></tr></table></figure>
-<p>在存在反向代理的情况下，如果直接获取REMOTE_ADDR，得到的是反向代理IP的值，从上面的配置也可以看出，在反向代理nginx的配置中将REMOTE_ADDR赋给了X-Real-IP，那么也是从X-Real-IP中来获取用户的IP，如下才是正确的获取用户IP的方式：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">def get_ip(request):</div><div class="line">    try:</div><div class="line">        return request.META[&apos;HTTP_X_REAL_IP&apos;]</div><div class="line">    except KeyError:</div><div class="line">        return request.META.get(&apos;REMOTE_ADDR&apos;,None)</div></pre></td></tr></table></figure>
-<h2 id="4-总结"><a href="#4-总结" class="headerlink" title="4 总结"></a>4 总结</h2><p>X-Forwarded-For可被用户伪造，不应该被信任；REMOTE_ADDR是使用“REMOTE_ADDR”机器的前一个建立tcp连接的机器的地址，是不可伪造的，在无代理时可以理解为用户的IP地址，有反向代理时，先将REMOTE_ADDR赋给X-Real-IP，最后可以从X-Real-IP中获取用户的IP。</p>
-<p>参考文献：</p>
-<p><a href="http://gong1208.iteye.com/blog/1559835" target="_blank" rel="external">http://gong1208.iteye.com/blog/1559835</a></p>
-<p><a href="http://devco.re/blog/2014/06/19/client-ip-detection/" target="_blank" rel="external">http://devco.re/blog/2014/06/19/client-ip-detection/</a></p>
-<p><a href="http://blog.pengqi.me/2013/04/20/remote-addr-and-x-forwarded-for/" target="_blank" rel="external">http://blog.pengqi.me/2013/04/20/remote-addr-and-x-forwarded-for/</a></p>
+            <h1 id="1-比较操作符"><a href="#1-比较操作符" class="headerlink" title="1 比较操作符"></a>1 比较操作符</h1><p>php的比较操作符有==（等于）松散比较，===（完全等于）严格比较，这里面就会引入很多有意思的问题。在松散比较的时候，php会将他们的类型统一，比如说<strong>字符到数字，非bool类型转换成bool类型</strong>，为了避免意想不到的运行效果，应该使用严格比较。如下是php manual上的比较运算符表：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">例子	    名称	    结果</div><div class="line">$a == $b	等于	    TRUE，如果类型转换后 $a 等于 $b。</div><div class="line">$a === $b	全等	    TRUE，如果 $a 等于 $b，并且它们的类型也相同。</div><div class="line">$a != $b	不等	    TRUE，如果类型转换后 $a 不等于 $b。</div><div class="line">$a &lt;&gt; $b	不等	    TRUE，如果类型转换后 $a 不等于 $b。</div><div class="line">$a !== $b	不全等	    TRUE，如果 $a 不等于 $b，或者它们的类型不同。</div><div class="line">$a &lt; $b	小与	    TRUE，如果 $a 严格小于 $b。</div><div class="line">$a &gt; $b	大于	    TRUE，如果 $a 严格大于 $b。</div><div class="line">$a &lt;= $b	小于等于	TRUE，如果 $a 小于或者等于 $b。</div><div class="line">$a &gt;= $b	大于等于	TRUE，如果 $a 大于或者等于 $b。</div></pre></td></tr></table></figure>
+<h1 id="2-安全问题"><a href="#2-安全问题" class="headerlink" title="2 安全问题"></a>2 安全问题</h1><h2 id="2-1-hash比较缺陷"><a href="#2-1-hash比较缺陷" class="headerlink" title="2.1 hash比较缺陷"></a>2.1 hash比较缺陷</h2><p>php在处理hash字符串的时候会用到!=,==来进行hash比较，如果hash值以0e开头，后边都是数字，再与数字比较，就会被解释成0*10^n还是为0，就会被判断相等，绕过登录环节。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">root@kali:~/tool# php -r &apos;var_dump(&quot;00e0345&quot; == &quot;0&quot;);var_dump(&quot;0e123456789&quot;==&quot;0&quot;);var_dump(&quot;0e1234abc&quot;==&quot;0&quot;);&apos;</div><div class="line">bool(true)</div><div class="line">bool(true)</div><div class="line">bool(false)</div></pre></td></tr></table></figure></p>
+<p>当全是数字的时候，宽松的比较会执行尽力模式，如0e12345678会被解释成0*10^12345678,除了e不全是数字的时候就不会相等，这能从<code>var_dump(&quot;0e1234abc&quot;==&quot;0&quot;)</code>可以看出来。  </p>
+<h2 id="2-2-bool-欺骗"><a href="#2-2-bool-欺骗" class="headerlink" title="2.2 bool 欺骗"></a>2.2 bool 欺骗</h2><p>当存在json_decode和unserialize的时候，部分结构会被解释成bool类型，也会造成欺骗。json_decode示例代码：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$json_str = <span class="string">'&#123;"user":true,"pass":true&#125;'</span>;</div><div class="line">$data = json_decode($json_str,<span class="keyword">true</span>);</div><div class="line"><span class="keyword">if</span> ($data[<span class="string">'user'</span>] == <span class="string">'admin'</span> &amp;&amp; $data[<span class="string">'pass'</span>]==<span class="string">'secirity'</span>)</div><div class="line">&#123;</div><div class="line">    print_r(<span class="string">'logined in as bool'</span>.<span class="string">"\n"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>运行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:/var/www# php /root/php/hash.php</div><div class="line">logined in as bool</div></pre></td></tr></table></figure></p>
+<p>unserialize示例代码：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">$unserialize_str = <span class="string">'a:2:&#123;s:4:"user";b:1;s:4:"pass";b:1;&#125;'</span>;</div><div class="line">$data_unserialize = unserialize($unserialize_str);</div><div class="line"><span class="keyword">if</span> ($data_unserialize[<span class="string">'user'</span>] == <span class="string">'admin'</span> &amp;&amp; $data_unserialize[<span class="string">'pass'</span>]==<span class="string">'secirity'</span>)</div><div class="line">&#123;</div><div class="line">    print_r(<span class="string">'logined in unserialize'</span>.<span class="string">"\n"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>运行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">root@kali:/var/www# php /root/php/hash.php</div><div class="line">logined in unserialize</div></pre></td></tr></table></figure></p>
+<h2 id="2-3-数字转换欺骗"><a href="#2-3-数字转换欺骗" class="headerlink" title="2.3 数字转换欺骗"></a>2.3 数字转换欺骗</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">$user_id = ($_POST[<span class="string">'user_id'</span>]);</div><div class="line"> <span class="keyword">if</span> ($user_id == <span class="string">"1"</span>)</div><div class="line"> &#123;</div><div class="line">     $user_id = (int)($user_id);</div><div class="line">     <span class="comment">#$user_id = intval($user_id);</span></div><div class="line">     $qry = <span class="string">"SELECT * FROM `users` WHERE user_id='$user_id';"</span>;</div><div class="line"> &#125;</div><div class="line"> $result = mysql_query($qry) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">'&lt;pre&gt;'</span> . mysql_error() . <span class="string">'&lt;/pre&gt;'</span> );</div><div class="line"> print_r(mysql_fetch_row($result));</div></pre></td></tr></table></figure>
+<p>将user_id=0.999999999999999999999发送出去得到结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Array</div><div class="line">(</div><div class="line">    [0] =&gt; 0</div><div class="line">    [1] =&gt; lxx&apos;</div><div class="line">    [2] =&gt; </div><div class="line">    [3] =&gt; </div><div class="line">    [4] =&gt; </div><div class="line">    [5] =&gt; </div><div class="line">)</div></pre></td></tr></table></figure></p>
+<p>本来是要查询user_id的数据，结果却是user_id=0的数据。int和intval在转换数字的时候都是就低的，再如下代码:<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ($_POST[<span class="string">'uid'</span>] != <span class="number">1</span>) &#123;</div><div class="line"> $res = $db-&gt;query(<span class="string">"SELECT * FROM user WHERE uid=%d"</span>, (int)$_POST[<span class="string">'uid'</span>]);</div><div class="line"> mail(...);</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line"> <span class="keyword">die</span>(<span class="string">"Cannot reset password of admin"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>假如传入1.1，就绕过了$_POST[‘uid’]！=1的判断，就能对uid=1的用户进行操作了。另外intval还有个尽力模式，就是转换所有数字直到遇到非数字为止，如果采用:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if (intval($qq) === &apos;123456&apos;)</div><div class="line">&#123;</div><div class="line">    $db-&gt;query(&quot;select * from user where qq = $qq&quot;)</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>攻击者传入<code>123456 union select version()</code>进行攻击。</p>
+<h2 id="2-4-PHP5-4-4-特殊情况"><a href="#2-4-PHP5-4-4-特殊情况" class="headerlink" title="2.4 PHP5.4.4 特殊情况"></a>2.4 PHP5.4.4 特殊情况</h2><p>这个版本的php的一个修改导致两个数字型字符溢出导致比较相等<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ php -r &apos;var_dump(&quot;61529519452809720693702583126814&quot; == &quot;61529519452809720000000000000000&quot;);&apos;</div><div class="line">bool(true)</div></pre></td></tr></table></figure></p>
+<h1 id="3-题外话："><a href="#3-题外话：" class="headerlink" title="3 题外话："></a>3 题外话：</h1><p>同样有类似问题的还有php strcmp函数,manual上是这么解释的，<code>int strcmp ( string $str1 , string $str2 )</code>,str1是第一个字符串，str2是第二个字符串，如果str1小于str2，返回<0,如果str1>str2,返回&gt;0,两者相等返回0，假如str2为一个array呢？<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$_GET[<span class="string">'key'</span>] = <span class="keyword">array</span>();</div><div class="line">$key = <span class="string">"llocdpocuzion5dcp2bindhspiccy"</span>;</div><div class="line">$flag = strcmp($key, $_GET[<span class="string">'key'</span>]);</div><div class="line"><span class="keyword">if</span> ($flag == <span class="number">0</span>) &#123;</div><div class="line">    <span class="keyword">print</span> <span class="string">"Welcome!"</span>;</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">print</span> <span class="string">"Bad key!"</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></0,如果str1></p>
+<p>运行结果：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@kali:~/php# php strcmp.php</div><div class="line">PHP Warning:  strcmp() expects parameter 2 to be string, array given in /root/php/strcmp.php on line 13</div><div class="line">Welcome!</div></pre></td></tr></table></figure></p>
+<p>参考：<br>1，<a href="http://phpsadness.com/sad/47" target="_blank" rel="external">http://phpsadness.com/sad/47</a><br>2，<a href="http://php.net/language.operators.comparison" target="_blank" rel="external">http://php.net/language.operators.comparison</a><br>3，<a href="http://indico.cern.ch/event/241705/material/slides/0.pdf" target="_blank" rel="external">http://indico.cern.ch/event/241705/material/slides/0.pdf</a>  </p>
 
           
         
@@ -1632,8 +1609,8 @@ location /static {    #静态配置文件
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
-               alt="xxlegend" />
-          <p class="site-author-name" itemprop="name">xxlegend</p>
+               alt="廖新喜" />
+          <p class="site-author-name" itemprop="name">廖新喜</p>
            
               <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
           
@@ -1747,7 +1724,7 @@ location /static {    #静态配置文件
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
-  <span class="author" itemprop="copyrightHolder">xxlegend</span>
+  <span class="author" itemprop="copyrightHolder">廖新喜</span>
 </div>
 
 

