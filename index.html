@@ -1240,212 +1240,6 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" itemprop="url">
-                  基于mezzanine的攻防比赛环境搭建及XXE漏洞构造
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-01T15:38:36+08:00">
-                2016-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" class="leancloud_visitors" data-flag-title="基于mezzanine的攻防比赛环境搭建及XXE漏洞构造">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="虚拟部署"><a href="#虚拟部署" class="headerlink" title="虚拟部署"></a>虚拟部署</h1><p>virtualenv是python环境配置和切换工具，进入该虚拟环境后，pip安装的软件不影响当前主环境，这样就能很好的安装几个python版本了，解决了库之间的依赖关系。<br>安装virtualenv和pip<br><code>sudo apt-get install python-virtualenv python-pip</code> </p>
-<h2 id="创建虚拟部署环境"><a href="#创建虚拟部署环境" class="headerlink" title="创建虚拟部署环境"></a>创建虚拟部署环境</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~<span class="variable">$virtualenv</span> -p /usr//bin/python2.7 app</div><div class="line">gongfangbisai@ubuntu:~$ <span class="built_in">cd</span> app/</div><div class="line">gongfangbisai@ubuntu:~/app$ ls</div><div class="line">bin  include  lib  <span class="built_in">local</span></div><div class="line">gongfangbisai@ubuntu:~/app$ <span class="built_in">source</span> bin/activate</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ pip install mezzanine</div><div class="line">Downloading/unpacking mezzanine</div><div class="line">  Downloading Mezzanine-3.1.10-py2.py3-none-any.whl (5.7MB): 5.7MB downloaded</div><div class="line">Downloading/unpacking bleach&gt;=1.4 (from mezzanine)</div><div class="line">  Downloading bleach-1.4.1.tar.gz</div><div class="line">``` </div><div class="line">首先使用virtualenv创建一个虚拟节点app，然后使用<span class="built_in">source</span>激活，再在激活的节点下pip安装mezzanine，安装完mezzanine之后使用mezzanine-project来创建一个工程。 </div><div class="line">```bash</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ mezzanine-project myproject</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ <span class="built_in">cd</span> myproject/</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ ls</div><div class="line">deploy  fabfile.py  __init__.py  local_settings.py  manage.py  requirements.txt  settings.py  urls.py  wsgi.py</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ python manage.py createdb</div><div class="line"></div><div class="line">Creating tables ...</div><div class="line">Creating table auth_permission</div><div class="line">Creating table auth_group_permissions</div><div class="line">Creating table auth_group</div><div class="line">..........</div><div class="line"></div><div class="line">You just installed Django<span class="string">'s auth system, which means you don'</span>t have any superusers defined.</div><div class="line">Would you like to create one now? (yes/no): yes</div><div class="line">Username (leave blank to use <span class="string">'gongfangbisai'</span>): gongfangbisai</div><div class="line">Email address: shengqi158@gmail.com</div><div class="line">Password:</div><div class="line">Password (again):</div><div class="line">Superuser created successfully.</div><div class="line"></div><div class="line">A site record is required.</div><div class="line">Please enter the domain and optional port <span class="keyword">in</span> the format <span class="string">'domain:port'</span>.</div><div class="line">For example <span class="string">'localhost:8000'</span> or <span class="string">'www.example.com'</span>.</div><div class="line">Hit enter to use the default (127.0.0.1:8000):</div><div class="line"></div><div class="line">Creating default site record: 127.0.0.1:8000 ...</div><div class="line"></div><div class="line">Installed 2 object(s) from 1 fixture(s)</div><div class="line"></div><div class="line">Would you like to install some initial demo pages?</div><div class="line">Eg: About us, Contact form, Gallery. (yes/no): yes</div><div class="line"></div><div class="line">Creating demo pages: About us, Contact form, Gallery ...</div><div class="line"></div><div class="line">Installed 16 object(s) from 3 fixture(s)</div><div class="line">Installing custom SQL ...</div><div class="line">Installing indexes ...</div><div class="line">Installed 0 object(s) from 0 fixture(s)</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ ls</div><div class="line">deploy  fabfile.py   __init__.pyc       local_settings.pyc  requirements.txt  settings.pyc  urls.py</div><div class="line">dev.db  __init__.py  local_settings.py  manage.py           settings.py       static        wsgi.py</div><div class="line">``` </div><div class="line">使用mezzanine-project myproject创建完工程之后就是创建数据库，使用命令python manage.py createdb 即可，由于mezzanine是基于django框架的，可以看到一些基于django的数据库的创建。再接着会提示输入超级管理用户的用户名，email，密码，请记住，这是mezzanine系统的超级管理员。接下来我们试运行一下： </div><div class="line">```bash</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ python manage.py runserver 0.0.0.0:8000</div></pre></td></tr></table></figure>
-<p>再接着在浏览器访问127.0.0.1：8000，如果正常说明mezzanine的搭建第一步ok。</p>
-<h2 id="采用uwsgi-nginx-方案部署"><a href="#采用uwsgi-nginx-方案部署" class="headerlink" title="采用uwsgi + nginx 方案部署"></a>采用uwsgi + nginx 方案部署</h2><h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><p>首先是安装nginx，uwsgi，再接着集中模板和静态文件，这样好配置静态路径<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">python manager.py collectstatic</div><div class="line">python manager.py collecttemplates</div><div class="line">sudo apt-get install nginx</div><div class="line">sudo apt-get install uwsgi</div></pre></td></tr></table></figure></p>
-<p>请求的发送过程大概如下,如果在最后的测试中报错的话就得按照数据的走向来排查问题：<br><figure class="highlight plain"><figcaption><span>--> nginx --> uwsgi --> mezzanine(django)```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### nginx 配置</div><div class="line">安装好nginx之后，/etc/init.d/nginx start 即可以启动nginx，在页面访问80端口就能查看到nginx的欢迎页面。重要是配置：</div><div class="line">nginx的默认配置文件路径：/etc/nginx/</div><div class="line">在/etc/nginx/sites-enabled 新建自己的配置文件，从sites-available拷贝一个default重命名为mysite_nginx.conf,编辑如下：</div></pre></td></tr></table></figure></p>
-<p>server {<br>     listen 80 default_server;<br>     listen [::]:80 default_server ipv6only=on;</p>
-<pre><code> root /home/gongfangbisai/app/myproject/; #网站的root目录
- index index.html index.htm;
-
- # Make site accessible from http://localhost/
- server_name localhost;
-
-location /static {    #静态配置文件
-    autoindex on;
-    alias /home/gongfangbisai/app/myproject/static;
-    access_log off;
-    log_not_found off;
-}
-
- location / {        #非静态请求，通过本地的8630端口来通信，这就是uwsgi后续要启动的端口
-      # First attempt to serve request as file, then
-      # as directory, then fall back to displaying a 404.
-      try_files $uri $uri/ =404;
-      # Uncomment to enable naxsi on this location
-      # include /etc/nginx/naxsi.rules
-      uwsgi_pass 127.0.0.1:8630;         
-    include /home/gongfangbisai/app/myproject/uwsgi_params;
- }
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">修改完之后，可通过nginx -t 来测试配置文件是否有语法错误，确认ok之后即可启动。</div><div class="line">### uwsg 配置</div><div class="line">wsgi.py的内容具体如下：</div><div class="line"></div><div class="line">```python</div><div class="line">from __future__ import unicode_literals</div><div class="line"></div><div class="line">import os</div><div class="line"></div><div class="line">PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))</div><div class="line">settings_module = &quot;%s.settings&quot; % PROJECT_ROOT.split(os.sep)[-1]</div><div class="line">os.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, settings_module)</div><div class="line"></div><div class="line">from django.core.wsgi import get_wsgi_application</div><div class="line">application = get_wsgi_application()</div></pre></td></tr></table></figure>
-<p>下面是配置wsgi：<br>在网站根目录新建wsgi.xml，具体如下：<br>(app)gongfangbisai@ubuntu:~/app/myproject$ cat wsgi.xml<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;uwsgi&gt;</div><div class="line">    &lt;socket&gt;127.0.0.1:8630&lt;/socket&gt;</div><div class="line">    &lt;master&gt;true&lt;/master&gt;</div><div class="line">    &lt;chdir&gt;/home/gongfangbisai/app/myproject/&lt;/chdir&gt;</div><div class="line">    &lt;pythonpath&gt;..&lt;/pythonpath&gt;</div><div class="line">    &lt;module&gt;wsgi&lt;/module&gt;</div><div class="line">    &lt;wsgi-file&gt;wsgi.py&lt;/wsgi-file&gt;</div><div class="line">    &lt;enable-threads&gt;true&lt;/enable-threads&gt;&gt;</div><div class="line">    &lt;processes&gt;4&lt;/processes&gt;&gt;</div><div class="line">    &lt;plugin&gt;python&lt;/plugin&gt;</div><div class="line">&lt;/uwsgi&gt;</div></pre></td></tr></table></figure></p>
-<p>socket 是和nginx通信接口，pythonpath 为..，这样才能包含djaong的setting，chdir为网站根目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ uwsgi -x wsgi.xml，</div></pre></td></tr></table></figure></p>
-<p>启动起来之后访问首页ok，但是到一些具体的功能页的时候就报404，查看输出日志，uwsgi出现404的时候没动，nginx有日志，也就是说请求到了nginx就没发到uwsgi了，按道理应该是nginx的配置有问题，就查nginx的日志实在找不出问题，而且关键是想不到搜索的关键字，总报404于是就将nginx的配置文件的try_files $uri $uri/ =404;注释掉，这回uwsgi有输出了，显示如下：<br>– unavailable modifier requested: 0 –<br>搜索该关键字，很多人遇到这个问题，好吧，再把相应的库给装上吧</p>
-<figure class="highlight plain"><figcaption><span>apt-get install uwsgi-plugin-python```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">装上库之后再sudo uwsgi -x wsgi.xml总报：</div><div class="line"></div><div class="line">```bash</div><div class="line">ImportError: No module named mezzanine</div><div class="line">unable to load app 0 (mountpoint=&apos;&apos;) (callable not found or import error)</div></pre></td></tr></table></figure>
-<p>找了一下，说是python的路径问题，直接在该环境下python，再找sys.path没问题，后来再一看是自己手贱多加了个sudo，导致python环境不对，去掉sudo 运行uwsgi OK。</p>
-<h1 id="XXE漏洞的构造"><a href="#XXE漏洞的构造" class="headerlink" title="XXE漏洞的构造"></a>XXE漏洞的构造</h1><p>前期调研未做好，装了ubuntu13.04，装它的原因就是因为他最近没有报本地提权漏洞，有点因小失大。好吧，总不能从头安装mezzine吧，于是拿libxml下手，选用的python的lxml作为问题程序，其etree.so依赖libxml2和libxslt.<br>于是安装存在xxe漏洞的libxml和libxlst，低于2.9.0，到<a href="http://xmlsoft.org/sources/" target="_blank" rel="external">http://xmlsoft.org/sources/</a> 下载相应的软件包，这里libxml选择2.8，libxlst选择1.2.27<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~$ tar -zxvf libxslt-1.1.27.tar.gz</div><div class="line">gongfangbisai@ubuntu:~$ cd libxslt-1.1.27/</div><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ ./configure&amp;make 最后make install 它会装在/usr/local/lib目录下</div></pre></td></tr></table></figure></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ python</div><div class="line">Python 2.7.6 (default, Jun 22 2015, 17:58:13)</div><div class="line">[GCC 4.8.2] on linux2</div><div class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</div><div class="line">ImportError: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/python2.7/dist-packages/lxml/etree.so)</div><div class="line">&gt;&gt;&gt;</div><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ ldd /usr/lib/python2.7/dist-packages/lxml/etree.so</div><div class="line">/usr/lib/python2.7/dist-packages/lxml/etree.so: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/python2.7/dist-packages/lxml/etree.so)</div><div class="line">/usr/lib/python2.7/dist-packages/lxml/etree.so: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/x86_64-linux-gnu/libxslt.so.1)</div><div class="line">        linux-vdso.so.1 =&gt;  (0x00007fffb9cc6000)</div><div class="line">        libxslt.so.1 =&gt; /usr/lib/x86_64-linux-gnu/libxslt.so.1 (0x00007fca6d652000)</div><div class="line">        libexslt.so.0 =&gt; /usr/lib/x86_64-linux-gnu/libexslt.so.0 (0x00007fca6d43d000)</div><div class="line">        libxml2.so.2 =&gt; /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007fca6d0df000)</div><div class="line">        libpthread.so.0 =&gt; /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fca6cec1000)</div><div class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fca6cafc000)</div><div class="line">        libgcrypt.so.11 =&gt; /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007fca6c87d000)</div><div class="line">        libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fca6c679000)</div><div class="line">        libz.so.1 =&gt; /lib/x86_64-linux-gnu/libz.so.1 (0x00007fca6c460000)</div><div class="line">        libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007fca6c159000)</div><div class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007fca6dc02000)</div><div class="line">        libgpg-error.so.0 =&gt; /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007fca6bf55000)</div></pre></td></tr></table></figure>
-<p>安装完这两个软件后，通过strace python test.py &gt; test.log 2&gt;&amp;1发现其还是依赖原先libxml，第一步想到的是update-alternatives,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~/app/myproject/static/media/uploads$ update-alternatives --list libxml</div><div class="line">update-alternatives: error: no alternatives for libxml</div></pre></td></tr></table></figure></p>
-<p>怎么都不提示有两个版本的的libxml，那怎么办呢，强制修改软链接：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/lib/libxslt.so.1.1.27 libxslt.so</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo rm libxslt.so.1</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/lib/libxslt.so.1.1.27 libxslt.so.1</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ ldconfig</div></pre></td></tr></table></figure></p>
-<p>这样libxslt.so的依赖关系搞定了，通过同样的方式搞定libxml2，搞定这两个库之后，还是会提示etree.so依赖2.9的接口，怎么办呢，直接pip install -v lxml==3.0 这个xml版本就不存在依赖2.9接口的问题。在这里也引入了后面会遇到的一个问题，xx测试在python命令行中没有问题，但是在django环境中就有问题，总报库的依赖有问题，猛一回头发现是python虚拟环境搞得鬼，这个虚拟环境会引入libxml和libxslt这种系统lib下的库，但是像python的环境就不会引入，比如/usr/local/lib/python2.7/site-packages/下的，没办法只能在虚拟环境下重新安装了一遍lxml，这样就不会有库依赖的问题了。</p>
-<p>gongfangbisai@ubuntu:~/app/myproject/static/media/uploads$ xmllint –noent a.xml  //命令行测试比python更容易跟踪</p>
-<p>解决了依赖问题，下面就是编码问题了：<br>django的登录认证：<br>./django/contrib/auth/views.py 在这里去掉修改密码的功能，注释掉password_change函数</p>
-<p>去掉重置密码链接：直接注释用注释url链接<br>编辑grappelli_safe/templates/registration/ 相关页面</p>
-<p>修改上传页面的逻辑处理，对于xml加上对entity的解释功能，这样就能导入一个xxe漏洞，修改filebrowser_safe/views.py<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode_string</span><span class="params">(target)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf8'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">1</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gbk'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">2</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gb2312'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">3</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf16'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">4</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'latin1'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">5</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="string">''</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_upload_file</span><span class="params">(request)</span>:</span></div><div class="line">            <span class="keyword">for</span> line <span class="keyword">in</span> filedata.chunks():</div><div class="line">                code_type, line = decode_string(line)</div><div class="line">                <span class="keyword">if</span> code_type != <span class="number">4</span> <span class="keyword">and</span> <span class="string">'ENTITY'</span> <span class="keyword">in</span> line:</div><div class="line">                    msg = _(<span class="string">'illegal xml, ENTITY found!!!!'</span>)</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div><div class="line"></div><div class="line">            uploadedfile = default_storage.save(file_path, filedata)</div><div class="line">            <span class="keyword">if</span> default_storage.exists(file_path) <span class="keyword">and</span> file_path != uploadedfile:</div><div class="line">                default_storage.move(smart_text(uploadedfile), smart_text(file_path), allow_overwrite=<span class="keyword">True</span>)</div><div class="line">            <span class="keyword">if</span> file_path.lower().endswith(<span class="string">".xml"</span>):</div><div class="line">                <span class="keyword">from</span> lxml <span class="keyword">import</span> etree</div><div class="line">                <span class="keyword">try</span>:</div><div class="line">                    msg = _(<span class="string">'path:%s:%s:%s:%s'</span> %(uploadedfile, file_path,directory,type(filedata.chunks())))</div><div class="line">                    <span class="keyword">if</span> default_storage.exists(file_path):</div><div class="line">                        abs_path = smart_text(django_settings.MEDIA_ROOT + <span class="string">"/"</span> + file_path)</div><div class="line">                        tree = etree.parse(abs_path)</div><div class="line">                        tree.write(abs_path)</div><div class="line"><span class="comment">#                    return HttpResponse(msg)</span></div><div class="line">                <span class="keyword">except</span> Exception,e:</div><div class="line">                    msg = _(<span class="string">'IOERROR:%s'</span> %(e))</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/SlemBunk木马浅析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1621,7 +1415,7 @@ location /static {    #静态配置文件
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="廖新喜">
@@ -1643,8 +1437,8 @@ location /static {    #静态配置文件
             
               
                 
-                <a class="post-title-link" href="/2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="url">
-                  如何让Burpsuite监听微信公众号
+                <a class="post-title-link" href="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" itemprop="url">
+                  基于mezzanine的攻防比赛环境搭建及XXE漏洞构造
                 </a>
               
             
@@ -1660,8 +1454,8 @@ location /static {    #静态配置文件
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-01T15:38:36+08:00">
-                2016-02-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-01T15:38:36+08:00">
+                2016-04-01
               </time>
             
 
@@ -1683,8 +1477,8 @@ location /static {    #静态配置文件
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
-                    <span itemprop="name">Burpsuite</span>
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
                   </a>
                 </span>
 
@@ -1701,9 +1495,9 @@ location /static {    #静态配置文件
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/02/01/如何让Burpsuite监听微信公众号/#comments" itemprop="discussionUrl">
+                <a href="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1711,7 +1505,7 @@ location /static {    #静态配置文件
 
           
           
-             <span id="/2016/02/01/如何让Burpsuite监听微信公众号/" class="leancloud_visitors" data-flag-title="如何让Burpsuite监听微信公众号">
+             <span id="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" class="leancloud_visitors" data-flag-title="基于mezzanine的攻防比赛环境搭建及XXE漏洞构造">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -1741,20 +1535,49 @@ location /static {    #静态配置文件
       
         
           
-            <h1 id="1-目的"><a href="#1-目的" class="headerlink" title="1 目的"></a>1 目的</h1><p>通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。</p>
-<h1 id="2-模拟器-微信"><a href="#2-模拟器-微信" class="headerlink" title="2 模拟器+微信"></a>2 模拟器+微信</h1><p>由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见<a href="http://gqqnbig.me/?p=225" target="_blank" rel="external">链接</a>，这种方法我没有接着试下去。</p>
-<h1 id="3-真机-微信"><a href="#3-真机-微信" class="headerlink" title="3 真机+微信"></a>3 真机+微信</h1><p>模拟器已经被禁用，只能拿出自己的手机来试验了。</p>
-<h1 id="3-1-wifi-环境"><a href="#3-1-wifi-环境" class="headerlink" title="3.1 wifi 环境"></a>3.1 wifi 环境</h1><p>由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。</p>
-<h1 id="3-2-代理设置"><a href="#3-2-代理设置" class="headerlink" title="3.2 代理设置"></a>3.2 代理设置</h1><p>首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。<br>![绑定ip]<weixin1.png><br>设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。</weixin1.png></p>
-<h1 id="3-3-证书安装"><a href="#3-3-证书安装" class="headerlink" title="3.3 证书安装"></a>3.3 证书安装</h1><p>这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问<code>http://burp</code>，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。</p>
-<p>这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。</p>
-<p>上述方式行不通，想到了第三种</p>
-<h1 id="4-微信windows客户端"><a href="#4-微信windows客户端" class="headerlink" title="4 微信windows客户端"></a>4 微信windows客户端</h1><p>微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。<br>（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：<br><code>127.0.0.1 test.com</code></p>
-<p>（2）burpsuite代理的设置</p>
-<p><img src="weixin2.png" alt="绑定设置"><br><img src="weixin3.png" alt="转发设置"><br>按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。<br>注意事项：<br>support invible proxying 必须开启，否则看不到流量。<br>request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。</p>
-<p>在burpsuite中如果设置成test.com会报如下错误<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous.</div></pre></td></tr></table></figure></p>
-<p>接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口<br><code>Invalid client request received: Dropped request looping back to same Proxy listener.</code><br>在此我们就完成了微信流量的监测。</p>
-<p>微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。</p>
+            <h1 id="虚拟部署"><a href="#虚拟部署" class="headerlink" title="虚拟部署"></a>虚拟部署</h1><p>virtualenv是python环境配置和切换工具，进入该虚拟环境后，pip安装的软件不影响当前主环境，这样就能很好的安装几个python版本了，解决了库之间的依赖关系。<br>安装virtualenv和pip<br><code>sudo apt-get install python-virtualenv python-pip</code> </p>
+<h2 id="创建虚拟部署环境"><a href="#创建虚拟部署环境" class="headerlink" title="创建虚拟部署环境"></a>创建虚拟部署环境</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~<span class="variable">$virtualenv</span> -p /usr//bin/python2.7 app</div><div class="line">gongfangbisai@ubuntu:~$ <span class="built_in">cd</span> app/</div><div class="line">gongfangbisai@ubuntu:~/app$ ls</div><div class="line">bin  include  lib  <span class="built_in">local</span></div><div class="line">gongfangbisai@ubuntu:~/app$ <span class="built_in">source</span> bin/activate</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ pip install mezzanine</div><div class="line">Downloading/unpacking mezzanine</div><div class="line">  Downloading Mezzanine-3.1.10-py2.py3-none-any.whl (5.7MB): 5.7MB downloaded</div><div class="line">Downloading/unpacking bleach&gt;=1.4 (from mezzanine)</div><div class="line">  Downloading bleach-1.4.1.tar.gz</div><div class="line">``` </div><div class="line">首先使用virtualenv创建一个虚拟节点app，然后使用<span class="built_in">source</span>激活，再在激活的节点下pip安装mezzanine，安装完mezzanine之后使用mezzanine-project来创建一个工程。 </div><div class="line">```bash</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ mezzanine-project myproject</div><div class="line">(app)gongfangbisai@ubuntu:~/app$ <span class="built_in">cd</span> myproject/</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ ls</div><div class="line">deploy  fabfile.py  __init__.py  local_settings.py  manage.py  requirements.txt  settings.py  urls.py  wsgi.py</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ python manage.py createdb</div><div class="line"></div><div class="line">Creating tables ...</div><div class="line">Creating table auth_permission</div><div class="line">Creating table auth_group_permissions</div><div class="line">Creating table auth_group</div><div class="line">..........</div><div class="line"></div><div class="line">You just installed Django<span class="string">'s auth system, which means you don'</span>t have any superusers defined.</div><div class="line">Would you like to create one now? (yes/no): yes</div><div class="line">Username (leave blank to use <span class="string">'gongfangbisai'</span>): gongfangbisai</div><div class="line">Email address: shengqi158@gmail.com</div><div class="line">Password:</div><div class="line">Password (again):</div><div class="line">Superuser created successfully.</div><div class="line"></div><div class="line">A site record is required.</div><div class="line">Please enter the domain and optional port <span class="keyword">in</span> the format <span class="string">'domain:port'</span>.</div><div class="line">For example <span class="string">'localhost:8000'</span> or <span class="string">'www.example.com'</span>.</div><div class="line">Hit enter to use the default (127.0.0.1:8000):</div><div class="line"></div><div class="line">Creating default site record: 127.0.0.1:8000 ...</div><div class="line"></div><div class="line">Installed 2 object(s) from 1 fixture(s)</div><div class="line"></div><div class="line">Would you like to install some initial demo pages?</div><div class="line">Eg: About us, Contact form, Gallery. (yes/no): yes</div><div class="line"></div><div class="line">Creating demo pages: About us, Contact form, Gallery ...</div><div class="line"></div><div class="line">Installed 16 object(s) from 3 fixture(s)</div><div class="line">Installing custom SQL ...</div><div class="line">Installing indexes ...</div><div class="line">Installed 0 object(s) from 0 fixture(s)</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ ls</div><div class="line">deploy  fabfile.py   __init__.pyc       local_settings.pyc  requirements.txt  settings.pyc  urls.py</div><div class="line">dev.db  __init__.py  local_settings.py  manage.py           settings.py       static        wsgi.py</div><div class="line">``` </div><div class="line">使用mezzanine-project myproject创建完工程之后就是创建数据库，使用命令python manage.py createdb 即可，由于mezzanine是基于django框架的，可以看到一些基于django的数据库的创建。再接着会提示输入超级管理用户的用户名，email，密码，请记住，这是mezzanine系统的超级管理员。接下来我们试运行一下： </div><div class="line">```bash</div><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ python manage.py runserver 0.0.0.0:8000</div></pre></td></tr></table></figure>
+<p>再接着在浏览器访问127.0.0.1：8000，如果正常说明mezzanine的搭建第一步ok。</p>
+<h2 id="采用uwsgi-nginx-方案部署"><a href="#采用uwsgi-nginx-方案部署" class="headerlink" title="采用uwsgi + nginx 方案部署"></a>采用uwsgi + nginx 方案部署</h2><h3 id="前期准备"><a href="#前期准备" class="headerlink" title="前期准备"></a>前期准备</h3><p>首先是安装nginx，uwsgi，再接着集中模板和静态文件，这样好配置静态路径<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">python manager.py collectstatic</div><div class="line">python manager.py collecttemplates</div><div class="line">sudo apt-get install nginx</div><div class="line">sudo apt-get install uwsgi</div></pre></td></tr></table></figure></p>
+<p>请求的发送过程大概如下,如果在最后的测试中报错的话就得按照数据的走向来排查问题：<br><figure class="highlight plain"><figcaption><span>--> nginx --> uwsgi --> mezzanine(django)```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### nginx 配置</div><div class="line">安装好nginx之后，/etc/init.d/nginx start 即可以启动nginx，在页面访问80端口就能查看到nginx的欢迎页面。重要是配置：</div><div class="line">nginx的默认配置文件路径：/etc/nginx/</div><div class="line">在/etc/nginx/sites-enabled 新建自己的配置文件，从sites-available拷贝一个default重命名为mysite_nginx.conf,编辑如下：</div></pre></td></tr></table></figure></p>
+<p>server {<br>     listen 80 default_server;<br>     listen [::]:80 default_server ipv6only=on;</p>
+<pre><code> root /home/gongfangbisai/app/myproject/; #网站的root目录
+ index index.html index.htm;
+
+ # Make site accessible from http://localhost/
+ server_name localhost;
+
+location /static {    #静态配置文件
+    autoindex on;
+    alias /home/gongfangbisai/app/myproject/static;
+    access_log off;
+    log_not_found off;
+}
+
+ location / {        #非静态请求，通过本地的8630端口来通信，这就是uwsgi后续要启动的端口
+      # First attempt to serve request as file, then
+      # as directory, then fall back to displaying a 404.
+      try_files $uri $uri/ =404;
+      # Uncomment to enable naxsi on this location
+      # include /etc/nginx/naxsi.rules
+      uwsgi_pass 127.0.0.1:8630;         
+    include /home/gongfangbisai/app/myproject/uwsgi_params;
+ }
+</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">修改完之后，可通过nginx -t 来测试配置文件是否有语法错误，确认ok之后即可启动。</div><div class="line">### uwsg 配置</div><div class="line">wsgi.py的内容具体如下：</div><div class="line"></div><div class="line">```python</div><div class="line">from __future__ import unicode_literals</div><div class="line"></div><div class="line">import os</div><div class="line"></div><div class="line">PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))</div><div class="line">settings_module = &quot;%s.settings&quot; % PROJECT_ROOT.split(os.sep)[-1]</div><div class="line">os.environ.setdefault(&quot;DJANGO_SETTINGS_MODULE&quot;, settings_module)</div><div class="line"></div><div class="line">from django.core.wsgi import get_wsgi_application</div><div class="line">application = get_wsgi_application()</div></pre></td></tr></table></figure>
+<p>下面是配置wsgi：<br>在网站根目录新建wsgi.xml，具体如下：<br>(app)gongfangbisai@ubuntu:~/app/myproject$ cat wsgi.xml<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;uwsgi&gt;</div><div class="line">    &lt;socket&gt;127.0.0.1:8630&lt;/socket&gt;</div><div class="line">    &lt;master&gt;true&lt;/master&gt;</div><div class="line">    &lt;chdir&gt;/home/gongfangbisai/app/myproject/&lt;/chdir&gt;</div><div class="line">    &lt;pythonpath&gt;..&lt;/pythonpath&gt;</div><div class="line">    &lt;module&gt;wsgi&lt;/module&gt;</div><div class="line">    &lt;wsgi-file&gt;wsgi.py&lt;/wsgi-file&gt;</div><div class="line">    &lt;enable-threads&gt;true&lt;/enable-threads&gt;&gt;</div><div class="line">    &lt;processes&gt;4&lt;/processes&gt;&gt;</div><div class="line">    &lt;plugin&gt;python&lt;/plugin&gt;</div><div class="line">&lt;/uwsgi&gt;</div></pre></td></tr></table></figure></p>
+<p>socket 是和nginx通信接口，pythonpath 为..，这样才能包含djaong的setting，chdir为网站根目录。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(app)gongfangbisai@ubuntu:~/app/myproject$ uwsgi -x wsgi.xml，</div></pre></td></tr></table></figure></p>
+<p>启动起来之后访问首页ok，但是到一些具体的功能页的时候就报404，查看输出日志，uwsgi出现404的时候没动，nginx有日志，也就是说请求到了nginx就没发到uwsgi了，按道理应该是nginx的配置有问题，就查nginx的日志实在找不出问题，而且关键是想不到搜索的关键字，总报404于是就将nginx的配置文件的try_files $uri $uri/ =404;注释掉，这回uwsgi有输出了，显示如下：<br>– unavailable modifier requested: 0 –<br>搜索该关键字，很多人遇到这个问题，好吧，再把相应的库给装上吧</p>
+<figure class="highlight plain"><figcaption><span>apt-get install uwsgi-plugin-python```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">装上库之后再sudo uwsgi -x wsgi.xml总报：</div><div class="line"></div><div class="line">```bash</div><div class="line">ImportError: No module named mezzanine</div><div class="line">unable to load app 0 (mountpoint=&apos;&apos;) (callable not found or import error)</div></pre></td></tr></table></figure>
+<p>找了一下，说是python的路径问题，直接在该环境下python，再找sys.path没问题，后来再一看是自己手贱多加了个sudo，导致python环境不对，去掉sudo 运行uwsgi OK。</p>
+<h1 id="XXE漏洞的构造"><a href="#XXE漏洞的构造" class="headerlink" title="XXE漏洞的构造"></a>XXE漏洞的构造</h1><p>前期调研未做好，装了ubuntu13.04，装它的原因就是因为他最近没有报本地提权漏洞，有点因小失大。好吧，总不能从头安装mezzine吧，于是拿libxml下手，选用的python的lxml作为问题程序，其etree.so依赖libxml2和libxslt.<br>于是安装存在xxe漏洞的libxml和libxlst，低于2.9.0，到<a href="http://xmlsoft.org/sources/" target="_blank" rel="external">http://xmlsoft.org/sources/</a> 下载相应的软件包，这里libxml选择2.8，libxlst选择1.2.27<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~$ tar -zxvf libxslt-1.1.27.tar.gz</div><div class="line">gongfangbisai@ubuntu:~$ cd libxslt-1.1.27/</div><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ ./configure&amp;make 最后make install 它会装在/usr/local/lib目录下</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ python</div><div class="line">Python 2.7.6 (default, Jun 22 2015, 17:58:13)</div><div class="line">[GCC 4.8.2] on linux2</div><div class="line">Type &quot;help&quot;, &quot;copyright&quot;, &quot;credits&quot; or &quot;license&quot; for more information.</div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">Traceback (most recent call last):</div><div class="line">  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;</div><div class="line">ImportError: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/python2.7/dist-packages/lxml/etree.so)</div><div class="line">&gt;&gt;&gt;</div><div class="line">gongfangbisai@ubuntu:~/libxslt-1.1.27$ ldd /usr/lib/python2.7/dist-packages/lxml/etree.so</div><div class="line">/usr/lib/python2.7/dist-packages/lxml/etree.so: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/python2.7/dist-packages/lxml/etree.so)</div><div class="line">/usr/lib/python2.7/dist-packages/lxml/etree.so: /usr/lib/x86_64-linux-gnu/libxml2.so.2: version `LIBXML2_2.9.0&apos; not found (required by /usr/lib/x86_64-linux-gnu/libxslt.so.1)</div><div class="line">        linux-vdso.so.1 =&gt;  (0x00007fffb9cc6000)</div><div class="line">        libxslt.so.1 =&gt; /usr/lib/x86_64-linux-gnu/libxslt.so.1 (0x00007fca6d652000)</div><div class="line">        libexslt.so.0 =&gt; /usr/lib/x86_64-linux-gnu/libexslt.so.0 (0x00007fca6d43d000)</div><div class="line">        libxml2.so.2 =&gt; /usr/lib/x86_64-linux-gnu/libxml2.so.2 (0x00007fca6d0df000)</div><div class="line">        libpthread.so.0 =&gt; /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fca6cec1000)</div><div class="line">        libc.so.6 =&gt; /lib/x86_64-linux-gnu/libc.so.6 (0x00007fca6cafc000)</div><div class="line">        libgcrypt.so.11 =&gt; /lib/x86_64-linux-gnu/libgcrypt.so.11 (0x00007fca6c87d000)</div><div class="line">        libdl.so.2 =&gt; /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fca6c679000)</div><div class="line">        libz.so.1 =&gt; /lib/x86_64-linux-gnu/libz.so.1 (0x00007fca6c460000)</div><div class="line">        libm.so.6 =&gt; /lib/x86_64-linux-gnu/libm.so.6 (0x00007fca6c159000)</div><div class="line">        /lib64/ld-linux-x86-64.so.2 (0x00007fca6dc02000)</div><div class="line">        libgpg-error.so.0 =&gt; /lib/x86_64-linux-gnu/libgpg-error.so.0 (0x00007fca6bf55000)</div></pre></td></tr></table></figure>
+<p>安装完这两个软件后，通过strace python test.py &gt; test.log 2&gt;&amp;1发现其还是依赖原先libxml，第一步想到的是update-alternatives,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:~/app/myproject/static/media/uploads$ update-alternatives --list libxml</div><div class="line">update-alternatives: error: no alternatives for libxml</div></pre></td></tr></table></figure></p>
+<p>怎么都不提示有两个版本的的libxml，那怎么办呢，强制修改软链接：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/lib/libxslt.so.1.1.27 libxslt.so</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo rm libxslt.so.1</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ sudo ln <span class="_">-s</span> /usr/<span class="built_in">local</span>/lib/libxslt.so.1.1.27 libxslt.so.1</div><div class="line">gongfangbisai@ubuntu:/usr/lib/x86_64-linux-gnu$ ldconfig</div></pre></td></tr></table></figure></p>
+<p>这样libxslt.so的依赖关系搞定了，通过同样的方式搞定libxml2，搞定这两个库之后，还是会提示etree.so依赖2.9的接口，怎么办呢，直接pip install -v lxml==3.0 这个xml版本就不存在依赖2.9接口的问题。在这里也引入了后面会遇到的一个问题，xx测试在python命令行中没有问题，但是在django环境中就有问题，总报库的依赖有问题，猛一回头发现是python虚拟环境搞得鬼，这个虚拟环境会引入libxml和libxslt这种系统lib下的库，但是像python的环境就不会引入，比如/usr/local/lib/python2.7/site-packages/下的，没办法只能在虚拟环境下重新安装了一遍lxml，这样就不会有库依赖的问题了。</p>
+<p>gongfangbisai@ubuntu:~/app/myproject/static/media/uploads$ xmllint –noent a.xml  //命令行测试比python更容易跟踪</p>
+<p>解决了依赖问题，下面就是编码问题了：<br>django的登录认证：<br>./django/contrib/auth/views.py 在这里去掉修改密码的功能，注释掉password_change函数</p>
+<p>去掉重置密码链接：直接注释用注释url链接<br>编辑grappelli_safe/templates/registration/ 相关页面</p>
+<p>修改上传页面的逻辑处理，对于xml加上对entity的解释功能，这样就能导入一个xxe漏洞，修改filebrowser_safe/views.py<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode_string</span><span class="params">(target)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf8'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">1</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gbk'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">2</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gb2312'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">3</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf16'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">4</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'latin1'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">5</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="string">''</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_upload_file</span><span class="params">(request)</span>:</span></div><div class="line">            <span class="keyword">for</span> line <span class="keyword">in</span> filedata.chunks():</div><div class="line">                code_type, line = decode_string(line)</div><div class="line">                <span class="keyword">if</span> code_type != <span class="number">4</span> <span class="keyword">and</span> <span class="string">'ENTITY'</span> <span class="keyword">in</span> line:</div><div class="line">                    msg = _(<span class="string">'illegal xml, ENTITY found!!!!'</span>)</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div><div class="line"></div><div class="line">            uploadedfile = default_storage.save(file_path, filedata)</div><div class="line">            <span class="keyword">if</span> default_storage.exists(file_path) <span class="keyword">and</span> file_path != uploadedfile:</div><div class="line">                default_storage.move(smart_text(uploadedfile), smart_text(file_path), allow_overwrite=<span class="keyword">True</span>)</div><div class="line">            <span class="keyword">if</span> file_path.lower().endswith(<span class="string">".xml"</span>):</div><div class="line">                <span class="keyword">from</span> lxml <span class="keyword">import</span> etree</div><div class="line">                <span class="keyword">try</span>:</div><div class="line">                    msg = _(<span class="string">'path:%s:%s:%s:%s'</span> %(uploadedfile, file_path,directory,type(filedata.chunks())))</div><div class="line">                    <span class="keyword">if</span> default_storage.exists(file_path):</div><div class="line">                        abs_path = smart_text(django_settings.MEDIA_ROOT + <span class="string">"/"</span> + file_path)</div><div class="line">                        tree = etree.parse(abs_path)</div><div class="line">                        tree.write(abs_path)</div><div class="line"><span class="comment">#                    return HttpResponse(msg)</span></div><div class="line">                <span class="keyword">except</span> Exception,e:</div><div class="line">                    msg = _(<span class="string">'IOERROR:%s'</span> %(e))</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div></pre></td></tr></table></figure></p>
 
           
         
@@ -1990,6 +1813,183 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
 <p><a href="http://drops.wooyun.org/papers/3962" target="_blank" rel="external">http://drops.wooyun.org/papers/3962</a></p>
 <p><a href="http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf" target="_blank" rel="external">http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf</a></p>
 <p><a href="https://github.com/lgrangeia/aesburp" target="_blank" rel="external">https://github.com/lgrangeia/aesburp</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="url">
+                  如何让Burpsuite监听微信公众号
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-01T15:38:36+08:00">
+                2016-02-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
+                    <span itemprop="name">Burpsuite</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/02/01/如何让Burpsuite监听微信公众号/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/02/01/如何让Burpsuite监听微信公众号/" class="leancloud_visitors" data-flag-title="如何让Burpsuite监听微信公众号">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-目的"><a href="#1-目的" class="headerlink" title="1 目的"></a>1 目的</h1><p>通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。</p>
+<h1 id="2-模拟器-微信"><a href="#2-模拟器-微信" class="headerlink" title="2 模拟器+微信"></a>2 模拟器+微信</h1><p>由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见<a href="http://gqqnbig.me/?p=225" target="_blank" rel="external">链接</a>，这种方法我没有接着试下去。</p>
+<h1 id="3-真机-微信"><a href="#3-真机-微信" class="headerlink" title="3 真机+微信"></a>3 真机+微信</h1><p>模拟器已经被禁用，只能拿出自己的手机来试验了。</p>
+<h1 id="3-1-wifi-环境"><a href="#3-1-wifi-环境" class="headerlink" title="3.1 wifi 环境"></a>3.1 wifi 环境</h1><p>由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。</p>
+<h1 id="3-2-代理设置"><a href="#3-2-代理设置" class="headerlink" title="3.2 代理设置"></a>3.2 代理设置</h1><p>首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。<br>![绑定ip]<weixin1.png><br>设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。</weixin1.png></p>
+<h1 id="3-3-证书安装"><a href="#3-3-证书安装" class="headerlink" title="3.3 证书安装"></a>3.3 证书安装</h1><p>这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问<code>http://burp</code>，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。</p>
+<p>这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。</p>
+<p>上述方式行不通，想到了第三种</p>
+<h1 id="4-微信windows客户端"><a href="#4-微信windows客户端" class="headerlink" title="4 微信windows客户端"></a>4 微信windows客户端</h1><p>微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。<br>（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：<br><code>127.0.0.1 test.com</code></p>
+<p>（2）burpsuite代理的设置</p>
+<p><img src="weixin2.png" alt="绑定设置"><br><img src="weixin3.png" alt="转发设置"><br>按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。<br>注意事项：<br>support invible proxying 必须开启，否则看不到流量。<br>request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。</p>
+<p>在burpsuite中如果设置成test.com会报如下错误<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous.</div></pre></td></tr></table></figure></p>
+<p>接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口<br><code>Invalid client request received: Dropped request looping back to same Proxy listener.</code><br>在此我们就完成了微信流量的监测。</p>
+<p>微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。</p>
 
           
         

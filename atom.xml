@@ -157,32 +157,6 @@
   </entry>
   
   <entry>
-    <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
-    <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
-    <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
-    <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:44:28.856Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;虚拟部署&quot;&gt;&lt;a href=&quot;#虚拟部署&quot; class=&quot;headerlink&quot; title=&quot;虚拟部署&quot;&gt;&lt;/a&gt;虚拟部署&lt;/h1&gt;&lt;p&gt;virtualenv是python环境配置和切换工具，进入该虚拟环境后，pip安装的软件不影响当前主环境，这样就能很好的安装
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="攻防比赛" scheme="http://xxlegend.com/tags/%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B/"/>
-    
-      <category term="xxe" scheme="http://xxlegend.com/tags/xxe/"/>
-    
-      <category term="mezzanine" scheme="http://xxlegend.com/tags/mezzanine/"/>
-    
-      <category term="virtualenv" scheme="http://xxlegend.com/tags/virtualenv/"/>
-    
-  </entry>
-  
-  <entry>
     <title>SlemBunk木马浅析</title>
     <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
     <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
@@ -208,26 +182,28 @@
   </entry>
   
   <entry>
-    <title>如何让Burpsuite监听微信公众号</title>
-    <link href="http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
-    <id>http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/</id>
-    <published>2016-02-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:44:43.397Z</updated>
+    <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
+    <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
+    <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
+    <published>2016-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:44:28.856Z</updated>
     
     <summary type="html">
     
-      &lt;h1 id=&quot;1-目的&quot;&gt;&lt;a href=&quot;#1-目的&quot; class=&quot;headerlink&quot; title=&quot;1 目的&quot;&gt;&lt;/a&gt;1 目的&lt;/h1&gt;&lt;p&gt;通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后
+      &lt;h1 id=&quot;虚拟部署&quot;&gt;&lt;a href=&quot;#虚拟部署&quot; class=&quot;headerlink&quot; title=&quot;虚拟部署&quot;&gt;&lt;/a&gt;虚拟部署&lt;/h1&gt;&lt;p&gt;virtualenv是python环境配置和切换工具，进入该虚拟环境后，pip安装的软件不影响当前主环境，这样就能很好的安装
     
     </summary>
     
-      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
+      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
     
     
-      <category term="Burpsuite" scheme="http://xxlegend.com/tags/Burpsuite/"/>
+      <category term="攻防比赛" scheme="http://xxlegend.com/tags/%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B/"/>
     
-      <category term="微信公众号" scheme="http://xxlegend.com/tags/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
+      <category term="xxe" scheme="http://xxlegend.com/tags/xxe/"/>
     
-      <category term="监听" scheme="http://xxlegend.com/tags/%E7%9B%91%E5%90%AC/"/>
+      <category term="mezzanine" scheme="http://xxlegend.com/tags/mezzanine/"/>
+    
+      <category term="virtualenv" scheme="http://xxlegend.com/tags/virtualenv/"/>
     
   </entry>
   
@@ -267,6 +243,30 @@
   </entry>
   
   <entry>
+    <title>如何让Burpsuite监听微信公众号</title>
+    <link href="http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
+    <id>http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/</id>
+    <published>2016-02-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:44:43.397Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;1-目的&quot;&gt;&lt;a href=&quot;#1-目的&quot; class=&quot;headerlink&quot; title=&quot;1 目的&quot;&gt;&lt;/a&gt;1 目的&lt;/h1&gt;&lt;p&gt;通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后
+    
+    </summary>
+    
+      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
+    
+    
+      <category term="Burpsuite" scheme="http://xxlegend.com/tags/Burpsuite/"/>
+    
+      <category term="微信公众号" scheme="http://xxlegend.com/tags/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
+    
+      <category term="监听" scheme="http://xxlegend.com/tags/%E7%9B%91%E5%90%AC/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Python eval的常见错误封装及利用原理</title>
     <link href="http://xxlegend.com/2015/07/31/Python%20eval%E7%9A%84%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E5%B0%81%E8%A3%85%E5%8F%8A%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86/"/>
     <id>http://xxlegend.com/2015/07/31/Python eval的常见错误封装及利用原理/</id>
@@ -294,8 +294,8 @@
   
   <entry>
     <title>Python安全编码&amp;代码审计</title>
-    <link href="http://xxlegend.com/2015/07/30/Python%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81&amp;%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    <id>http://xxlegend.com/2015/07/30/Python安全编码&amp;代码审计/</id>
+    <link href="http://xxlegend.com/2015/07/30/Python%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81%E5%92%8C%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
+    <id>http://xxlegend.com/2015/07/30/Python安全编码和代码审计/</id>
     <published>2015-07-30T07:38:36.000Z</published>
     <updated>2017-05-01T09:43:42.716Z</updated>
     
