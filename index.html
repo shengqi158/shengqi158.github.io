@@ -331,6 +331,199 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/" itemprop="url">
+                  PhpStorm Xdebug远程调试环境搭建原理分析及问题排查
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-23T11:26:59+08:00">
+                2017-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php/" itemprop="url" rel="index">
+                    <span itemprop="name">php</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/" class="leancloud_visitors" data-flag-title="PhpStorm Xdebug远程调试环境搭建原理分析及问题排查">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<p>网上关于phpstorm调试的文章很多，真实实践过的不多，都是几篇文章转来转去，没有原理分析，甚至有些文章的配置文件都是错的，我就是按照一篇错误的配置一路走过来的，不过好歹把这些坑都给埋了，这篇文章不仅仅有操作，还有原理分析，更有问题排查思路。<br>对于简单的工程，直接print_r();exit()已经足够，但是对于大型项目有时就有点力不从心，如果直接将apache部署在本地，phpstorm调试本地代码这种方式也可以，我以前就是这么干的，这篇文章主要介绍远程调试系问题排除。</p>
+<h1 id="1，环境介绍"><a href="#1，环境介绍" class="headerlink" title="1，环境介绍"></a>1，环境介绍</h1><p>本地：windows7（192.168..）+ phpstorm8<br>远程：Ubuntu14.04（192.168.3.206）+ apache2 + php5</p>
+<h1 id="2-远程环境配置"><a href="#2-远程环境配置" class="headerlink" title="2 远程环境配置"></a>2 远程环境配置</h1><h2 id="2-2-xdebug安装"><a href="#2-2-xdebug安装" class="headerlink" title="2.2 xdebug安装"></a>2.2 xdebug安装</h2><p>Ubuntu下直接apt-get安装，安装命令如下：<code>apt-get install php5-xdebug</code></p>
+<h2 id="2-3-配置"><a href="#2-3-配置" class="headerlink" title="2.3 配置"></a>2.3 配置</h2><p>首先通过locate定位到xdebug.ini，这个位置一定得对，在Ubuntu上位于/etc/php5/apache2/conf.d/20-xdebug.ini</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">zend_extension=xdebug.so</div><div class="line">xdebug.idekey=PHPSTORM</div><div class="line">xdebug.remote_connect_back = 1</div><div class="line">；//如果开启此，将忽略下面的 xdebug.remote_host 的参数</div><div class="line"></div><div class="line">；xdebug.remote_host=192.168.x.x</div><div class="line">; //注意这里是，客户端的ip&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line"></div><div class="line">xdebug.remote_enable=on</div><div class="line">xdebug.remote_port = 9001</div><div class="line">;//注意这里是，客户端的端口&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line"></div><div class="line">xdebug.remote_handler = dbgp</div><div class="line">xdebug.auto_trace = 1</div><div class="line">xdebug.remote_log = /tmp/xdebug.log</div></pre></td></tr></table></figure>
+<h1 id="3-本地phpstorm配置"><a href="#3-本地phpstorm配置" class="headerlink" title="3 本地phpstorm配置"></a>3 本地phpstorm配置</h1><p>下面的配置有执行顺序要求，请一步一步来。</p>
+<h2 id="3-1-下载远程代码"><a href="#3-1-下载远程代码" class="headerlink" title="3.1 下载远程代码"></a>3.1 下载远程代码</h2><p>phpstorm在新建项目的时候提供了选项，可以通过ftp/sftp远程下载代码，直接按照提示下一步下一步就可以。<img src="/images/xdebug_xinjianxiangmu.png" alt="新建项目"></p>
+<h2 id="3-2-添加php解释器"><a href="#3-2-添加php解释器" class="headerlink" title="3.2 添加php解释器"></a>3.2 添加php解释器</h2><p>通过file-&gt;settings-&gt;Languages &amp; Frameworks找到php栏，<img src="/images/xdebug_peizhiphp.png" alt="添加php解释器"></p>
+<h2 id="3-3-配置Debug"><a href="#3-3-配置Debug" class="headerlink" title="3.3 配置Debug"></a>3.3 配置Debug</h2><p>路径还是在file-&gt;settings-&gt;Languages &amp; Frameworks-&gt;PHP，选择Debug，选择要监听的端口，这里设置为9001，如图所示：<img src="/images/xdebug_peizhidebug.png" alt="配置Debug"></p>
+<p>设置完端口还需要设置DBGp Proxy，配置如下：<img src="/images/xdebug_peizhiproxy.png" alt="设置DBGp Proxy"></p>
+<p>在设置完Debug页面后，在DBGp Proxy页面的端口已经确定，添加上IDE key为刚才xdebug配置文件设置的key:PHPSTORM,Host则为要调试的远程主机。</p>
+<h2 id="3-4-配置Server"><a href="#3-4-配置Server" class="headerlink" title="3.4 配置Server"></a>3.4 配置Server</h2><p>通过通过file-&gt;settings-&gt;Languages Frameworks-&gt;PHP找到Servers，Host对应远程主机IP,Debugger选用Xdebug，如果是远程调试，一定得开启路径映射功能，否则无法调试，本地的路径不用选，在新建远程项目的时候就已经确定，Absolute path on the server则是远程主机的Web路径。在途中红框上方有一个Validate remote environment可以用来验证远程的Xdebug配置，如果配置明显不对的话，会有提示信息，可按照提示信息修改远程服务器的xdebug配置。<img src="/images/xdebug_peizhiserver.png" alt="配置Server"></p>
+<h2 id="3-5-配置调试选项"><a href="#3-5-配置调试选项" class="headerlink" title="3.5 配置调试选项"></a>3.5 配置调试选项</h2><p>由于调试的目标是一个项目，所以这里需要设置PHP Web Application，配置中Server：远程目标主机，Start URL设为/,设置完之后会在左侧新建一个PHP Web Application <img src="/images/xdebug_peizhitiaoshiserver.png" alt="配置调试选项"></p>
+<p>到目前为止，该配置的都已经配置完成，这里面配置的选项比较多，一步一步配置，有顺序要求。配置完之后就是调试。点击下图右边红框中的小按钮，打开xdebug监听，再选择我们要调试的目标，这里是server，最后点击那个调试按钮，就能开启调试之旅。<img src="/images/xdebug_peizhijianting.png" alt="开启调试之旅"><br>打开xdebug监听的时候，可以看到IDE已经在本地建立监听服务，具体如下：<img src="/images/xdebug_9001.png" alt="监听效果"></p>
+<p>可以看到调试页面。如下所示<img src="/images/xdebug_debug_page.png" alt="调试"></p>
+<h1 id="3-6-浏览器添加书签或者Xdebug-Helper"><a href="#3-6-浏览器添加书签或者Xdebug-Helper" class="headerlink" title="3.6 浏览器添加书签或者Xdebug Helper"></a>3.6 浏览器添加书签或者Xdebug Helper</h1><p>前面描述的是通过PHPStorm的debug按钮，发送类似<code>?XDEBUG_SESSION_START=17212</code>这种请求调起浏览器来达到调试的目的，但是这种方式只能调起首页，存在缺陷。下面介绍另外一种启动调试的方式，就是通过浏览器中带XDEBUG_SESSION<br>的cookie直接发起，可以安装Chrome插件Xdebug Helper或者添加浏览器的调试插件、或书签来达到目的。新建书签的url：<a href="https://www.jetbrains.com/phpstorm/marklets/，这里就不再做示例，插件和书签的原理都是一样的，都是在cookie中添加XDEBUG_SESSION=PHPSTORM。" target="_blank" rel="external">https://www.jetbrains.com/phpstorm/marklets/，这里就不再做示例，插件和书签的原理都是一样的，都是在cookie中添加XDEBUG_SESSION=PHPSTORM。</a></p>
+<h1 id="4-数据流程"><a href="#4-数据流程" class="headerlink" title="4 数据流程"></a>4 数据流程</h1><p>前面的配置完全是一个操作指南，如果仅仅是为了配置，上面的内容已经足够，但是如果配置中遇到什么问题，就需要接下来的原理分析。古人说的好，我们得知其然还得知其所以然。</p>
+<h1 id="4-1-Xdebug工作原理"><a href="#4-1-Xdebug工作原理" class="headerlink" title="4.1 Xdebug工作原理"></a>4.1 Xdebug工作原理</h1><p>1，IDE（如PhpStorm）已经集成了一个遵循BGDP的Xdebug插件，当开启它的时候， 会在本地开一个xdebug调试服务，监听在调试器中所设置的端口上，默认是9000，这个服务就会监听所有到9000端口的链接。在PhpStorm中，位于：工具栏 &gt; Run &gt; Start / Stop Listening for PHP Xdebug Connetions。<br>2，当浏览器发送一个带XDEBUG_SESSION_START的参数的请求到服务器时，服务器接受后将其转到后端的php处理，如果php开启了xdebug模块，则会将debug信息转发到客户端IP的IDE的调试端口上。当参数或者cookie信息中不带XDEBUG_SESSION_START，则不会启动调试。这就为后续在浏览器中添加开关提供了可能。Xdebug的官方给出了一个示例图：很好的展示了相互调用关系。<br>这个示例图是绑定了ip，即使用了固定ip地址，xdebug.remote_connect_back = 0 ，也是 xdebug 的默认方式，这种情况下，xdebug 在收到调试通知时会读取配置 xdebug.remote_host 和 xdebug.remote_port ，默认是 localhost:9000，然后向这个端口发送通知，这种方式只适合单一客户端开发调试。<img src="/images/xdebug_xdebug1.png" alt="单一客户端"></p>
+<p>另外一种方式则是不绑定IP，Xdebug根据请求来源（REMOTE_HOST）来发起调试。示例图如下：<img src="/images/xdebug_xdebug2.png" alt="多客户端"></p>
+<p>那从用户发起请求到，到IDE的整个流程图如下：<img src="/images/xdebug_xdebug3.png" alt="xdebug流程图"></p>
+<p>当用户的请求参数或者cookie中不带调试信息，数据流就是浏览器到Apache（或其他web容器）到PHP，如果加上了调试参数，则请求还会由PHP转给Xdebug处理，Xdebug再把信息转发给IDE，完成调试功能。</p>
+<h1 id="5-问题分析"><a href="#5-问题分析" class="headerlink" title="5 问题分析"></a>5 问题分析</h1><p>由于拷贝了错误的Xdebug参数，导致走了不少弯路，如果仅仅是为了配置PhpStorm及Xdebug原理，关注前面部分即可。下面主要分析排除过程。<br>错误得配置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">zend_extension=xdebug.so</div><div class="line">xdebug.idekey=PHPSTORM</div><div class="line"></div><div class="line">#xdebug.remote_connect_back = 1 //如果开启此，将忽略下面的 xdebug.remote_host 的参数</div><div class="line"></div><div class="line">xdebug.remote_host=192.168.x.x //注意这里是，客户端的ip&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line">xdebug.remote_enable=on</div><div class="line">xdebug.remote_port = 9001 //注意这里是，客户端的端口&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line"></div><div class="line">xdebug.remote_handler = dbgp</div><div class="line">xdebug.auto_trace = 1</div><div class="line">xdebug.collect_includes = 1</div><div class="line">xdebug.collect_params = 1</div><div class="line">;xdebug.collect_return = 1</div><div class="line"></div><div class="line">xdebug.remote_autostart = 1</div><div class="line"></div><div class="line">xdebug.remote_log = /tmp/xdebug.log</div></pre></td></tr></table></figure></p>
+<p>问题现象：<br>Apache反应奇慢无比，一个普通请求能耗时10分钟，但是最终会有效应。<br>排查过程：</p>
+<h2 id="5-1-问题背景"><a href="#5-1-问题背景" class="headerlink" title="5.1 问题背景"></a>5.1 问题背景</h2><p>本地环境：Windows7，远程服务器：Ubuntu14.04，这个远程服务器是本地环境下VMWare WorkStation下的一台虚拟机，网络连接方式是桥接。在调试远程项目时，作者使用的sftp来管理服务器的资源，这里面就会涉及到权限的问题。远程服务器只开了一个普通账户liaoxinxi，而/var/www 目录以前是root权限的，由于PhpStorm调试时会在远程服务器web目录下创建一个文件，这必然会导致权限问题，为了解决这个问题，执行<code>chmod liaoxinxi:liaoxinxi /var/www -R</code>将web目录修改为liaoxinxi用户所有。当然为了远程调试，我配置了xdebug.ini，这个配置参数当时也不是太清楚具体含义，比较着急，就从某篇号称亲手测试过可用的xdebug环境拷贝而来。下午比较混沌，当时做过的操作还挺多，xdebug这个配置我居然忘记我配过了，只记得修改了权限相关内容。重启Apache之后，web请求响应奇慢无比。</p>
+<h2 id="5-2-疑问点"><a href="#5-2-疑问点" class="headerlink" title="5.2 疑问点"></a>5.2 疑问点</h2><h3 id="5-2-1，权限"><a href="#5-2-1，权限" class="headerlink" title="5.2.1，权限"></a>5.2.1，权限</h3><p>当时一股脑的认为是权限的问题，就又把web目录权限全改为777，还是奇慢无比，查看apache日志也没有半点异常。</p>
+<h3 id="5-2-2-网络"><a href="#5-2-2-网络" class="headerlink" title="5.2.2 网络"></a>5.2.2 网络</h3><p>无意之中发现在远程服务器上直接访问，很快就能得到响应。这个远程服务器是我VMware下的虚拟机，通过桥接模式与宿主机通信。中午与其他同事讨论这个问题的时候将问题排查点转移到网络环境。怀疑是网络的问题，将桥接模式改成NAT，又是重启虚拟机，重启宿主机，都不起作用。</p>
+<h3 id="5-2-3-Apache配置"><a href="#5-2-3-Apache配置" class="headerlink" title="5.2.3 Apache配置"></a>5.2.3 Apache配置</h3><p>于是又将矛盾转移到Apache的配置上，Apache的配置文件被我改动了很多回，当时觉得很简单所以没设置备份点，一个好的备份是多么重要。只能重装，这个在Ubuntu下还是很简单的，一条命令搞定<code>apt-get auto-remove --purge apache2</code>，并且删除了原有的配置文件。再通过apt-get重新安装，<code>apt-get install apache2</code>,重启apache后发现在本地访问，很快得到响应，不过响应的都是原始的php文件，再安装一下libapache2php模块，安装完之后，响应还是一样的奇慢无比。难道跟这个模块有关系，但是找不到相关资料。再翻看安装apache2的输出信息时发现其重启了xdebug模块，回想一下，是不是这些模块导致的问题呢？再仔细想想，那天下午好像还改了xdebug的配置，可能有问题。</p>
+<h3 id="5-2-4-Xdebug配置"><a href="#5-2-4-Xdebug配置" class="headerlink" title="5.2.4 Xdebug配置"></a>5.2.4 Xdebug配置</h3><p>回到Xdebug的配置文件，其中一个配置<code>xdebug.remote_host=192.168.*.* //这个配置是用来</code>，感觉峰回路转了，因为只有这个ip访问就会奇慢无比，于是注释掉，再重启apache访问，果然奇慢无比的问题解决了。<br>但是这又带来一个新的问题，这个ip是我的本地环境，如果不配置的话怎么调试呢？于是将//后边的内容用;注释起来，前期一直以为//也是个注释。//这种注释方式在xdebug中不识别，所以根本不会向IDE所在机器发送调试包，会一直等到超时，所以就会特别慢。 再去调试，在index.php下断点，终于断下来了。调试的过程中发现，开启或者未开启调试参数都会直接进入调试模式，见了鬼了，回想起调试流程图，肯定出问题的地方在xdebug的配置，打开配置文件，果然发现一个相关参数<code>xdebug.remote_autostart = 1</code>，这个参数的意思就是自动打开远程调试，注释掉就能接收不使用Xdebug调试的参数。<br>说到最后不得不佩服这位兄弟，挖了两个大大的坑（坑的位置：<a href="http://www.51testing.com/html/18/170218-3538738.html），好歹我全埋了，提醒大家尽量找官方文档，如果官方文档写的不详细的，还是多见识见识几份文档。" target="_blank" rel="external">http://www.51testing.com/html/18/170218-3538738.html），好歹我全埋了，提醒大家尽量找官方文档，如果官方文档写的不详细的，还是多见识见识几份文档。</a></p>
+<p>综合来看，信息大爆炸的年代，干扰信息太多，各位见仁见智。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2033,183 +2226,6 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="url">
-                  如何让Burpsuite监听微信公众号
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-01T15:38:36+08:00">
-                2016-02-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
-                    <span itemprop="name">Burpsuite</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/02/01/如何让Burpsuite监听微信公众号/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/02/01/如何让Burpsuite监听微信公众号/" class="leancloud_visitors" data-flag-title="如何让Burpsuite监听微信公众号">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="1-目的"><a href="#1-目的" class="headerlink" title="1 目的"></a>1 目的</h1><p>通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。</p>
-<h1 id="2-模拟器-微信"><a href="#2-模拟器-微信" class="headerlink" title="2 模拟器+微信"></a>2 模拟器+微信</h1><p>由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见<a href="http://gqqnbig.me/?p=225" target="_blank" rel="external">链接</a>，这种方法我没有接着试下去。</p>
-<h1 id="3-真机-微信"><a href="#3-真机-微信" class="headerlink" title="3 真机+微信"></a>3 真机+微信</h1><p>模拟器已经被禁用，只能拿出自己的手机来试验了。</p>
-<h1 id="3-1-wifi-环境"><a href="#3-1-wifi-环境" class="headerlink" title="3.1 wifi 环境"></a>3.1 wifi 环境</h1><p>由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。</p>
-<h1 id="3-2-代理设置"><a href="#3-2-代理设置" class="headerlink" title="3.2 代理设置"></a>3.2 代理设置</h1><p>首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。<br><img src="/images/weixin1.png" alt="绑定ip"><br>设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。</p>
-<h1 id="3-3-证书安装"><a href="#3-3-证书安装" class="headerlink" title="3.3 证书安装"></a>3.3 证书安装</h1><p>这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问<code>http://burp</code>，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。</p>
-<p>这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。</p>
-<p>上述方式行不通，想到了第三种</p>
-<h1 id="4-微信windows客户端"><a href="#4-微信windows客户端" class="headerlink" title="4 微信windows客户端"></a>4 微信windows客户端</h1><p>微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。<br>（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：<br><code>127.0.0.1 test.com</code></p>
-<p>（2）burpsuite代理的设置</p>
-<p><img src="/images/weixin2.png" alt="绑定设置"><br><img src="/images/weixin3.png" alt="转发设置"><br>按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。<br>注意事项：<br>support invible proxying 必须开启，否则看不到流量。<br>request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。</p>
-<p>在burpsuite中如果设置成test.com会报如下错误<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous.</div></pre></td></tr></table></figure></p>
-<p>接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口<br><code>Invalid client request received: Dropped request looping back to same Proxy listener.</code><br>在此我们就完成了微信流量的监测。</p>
-<p>微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2259,7 +2275,7 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2270,7 +2286,7 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2280,8 +2296,8 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">70</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">75</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

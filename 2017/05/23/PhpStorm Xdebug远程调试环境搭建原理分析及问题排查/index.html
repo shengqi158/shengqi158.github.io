@@ -1,0 +1,1340 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="PhpStorm,Xdebug,远程调试,Xdebug原理,Apache响应慢," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="网上关于phpstorm调试的文章很多，真实实践过的不多，都是几篇文章转来转去，没有原理分析，甚至有些文章的配置文件都是错的，我就是按照一篇错误的配置一路走过来的，不过好歹把这些坑都给埋了，这篇文章不仅仅有操作，还有原理分析，更有问题排查思路。对于简单的工程，直接print_r();exit()已经足够，但是对于大型项目有时就有点力不从心，如果直接将apache部署在本地，phpstorm调试本">
+<meta name="keywords" content="PhpStorm,Xdebug,远程调试,Xdebug原理,Apache响应慢">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PhpStorm Xdebug远程调试环境搭建原理分析及问题排查">
+<meta property="og:url" content="http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/index.html">
+<meta property="og:site_name" content="xxlegend">
+<meta property="og:description" content="网上关于phpstorm调试的文章很多，真实实践过的不多，都是几篇文章转来转去，没有原理分析，甚至有些文章的配置文件都是错的，我就是按照一篇错误的配置一路走过来的，不过好歹把这些坑都给埋了，这篇文章不仅仅有操作，还有原理分析，更有问题排查思路。对于简单的工程，直接print_r();exit()已经足够，但是对于大型项目有时就有点力不从心，如果直接将apache部署在本地，phpstorm调试本">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_xinjianxiangmu.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_peizhiphp.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_peizhidebug.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_peizhiproxy.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_peizhiserver.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_peizhitiaoshiserver.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_peizhijianting.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_9001.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_debug_page.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_xdebug1.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_xdebug2.png">
+<meta property="og:image" content="http://xxlegend.com/images/xdebug_xdebug3.png">
+<meta property="og:updated_time" content="2017-05-23T03:33:56.413Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PhpStorm Xdebug远程调试环境搭建原理分析及问题排查">
+<meta name="twitter:description" content="网上关于phpstorm调试的文章很多，真实实践过的不多，都是几篇文章转来转去，没有原理分析，甚至有些文章的配置文件都是错的，我就是按照一篇错误的配置一路走过来的，不过好歹把这些坑都给埋了，这篇文章不仅仅有操作，还有原理分析，更有问题排查思路。对于简单的工程，直接print_r();exit()已经足够，但是对于大型项目有时就有点力不从心，如果直接将apache部署在本地，phpstorm调试本">
+<meta name="twitter:image" content="http://xxlegend.com/images/xdebug_xinjianxiangmu.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/"/>
+
+
+
+
+
+  <title>PhpStorm Xdebug远程调试环境搭建原理分析及问题排查 | xxlegend</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ae110488ae3a7a2872b00e735070cfbc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xxlegend</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                PhpStorm Xdebug远程调试环境搭建原理分析及问题排查
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-23T11:26:59+08:00">
+                2017-05-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/php/" itemprop="url" rel="index">
+                    <span itemprop="name">php</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/" class="leancloud_visitors" data-flag-title="PhpStorm Xdebug远程调试环境搭建原理分析及问题排查">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <hr>
+<p>网上关于phpstorm调试的文章很多，真实实践过的不多，都是几篇文章转来转去，没有原理分析，甚至有些文章的配置文件都是错的，我就是按照一篇错误的配置一路走过来的，不过好歹把这些坑都给埋了，这篇文章不仅仅有操作，还有原理分析，更有问题排查思路。<br>对于简单的工程，直接print_r();exit()已经足够，但是对于大型项目有时就有点力不从心，如果直接将apache部署在本地，phpstorm调试本地代码这种方式也可以，我以前就是这么干的，这篇文章主要介绍远程调试系问题排除。</p>
+<h1 id="1，环境介绍"><a href="#1，环境介绍" class="headerlink" title="1，环境介绍"></a>1，环境介绍</h1><p>本地：windows7（192.168..）+ phpstorm8<br>远程：Ubuntu14.04（192.168.3.206）+ apache2 + php5</p>
+<h1 id="2-远程环境配置"><a href="#2-远程环境配置" class="headerlink" title="2 远程环境配置"></a>2 远程环境配置</h1><h2 id="2-2-xdebug安装"><a href="#2-2-xdebug安装" class="headerlink" title="2.2 xdebug安装"></a>2.2 xdebug安装</h2><p>Ubuntu下直接apt-get安装，安装命令如下：<code>apt-get install php5-xdebug</code></p>
+<h2 id="2-3-配置"><a href="#2-3-配置" class="headerlink" title="2.3 配置"></a>2.3 配置</h2><p>首先通过locate定位到xdebug.ini，这个位置一定得对，在Ubuntu上位于/etc/php5/apache2/conf.d/20-xdebug.ini</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">zend_extension=xdebug.so</div><div class="line">xdebug.idekey=PHPSTORM</div><div class="line">xdebug.remote_connect_back = 1</div><div class="line">；//如果开启此，将忽略下面的 xdebug.remote_host 的参数</div><div class="line"></div><div class="line">；xdebug.remote_host=192.168.x.x</div><div class="line">; //注意这里是，客户端的ip&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line"></div><div class="line">xdebug.remote_enable=on</div><div class="line">xdebug.remote_port = 9001</div><div class="line">;//注意这里是，客户端的端口&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line"></div><div class="line">xdebug.remote_handler = dbgp</div><div class="line">xdebug.auto_trace = 1</div><div class="line">xdebug.remote_log = /tmp/xdebug.log</div></pre></td></tr></table></figure>
+<h1 id="3-本地phpstorm配置"><a href="#3-本地phpstorm配置" class="headerlink" title="3 本地phpstorm配置"></a>3 本地phpstorm配置</h1><p>下面的配置有执行顺序要求，请一步一步来。</p>
+<h2 id="3-1-下载远程代码"><a href="#3-1-下载远程代码" class="headerlink" title="3.1 下载远程代码"></a>3.1 下载远程代码</h2><p>phpstorm在新建项目的时候提供了选项，可以通过ftp/sftp远程下载代码，直接按照提示下一步下一步就可以。<img src="/images/xdebug_xinjianxiangmu.png" alt="新建项目"></p>
+<h2 id="3-2-添加php解释器"><a href="#3-2-添加php解释器" class="headerlink" title="3.2 添加php解释器"></a>3.2 添加php解释器</h2><p>通过file-&gt;settings-&gt;Languages &amp; Frameworks找到php栏，<img src="/images/xdebug_peizhiphp.png" alt="添加php解释器"></p>
+<h2 id="3-3-配置Debug"><a href="#3-3-配置Debug" class="headerlink" title="3.3 配置Debug"></a>3.3 配置Debug</h2><p>路径还是在file-&gt;settings-&gt;Languages &amp; Frameworks-&gt;PHP，选择Debug，选择要监听的端口，这里设置为9001，如图所示：<img src="/images/xdebug_peizhidebug.png" alt="配置Debug"></p>
+<p>设置完端口还需要设置DBGp Proxy，配置如下：<img src="/images/xdebug_peizhiproxy.png" alt="设置DBGp Proxy"></p>
+<p>在设置完Debug页面后，在DBGp Proxy页面的端口已经确定，添加上IDE key为刚才xdebug配置文件设置的key:PHPSTORM,Host则为要调试的远程主机。</p>
+<h2 id="3-4-配置Server"><a href="#3-4-配置Server" class="headerlink" title="3.4 配置Server"></a>3.4 配置Server</h2><p>通过通过file-&gt;settings-&gt;Languages Frameworks-&gt;PHP找到Servers，Host对应远程主机IP,Debugger选用Xdebug，如果是远程调试，一定得开启路径映射功能，否则无法调试，本地的路径不用选，在新建远程项目的时候就已经确定，Absolute path on the server则是远程主机的Web路径。在途中红框上方有一个Validate remote environment可以用来验证远程的Xdebug配置，如果配置明显不对的话，会有提示信息，可按照提示信息修改远程服务器的xdebug配置。<img src="/images/xdebug_peizhiserver.png" alt="配置Server"></p>
+<h2 id="3-5-配置调试选项"><a href="#3-5-配置调试选项" class="headerlink" title="3.5 配置调试选项"></a>3.5 配置调试选项</h2><p>由于调试的目标是一个项目，所以这里需要设置PHP Web Application，配置中Server：远程目标主机，Start URL设为/,设置完之后会在左侧新建一个PHP Web Application <img src="/images/xdebug_peizhitiaoshiserver.png" alt="配置调试选项"></p>
+<p>到目前为止，该配置的都已经配置完成，这里面配置的选项比较多，一步一步配置，有顺序要求。配置完之后就是调试。点击下图右边红框中的小按钮，打开xdebug监听，再选择我们要调试的目标，这里是server，最后点击那个调试按钮，就能开启调试之旅。<img src="/images/xdebug_peizhijianting.png" alt="开启调试之旅"><br>打开xdebug监听的时候，可以看到IDE已经在本地建立监听服务，具体如下：<img src="/images/xdebug_9001.png" alt="监听效果"></p>
+<p>可以看到调试页面。如下所示<img src="/images/xdebug_debug_page.png" alt="调试"></p>
+<h1 id="3-6-浏览器添加书签或者Xdebug-Helper"><a href="#3-6-浏览器添加书签或者Xdebug-Helper" class="headerlink" title="3.6 浏览器添加书签或者Xdebug Helper"></a>3.6 浏览器添加书签或者Xdebug Helper</h1><p>前面描述的是通过PHPStorm的debug按钮，发送类似<code>?XDEBUG_SESSION_START=17212</code>这种请求调起浏览器来达到调试的目的，但是这种方式只能调起首页，存在缺陷。下面介绍另外一种启动调试的方式，就是通过浏览器中带XDEBUG_SESSION<br>的cookie直接发起，可以安装Chrome插件Xdebug Helper或者添加浏览器的调试插件、或书签来达到目的。新建书签的url：<a href="https://www.jetbrains.com/phpstorm/marklets/，这里就不再做示例，插件和书签的原理都是一样的，都是在cookie中添加XDEBUG_SESSION=PHPSTORM。" target="_blank" rel="external">https://www.jetbrains.com/phpstorm/marklets/，这里就不再做示例，插件和书签的原理都是一样的，都是在cookie中添加XDEBUG_SESSION=PHPSTORM。</a></p>
+<h1 id="4-数据流程"><a href="#4-数据流程" class="headerlink" title="4 数据流程"></a>4 数据流程</h1><p>前面的配置完全是一个操作指南，如果仅仅是为了配置，上面的内容已经足够，但是如果配置中遇到什么问题，就需要接下来的原理分析。古人说的好，我们得知其然还得知其所以然。</p>
+<h1 id="4-1-Xdebug工作原理"><a href="#4-1-Xdebug工作原理" class="headerlink" title="4.1 Xdebug工作原理"></a>4.1 Xdebug工作原理</h1><p>1，IDE（如PhpStorm）已经集成了一个遵循BGDP的Xdebug插件，当开启它的时候， 会在本地开一个xdebug调试服务，监听在调试器中所设置的端口上，默认是9000，这个服务就会监听所有到9000端口的链接。在PhpStorm中，位于：工具栏 &gt; Run &gt; Start / Stop Listening for PHP Xdebug Connetions。<br>2，当浏览器发送一个带XDEBUG_SESSION_START的参数的请求到服务器时，服务器接受后将其转到后端的php处理，如果php开启了xdebug模块，则会将debug信息转发到客户端IP的IDE的调试端口上。当参数或者cookie信息中不带XDEBUG_SESSION_START，则不会启动调试。这就为后续在浏览器中添加开关提供了可能。Xdebug的官方给出了一个示例图：很好的展示了相互调用关系。<br>这个示例图是绑定了ip，即使用了固定ip地址，xdebug.remote_connect_back = 0 ，也是 xdebug 的默认方式，这种情况下，xdebug 在收到调试通知时会读取配置 xdebug.remote_host 和 xdebug.remote_port ，默认是 localhost:9000，然后向这个端口发送通知，这种方式只适合单一客户端开发调试。<img src="/images/xdebug_xdebug1.png" alt="单一客户端"></p>
+<p>另外一种方式则是不绑定IP，Xdebug根据请求来源（REMOTE_HOST）来发起调试。示例图如下：<img src="/images/xdebug_xdebug2.png" alt="多客户端"></p>
+<p>那从用户发起请求到，到IDE的整个流程图如下：<img src="/images/xdebug_xdebug3.png" alt="xdebug流程图"></p>
+<p>当用户的请求参数或者cookie中不带调试信息，数据流就是浏览器到Apache（或其他web容器）到PHP，如果加上了调试参数，则请求还会由PHP转给Xdebug处理，Xdebug再把信息转发给IDE，完成调试功能。</p>
+<h1 id="5-问题分析"><a href="#5-问题分析" class="headerlink" title="5 问题分析"></a>5 问题分析</h1><p>由于拷贝了错误的Xdebug参数，导致走了不少弯路，如果仅仅是为了配置PhpStorm及Xdebug原理，关注前面部分即可。下面主要分析排除过程。<br>错误得配置如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">zend_extension=xdebug.so</div><div class="line">xdebug.idekey=PHPSTORM</div><div class="line"></div><div class="line">#xdebug.remote_connect_back = 1 //如果开启此，将忽略下面的 xdebug.remote_host 的参数</div><div class="line"></div><div class="line">xdebug.remote_host=192.168.x.x //注意这里是，客户端的ip&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line">xdebug.remote_enable=on</div><div class="line">xdebug.remote_port = 9001 //注意这里是，客户端的端口&lt;即IDE的机器的ip,不是你的web server&gt;</div><div class="line"></div><div class="line">xdebug.remote_handler = dbgp</div><div class="line">xdebug.auto_trace = 1</div><div class="line">xdebug.collect_includes = 1</div><div class="line">xdebug.collect_params = 1</div><div class="line">;xdebug.collect_return = 1</div><div class="line"></div><div class="line">xdebug.remote_autostart = 1</div><div class="line"></div><div class="line">xdebug.remote_log = /tmp/xdebug.log</div></pre></td></tr></table></figure></p>
+<p>问题现象：<br>Apache反应奇慢无比，一个普通请求能耗时10分钟，但是最终会有效应。<br>排查过程：</p>
+<h2 id="5-1-问题背景"><a href="#5-1-问题背景" class="headerlink" title="5.1 问题背景"></a>5.1 问题背景</h2><p>本地环境：Windows7，远程服务器：Ubuntu14.04，这个远程服务器是本地环境下VMWare WorkStation下的一台虚拟机，网络连接方式是桥接。在调试远程项目时，作者使用的sftp来管理服务器的资源，这里面就会涉及到权限的问题。远程服务器只开了一个普通账户liaoxinxi，而/var/www 目录以前是root权限的，由于PhpStorm调试时会在远程服务器web目录下创建一个文件，这必然会导致权限问题，为了解决这个问题，执行<code>chmod liaoxinxi:liaoxinxi /var/www -R</code>将web目录修改为liaoxinxi用户所有。当然为了远程调试，我配置了xdebug.ini，这个配置参数当时也不是太清楚具体含义，比较着急，就从某篇号称亲手测试过可用的xdebug环境拷贝而来。下午比较混沌，当时做过的操作还挺多，xdebug这个配置我居然忘记我配过了，只记得修改了权限相关内容。重启Apache之后，web请求响应奇慢无比。</p>
+<h2 id="5-2-疑问点"><a href="#5-2-疑问点" class="headerlink" title="5.2 疑问点"></a>5.2 疑问点</h2><h3 id="5-2-1，权限"><a href="#5-2-1，权限" class="headerlink" title="5.2.1，权限"></a>5.2.1，权限</h3><p>当时一股脑的认为是权限的问题，就又把web目录权限全改为777，还是奇慢无比，查看apache日志也没有半点异常。</p>
+<h3 id="5-2-2-网络"><a href="#5-2-2-网络" class="headerlink" title="5.2.2 网络"></a>5.2.2 网络</h3><p>无意之中发现在远程服务器上直接访问，很快就能得到响应。这个远程服务器是我VMware下的虚拟机，通过桥接模式与宿主机通信。中午与其他同事讨论这个问题的时候将问题排查点转移到网络环境。怀疑是网络的问题，将桥接模式改成NAT，又是重启虚拟机，重启宿主机，都不起作用。</p>
+<h3 id="5-2-3-Apache配置"><a href="#5-2-3-Apache配置" class="headerlink" title="5.2.3 Apache配置"></a>5.2.3 Apache配置</h3><p>于是又将矛盾转移到Apache的配置上，Apache的配置文件被我改动了很多回，当时觉得很简单所以没设置备份点，一个好的备份是多么重要。只能重装，这个在Ubuntu下还是很简单的，一条命令搞定<code>apt-get auto-remove --purge apache2</code>，并且删除了原有的配置文件。再通过apt-get重新安装，<code>apt-get install apache2</code>,重启apache后发现在本地访问，很快得到响应，不过响应的都是原始的php文件，再安装一下libapache2php模块，安装完之后，响应还是一样的奇慢无比。难道跟这个模块有关系，但是找不到相关资料。再翻看安装apache2的输出信息时发现其重启了xdebug模块，回想一下，是不是这些模块导致的问题呢？再仔细想想，那天下午好像还改了xdebug的配置，可能有问题。</p>
+<h3 id="5-2-4-Xdebug配置"><a href="#5-2-4-Xdebug配置" class="headerlink" title="5.2.4 Xdebug配置"></a>5.2.4 Xdebug配置</h3><p>回到Xdebug的配置文件，其中一个配置<code>xdebug.remote_host=192.168.*.* //这个配置是用来</code>，感觉峰回路转了，因为只有这个ip访问就会奇慢无比，于是注释掉，再重启apache访问，果然奇慢无比的问题解决了。<br>但是这又带来一个新的问题，这个ip是我的本地环境，如果不配置的话怎么调试呢？于是将//后边的内容用;注释起来，前期一直以为//也是个注释。//这种注释方式在xdebug中不识别，所以根本不会向IDE所在机器发送调试包，会一直等到超时，所以就会特别慢。 再去调试，在index.php下断点，终于断下来了。调试的过程中发现，开启或者未开启调试参数都会直接进入调试模式，见了鬼了，回想起调试流程图，肯定出问题的地方在xdebug的配置，打开配置文件，果然发现一个相关参数<code>xdebug.remote_autostart = 1</code>，这个参数的意思就是自动打开远程调试，注释掉就能接收不使用Xdebug调试的参数。<br>说到最后不得不佩服这位兄弟，挖了两个大大的坑（坑的位置：<a href="http://www.51testing.com/html/18/170218-3538738.html），好歹我全埋了，提醒大家尽量找官方文档，如果官方文档写的不详细的，还是多见识见识几份文档。" target="_blank" rel="external">http://www.51testing.com/html/18/170218-3538738.html），好歹我全埋了，提醒大家尽量找官方文档，如果官方文档写的不详细的，还是多见识见识几份文档。</a></p>
+<p>综合来看，信息大爆炸的年代，干扰信息太多，各位见仁见智。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/PhpStorm/" rel="tag"># PhpStorm</a>
+          
+            <a href="/tags/Xdebug/" rel="tag"># Xdebug</a>
+          
+            <a href="/tags/远程调试/" rel="tag"># 远程调试</a>
+          
+            <a href="/tags/Xdebug原理/" rel="tag"># Xdebug原理</a>
+          
+            <a href="/tags/Apache响应慢/" rel="tag"># Apache响应慢</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" rel="next" title="WordPress远程代码执行环境构造和VirtualHost环境验证">
+                <i class="fa fa-chevron-left"></i> WordPress远程代码执行环境构造和VirtualHost环境验证
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="廖新喜" />
+          <p class="site-author-name" itemprop="name">廖新喜</p>
+           
+              <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">75</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/shengqi158" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/shengqi158" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/1900013681" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#1，环境介绍"><span class="nav-number">1.</span> <span class="nav-text">1，环境介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-远程环境配置"><span class="nav-number">2.</span> <span class="nav-text">2 远程环境配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-xdebug安装"><span class="nav-number">2.1.</span> <span class="nav-text">2.2 xdebug安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-3-配置"><span class="nav-number">2.2.</span> <span class="nav-text">2.3 配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-本地phpstorm配置"><span class="nav-number">3.</span> <span class="nav-text">3 本地phpstorm配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#3-1-下载远程代码"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 下载远程代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-2-添加php解释器"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 添加php解释器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-3-配置Debug"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 配置Debug</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-4-配置Server"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 配置Server</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-5-配置调试选项"><span class="nav-number">3.5.</span> <span class="nav-text">3.5 配置调试选项</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-6-浏览器添加书签或者Xdebug-Helper"><span class="nav-number">4.</span> <span class="nav-text">3.6 浏览器添加书签或者Xdebug Helper</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-数据流程"><span class="nav-number">5.</span> <span class="nav-text">4 数据流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#4-1-Xdebug工作原理"><span class="nav-number">6.</span> <span class="nav-text">4.1 Xdebug工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#5-问题分析"><span class="nav-number">7.</span> <span class="nav-text">5 问题分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#5-1-问题背景"><span class="nav-number">7.1.</span> <span class="nav-text">5.1 问题背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-2-疑问点"><span class="nav-number">7.2.</span> <span class="nav-text">5.2 疑问点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-1，权限"><span class="nav-number">7.2.1.</span> <span class="nav-text">5.2.1，权限</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-2-网络"><span class="nav-number">7.2.2.</span> <span class="nav-text">5.2.2 网络</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-3-Apache配置"><span class="nav-number">7.2.3.</span> <span class="nav-text">5.2.3 Apache配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-2-4-Xdebug配置"><span class="nav-number">7.2.4.</span> <span class="nav-text">5.2.4 Xdebug配置</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">廖新喜</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/';
+          this.page.identifier = '2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/';
+          this.page.title = 'PhpStorm Xdebug远程调试环境搭建原理分析及问题排查';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      $('#local-search-input').focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("rAO8AHWqEz3IlgcuNBzFXyK3-gzGzoHsz", "LI2NyeVIf9NiHynChn0UrBCl");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

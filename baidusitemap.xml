@@ -4,6 +4,34 @@
 
     
   <url>
+    <loc>http://xxlegend.com/2017/05/23/PhpStorm%20Xdebug%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</loc>
+    <lastmod>2017-05-23T03:33:56.413Z</lastmod>
+    <data>
+        <display>
+        <title>PhpStorm Xdebug远程调试环境搭建原理分析及问题排查</title>
+        <pubTime>2017-05-23T03:26:59.321Z</pubTime>
+        
+        <tag>PhpStorm</tag>
+         
+        <tag>Xdebug</tag>
+         
+        <tag>远程调试</tag>
+         
+        <tag>Xdebug原理</tag>
+         
+        <tag>Apache响应慢</tag>
+         
+         
+           
+             
+              <breadCrumb title="php" url="http://xxlegend.com/categories/php/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/</loc>
     <lastmod>2017-05-10T08:06:53.709Z</lastmod>
     <data>
@@ -35,13 +63,13 @@
         <title>WordPress远程代码执行环境构造和VirtualHost环境验证</title>
         <pubTime>2017-05-05T01:41:26.542Z</pubTime>
         
-        <tag>poc</tag>
-         
         <tag>WordPress</tag>
          
         <tag>远程代码执行</tag>
          
         <tag>VirtualHost</tag>
+         
+        <tag>poc</tag>
          
         <tag>exim4</tag>
          
@@ -65,11 +93,11 @@
         <title>fastjson 远程反序列化poc的构造和分析</title>
         <pubTime>2017-04-29T14:27:22.490Z</pubTime>
         
+        <tag>poc</tag>
+         
         <tag>fastjson</tag>
          
         <tag>反序列化</tag>
-         
-        <tag>poc</tag>
          
         <tag>java</tag>
          

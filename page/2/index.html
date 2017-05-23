@@ -331,6 +331,183 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="url">
+                  如何让Burpsuite监听微信公众号
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-01T15:38:36+08:00">
+                2016-02-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
+                    <span itemprop="name">Burpsuite</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/02/01/如何让Burpsuite监听微信公众号/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/02/01/如何让Burpsuite监听微信公众号/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/02/01/如何让Burpsuite监听微信公众号/" class="leancloud_visitors" data-flag-title="如何让Burpsuite监听微信公众号">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-目的"><a href="#1-目的" class="headerlink" title="1 目的"></a>1 目的</h1><p>通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。</p>
+<h1 id="2-模拟器-微信"><a href="#2-模拟器-微信" class="headerlink" title="2 模拟器+微信"></a>2 模拟器+微信</h1><p>由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见<a href="http://gqqnbig.me/?p=225" target="_blank" rel="external">链接</a>，这种方法我没有接着试下去。</p>
+<h1 id="3-真机-微信"><a href="#3-真机-微信" class="headerlink" title="3 真机+微信"></a>3 真机+微信</h1><p>模拟器已经被禁用，只能拿出自己的手机来试验了。</p>
+<h1 id="3-1-wifi-环境"><a href="#3-1-wifi-环境" class="headerlink" title="3.1 wifi 环境"></a>3.1 wifi 环境</h1><p>由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。</p>
+<h1 id="3-2-代理设置"><a href="#3-2-代理设置" class="headerlink" title="3.2 代理设置"></a>3.2 代理设置</h1><p>首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。<br><img src="/images/weixin1.png" alt="绑定ip"><br>设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。</p>
+<h1 id="3-3-证书安装"><a href="#3-3-证书安装" class="headerlink" title="3.3 证书安装"></a>3.3 证书安装</h1><p>这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问<code>http://burp</code>，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。</p>
+<p>这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。</p>
+<p>上述方式行不通，想到了第三种</p>
+<h1 id="4-微信windows客户端"><a href="#4-微信windows客户端" class="headerlink" title="4 微信windows客户端"></a>4 微信windows客户端</h1><p>微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。<br>（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：<br><code>127.0.0.1 test.com</code></p>
+<p>（2）burpsuite代理的设置</p>
+<p><img src="/images/weixin2.png" alt="绑定设置"><br><img src="/images/weixin3.png" alt="转发设置"><br>按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。<br>注意事项：<br>support invible proxying 必须开启，否则看不到流量。<br>request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。</p>
+<p>在burpsuite中如果设置成test.com会报如下错误<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous.</div></pre></td></tr></table></figure></p>
+<p>接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口<br><code>Invalid client request received: Dropped request looping back to same Proxy listener.</code><br>在此我们就完成了微信流量的监测。</p>
+<p>微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/07/31/Python eval的常见错误封装及利用原理/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -782,6 +959,188 @@ Linux
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/REST API 安全设计指南/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/REST API 安全设计指南/" itemprop="url">
+                  REST API安全设计指南
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/REST API 安全设计指南/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/REST API 安全设计指南/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/REST API 安全设计指南/" class="leancloud_visitors" data-flag-title="REST API安全设计指南">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，REST-API-简介"><a href="#1，REST-API-简介" class="headerlink" title="1，REST API 简介"></a>1，REST API 简介</h1><p>REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">==========  =====================  ========================</div><div class="line">HTTP 方法   行为                   示例</div><div class="line">==========  =====================  ========================</div><div class="line">GET         获取资源的信息         http://xx.com/api/orders</div><div class="line">GET         获取某个特定资源的信息 http://xx.com/api/orders/123</div><div class="line">POST        创建新资源             http://xx.com/api/orders</div><div class="line">PUT         更新资源               http://xx.com/api/orders/123</div><div class="line">DELETE      删除资源               http://xx.com/api/orders/123</div><div class="line">==========  ====================== =======================</div></pre></td></tr></table></figure></p>
+<p> 对于请求的数据一般用json或者xml形式来表示，推荐使用json。</p>
+<h1 id="2，身份认证"><a href="#2，身份认证" class="headerlink" title="2，身份认证"></a>2，身份认证</h1><p>身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下：</p>
+<p>##2.1 HTTP Basic<br>REST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">base64编码前：Basic admin:admin</div><div class="line">base64编码后：Basic YWRtaW46YWRtaW4=</div><div class="line">放到Header中：Authorization: Basic YWRtaW46YWRtaW4=</div></pre></td></tr></table></figure></p>
+<p>正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。<br>在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。</p>
+<p>##2.2 API KEY<br>API Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：<a href="http://example.com/api?key=dfkaj134,一般的处理流程如下：" target="_blank" rel="external">http://example.com/api?key=dfkaj134,一般的处理流程如下：</a><br>一个简单的设计示例如下：<br>client端：<img src="clint.png" alt="clint端"></p>
+<p>server端：<img src="server.png" alt="server端"></p>
+<p>client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。<br>服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。<br>通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。</p>
+<h2 id="2-3-Oauth1-0a或者Oauth2"><a href="#2-3-Oauth1-0a或者Oauth2" class="headerlink" title="2.3 Oauth1.0a或者Oauth2"></a>2.3 Oauth1.0a或者Oauth2</h2><p>OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。</p>
+<h2 id="2-4-JWT"><a href="#2-4-JWT" class="headerlink" title="2.4 JWT"></a>2.4 JWT</h2><p>JWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图<img src="jwt.png" alt="jwt组成图"></p>
+<h1 id="3-授权"><a href="#3-授权" class="headerlink" title="3 授权"></a>3 授权</h1><p>身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$roles = <span class="keyword">array</span>(</div><div class="line"><span class="string">'ADMIN'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device)$/'</span>), <span class="comment">// 允许访问哪些URL的正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>) <span class="comment">// 禁止访问哪些URL的正则表达式</span></div><div class="line">),</div><div class="line"><span class="string">'AUDIT'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>),<span class="comment">//允许访问的URL正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device).*)$/'</span>)</div><div class="line">)</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。</p>
+<h1 id="4-URL过滤"><a href="#4-URL过滤" class="headerlink" title="4 URL过滤"></a>4 URL过滤</h1><p>在进入逻辑处理之前，加入对URL的参数过滤，如<code>/site/{num}/policy</code> 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。</p>
+<h1 id="5-重要功能加密传输"><a href="#5-重要功能加密传输" class="headerlink" title="5 重要功能加密传输"></a>5 重要功能加密传输</h1><p>第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。</p>
+<h1 id="6-速率限制"><a href="#6-速率限制" class="headerlink" title="6 速率限制"></a>6 速率限制</h1><p>请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Route::filter(<span class="string">'api.limit'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">$key = sprintf(<span class="string">'api:%s'</span>, Auth::user()-&gt;api_key);</div><div class="line"><span class="comment">// Create the key if it doesn't exist</span></div><div class="line">Cache::add($key, <span class="number">0</span>, <span class="number">60</span>);</div><div class="line"><span class="comment">// Increment by 1</span></div><div class="line">$count = Cache::increment($key);</div><div class="line"><span class="comment">// Fail if hourly requests exceeded</span></div><div class="line"><span class="keyword">if</span> ($count &gt; Config::get(<span class="string">'api.requests_per_hour'</span>))</div><div class="line">&#123;</div><div class="line">App::abort(<span class="number">403</span>, <span class="string">'Hourly request limit exceeded'</span>);</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
+<h1 id="7-错误处理"><a href="#7-错误处理" class="headerlink" title="7 错误处理"></a>7 错误处理</h1><p>对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:<code>{&quot;result&quot;:&quot;Invalid URL!&quot;}</code>,错误的请求参数<code>{&quot;result&quot;:&quot;json format error&quot;}</code>,不允许的方法：<code>{&quot;result&quot;:&quot;Method Not Allowed&quot;}</code>，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 207 Multi-Status</div><div class="line">Content-Type: application/json; charset=&quot;UTF-8&quot;</div><div class="line">Content-Length: XXXX</div><div class="line"></div><div class="line">&#123;</div><div class="line">&quot;OPT_STATUS&quot;: 207</div><div class="line">&quot;DATA&quot;: &#123;</div><div class="line">    &quot;IP_ADDRESS&quot;: [&#123;</div><div class="line">        &quot;INTERFACE&quot;: &quot;eth0&quot;,</div><div class="line">        &quot;IP_LIST&quot;:[&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.168.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 200,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;created successfully&quot;</div><div class="line">        &#125;,&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.167.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 409,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;</div><div class="line">&#125;]</div><div class="line">&#125;]</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
+<h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
+<h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
+<p>总之，尽量使用SSL。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/从Django的SECTET_KEY到代码执行/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1087,188 +1446,6 @@ Linux
 Subject: hello
 cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
 <p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/REST API 安全设计指南/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/04/01/REST API 安全设计指南/" itemprop="url">
-                  REST API安全设计指南
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
-                2015-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2015/04/01/REST API 安全设计指南/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2015/04/01/REST API 安全设计指南/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2015/04/01/REST API 安全设计指南/" class="leancloud_visitors" data-flag-title="REST API安全设计指南">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="1，REST-API-简介"><a href="#1，REST-API-简介" class="headerlink" title="1，REST API 简介"></a>1，REST API 简介</h1><p>REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">==========  =====================  ========================</div><div class="line">HTTP 方法   行为                   示例</div><div class="line">==========  =====================  ========================</div><div class="line">GET         获取资源的信息         http://xx.com/api/orders</div><div class="line">GET         获取某个特定资源的信息 http://xx.com/api/orders/123</div><div class="line">POST        创建新资源             http://xx.com/api/orders</div><div class="line">PUT         更新资源               http://xx.com/api/orders/123</div><div class="line">DELETE      删除资源               http://xx.com/api/orders/123</div><div class="line">==========  ====================== =======================</div></pre></td></tr></table></figure></p>
-<p> 对于请求的数据一般用json或者xml形式来表示，推荐使用json。</p>
-<h1 id="2，身份认证"><a href="#2，身份认证" class="headerlink" title="2，身份认证"></a>2，身份认证</h1><p>身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下：</p>
-<p>##2.1 HTTP Basic<br>REST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">base64编码前：Basic admin:admin</div><div class="line">base64编码后：Basic YWRtaW46YWRtaW4=</div><div class="line">放到Header中：Authorization: Basic YWRtaW46YWRtaW4=</div></pre></td></tr></table></figure></p>
-<p>正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。<br>在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。</p>
-<p>##2.2 API KEY<br>API Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：<a href="http://example.com/api?key=dfkaj134,一般的处理流程如下：" target="_blank" rel="external">http://example.com/api?key=dfkaj134,一般的处理流程如下：</a><br>一个简单的设计示例如下：<br>client端：<img src="clint.png" alt="clint端"></p>
-<p>server端：<img src="server.png" alt="server端"></p>
-<p>client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。<br>服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。<br>通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。</p>
-<h2 id="2-3-Oauth1-0a或者Oauth2"><a href="#2-3-Oauth1-0a或者Oauth2" class="headerlink" title="2.3 Oauth1.0a或者Oauth2"></a>2.3 Oauth1.0a或者Oauth2</h2><p>OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。</p>
-<h2 id="2-4-JWT"><a href="#2-4-JWT" class="headerlink" title="2.4 JWT"></a>2.4 JWT</h2><p>JWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图<img src="jwt.png" alt="jwt组成图"></p>
-<h1 id="3-授权"><a href="#3-授权" class="headerlink" title="3 授权"></a>3 授权</h1><p>身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$roles = <span class="keyword">array</span>(</div><div class="line"><span class="string">'ADMIN'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device)$/'</span>), <span class="comment">// 允许访问哪些URL的正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>) <span class="comment">// 禁止访问哪些URL的正则表达式</span></div><div class="line">),</div><div class="line"><span class="string">'AUDIT'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>),<span class="comment">//允许访问的URL正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device).*)$/'</span>)</div><div class="line">)</div><div class="line">);</div></pre></td></tr></table></figure></p>
-<p>上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。</p>
-<h1 id="4-URL过滤"><a href="#4-URL过滤" class="headerlink" title="4 URL过滤"></a>4 URL过滤</h1><p>在进入逻辑处理之前，加入对URL的参数过滤，如<code>/site/{num}/policy</code> 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。</p>
-<h1 id="5-重要功能加密传输"><a href="#5-重要功能加密传输" class="headerlink" title="5 重要功能加密传输"></a>5 重要功能加密传输</h1><p>第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。</p>
-<h1 id="6-速率限制"><a href="#6-速率限制" class="headerlink" title="6 速率限制"></a>6 速率限制</h1><p>请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Route::filter(<span class="string">'api.limit'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">$key = sprintf(<span class="string">'api:%s'</span>, Auth::user()-&gt;api_key);</div><div class="line"><span class="comment">// Create the key if it doesn't exist</span></div><div class="line">Cache::add($key, <span class="number">0</span>, <span class="number">60</span>);</div><div class="line"><span class="comment">// Increment by 1</span></div><div class="line">$count = Cache::increment($key);</div><div class="line"><span class="comment">// Fail if hourly requests exceeded</span></div><div class="line"><span class="keyword">if</span> ($count &gt; Config::get(<span class="string">'api.requests_per_hour'</span>))</div><div class="line">&#123;</div><div class="line">App::abort(<span class="number">403</span>, <span class="string">'Hourly request limit exceeded'</span>);</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
-<h1 id="7-错误处理"><a href="#7-错误处理" class="headerlink" title="7 错误处理"></a>7 错误处理</h1><p>对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:<code>{&quot;result&quot;:&quot;Invalid URL!&quot;}</code>,错误的请求参数<code>{&quot;result&quot;:&quot;json format error&quot;}</code>,不允许的方法：<code>{&quot;result&quot;:&quot;Method Not Allowed&quot;}</code>，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 207 Multi-Status</div><div class="line">Content-Type: application/json; charset=&quot;UTF-8&quot;</div><div class="line">Content-Length: XXXX</div><div class="line"></div><div class="line">&#123;</div><div class="line">&quot;OPT_STATUS&quot;: 207</div><div class="line">&quot;DATA&quot;: &#123;</div><div class="line">    &quot;IP_ADDRESS&quot;: [&#123;</div><div class="line">        &quot;INTERFACE&quot;: &quot;eth0&quot;,</div><div class="line">        &quot;IP_LIST&quot;:[&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.168.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 200,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;created successfully&quot;</div><div class="line">        &#125;,&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.167.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 409,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;</div><div class="line">&#125;]</div><div class="line">&#125;]</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
-<h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
-<h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
-<p>总之，尽量使用SSL。</p>
 
           
         
@@ -1878,7 +2055,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">18</span>
+                <span class="site-state-item-count">19</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1889,7 +2066,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">10</span>
+                <span class="site-state-item-count">11</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -1899,8 +2076,8 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">70</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">75</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

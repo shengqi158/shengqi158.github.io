@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2017-05-05T01:43:57.327Z</updated>
+  <updated>2017-05-23T03:33:56.413Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>PhpStorm Xdebug远程调试环境搭建原理分析及问题排查</title>
+    <link href="http://xxlegend.com/2017/05/23/PhpStorm%20Xdebug%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"/>
+    <id>http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/</id>
+    <published>2017-05-23T03:26:59.321Z</published>
+    <updated>2017-05-23T03:33:56.413Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;p&gt;网上关于phpstorm调试的文章很多，真实实践过的不多，都是几篇文章转来转去，没有原理分析，甚至有些文章的配置文件都是错的，我就是按照一篇错误的配置一路走过来的，不过好歹把这些坑都给埋了，这篇文章不仅仅有操作，还有原理分析，更有问题排查思路。&lt;br&gt;对于简单的工
+    
+    </summary>
+    
+      <category term="php" scheme="http://xxlegend.com/categories/php/"/>
+    
+    
+      <category term="PhpStorm" scheme="http://xxlegend.com/tags/PhpStorm/"/>
+    
+      <category term="Xdebug" scheme="http://xxlegend.com/tags/Xdebug/"/>
+    
+      <category term="远程调试" scheme="http://xxlegend.com/tags/%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95/"/>
+    
+      <category term="Xdebug原理" scheme="http://xxlegend.com/tags/Xdebug%E5%8E%9F%E7%90%86/"/>
+    
+      <category term="Apache响应慢" scheme="http://xxlegend.com/tags/Apache%E5%93%8D%E5%BA%94%E6%85%A2/"/>
+    
+  </entry>
   
   <entry>
     <title>WordPress远程代码执行环境构造和VirtualHost环境验证</title>
@@ -31,13 +60,13 @@
       <category term="漏洞分析" scheme="http://xxlegend.com/categories/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
     
     
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
-    
       <category term="WordPress" scheme="http://xxlegend.com/tags/WordPress/"/>
     
       <category term="远程代码执行" scheme="http://xxlegend.com/tags/%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
     
       <category term="VirtualHost" scheme="http://xxlegend.com/tags/VirtualHost/"/>
+    
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
       <category term="exim4" scheme="http://xxlegend.com/tags/exim4/"/>
     
@@ -63,11 +92,11 @@
       <category term="java" scheme="http://xxlegend.com/categories/java/"/>
     
     
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
+    
       <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
       <category term="java" scheme="http://xxlegend.com/tags/java/"/>
     
@@ -349,6 +378,32 @@
   </entry>
   
   <entry>
+    <title>REST API安全设计指南</title>
+    <link href="http://xxlegend.com/2015/04/01/REST%20API%20%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/"/>
+    <id>http://xxlegend.com/2015/04/01/REST API 安全设计指南/</id>
+    <published>2015-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:36:16.965Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;1，REST-API-简介&quot;&gt;&lt;a href=&quot;#1，REST-API-简介&quot; class=&quot;headerlink&quot; title=&quot;1，REST API 简介&quot;&gt;&lt;/a&gt;1，REST API 简介&lt;/h1&gt;&lt;p&gt;REST的全称是REpresentational S
+    
+    </summary>
+    
+      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
+    
+    
+      <category term="REST API" scheme="http://xxlegend.com/tags/REST-API/"/>
+    
+      <category term="安全设计指南" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/"/>
+    
+      <category term="API KEY" scheme="http://xxlegend.com/tags/API-KEY/"/>
+    
+      <category term="授权认证" scheme="http://xxlegend.com/tags/%E6%8E%88%E6%9D%83%E8%AE%A4%E8%AF%81/"/>
+    
+  </entry>
+  
+  <entry>
     <title>从Django的SECTET_KEY到代码执行</title>
     <link href="http://xxlegend.com/2015/04/01/%E4%BB%8EDjango%E7%9A%84SECTET_KEY%E5%88%B0%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
     <id>http://xxlegend.com/2015/04/01/从Django的SECTET_KEY到代码执行/</id>
@@ -391,32 +446,6 @@
       <category term="Django" scheme="http://xxlegend.com/tags/Django/"/>
     
       <category term="安全属性" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E5%B1%9E%E6%80%A7/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>REST API安全设计指南</title>
-    <link href="http://xxlegend.com/2015/04/01/REST%20API%20%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/"/>
-    <id>http://xxlegend.com/2015/04/01/REST API 安全设计指南/</id>
-    <published>2015-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:36:16.965Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1，REST-API-简介&quot;&gt;&lt;a href=&quot;#1，REST-API-简介&quot; class=&quot;headerlink&quot; title=&quot;1，REST API 简介&quot;&gt;&lt;/a&gt;1，REST API 简介&lt;/h1&gt;&lt;p&gt;REST的全称是REpresentational S
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="REST API" scheme="http://xxlegend.com/tags/REST-API/"/>
-    
-      <category term="安全设计指南" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/"/>
-    
-      <category term="API KEY" scheme="http://xxlegend.com/tags/API-KEY/"/>
-    
-      <category term="授权认证" scheme="http://xxlegend.com/tags/%E6%8E%88%E6%9D%83%E8%AE%A4%E8%AF%81/"/>
     
   </entry>
   
