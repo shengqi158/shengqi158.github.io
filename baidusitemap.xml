@@ -5,14 +5,25 @@
     
   <url>
     <loc>http://xxlegend.com/2017/07/08/S2-048%20%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/</loc>
-    <lastmod>2017-07-07T20:15:39.903Z</lastmod>
+    <lastmod>2017-07-07T20:22:47.763Z</lastmod>
     <data>
         <display>
-        <title></title>
+        <title>S2-048 动态分析</title>
         <pubTime>2017-07-07T19:26:42.000Z</pubTime>
         
+        <tag>S2-048</tag>
+         
+        <tag>Struts2</tag>
+         
+        <tag>动态分析</tag>
+         
+        <tag>CVE-2017-9791</tag>
+         
          
            
+             
+              <breadCrumb title="Struts2" url="http://xxlegend.com/categories/Struts2/"/>
+          
         </display>
     </data>
     </url>
@@ -452,11 +463,11 @@
         <title>Python安全编码之预防LDAP注入</title>
         <pubTime>2016-12-01T07:38:36.000Z</pubTime>
         
-        <tag>安全编码</tag>
-         
         <tag>Python</tag>
          
         <tag>LDAP注入</tag>
+         
+        <tag>安全编码</tag>
          
         <tag>预防注入</tag>
          

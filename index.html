@@ -354,7 +354,7 @@
               
                 
                 <a class="post-title-link" href="/2017/07/08/S2-048 动态分析/" itemprop="url">
-                  未命名
+                  S2-048 动态分析
                 </a>
               
             
@@ -381,6 +381,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Struts2/" itemprop="url" rel="index">
+                    <span itemprop="name">Struts2</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -399,7 +421,7 @@
 
           
           
-             <span id="/2017/07/08/S2-048 动态分析/" class="leancloud_visitors" data-flag-title="">
+             <span id="/2017/07/08/S2-048 动态分析/" class="leancloud_visitors" data-flag-title="S2-048 动态分析">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -429,8 +451,7 @@
       
         
           
-            <h1 id="struts2-048-动态分析"><a href="#struts2-048-动态分析" class="headerlink" title="struts2-048 动态分析"></a>struts2-048 动态分析</h1><p>标签（空格分隔）： 未分类</p>
-<hr>
+            <hr>
 <h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>2017年7月7日，Apache Struts发布最新的安全公告，Apache Structs2的strus1插件存在远程代码执行的高危漏洞，漏洞编号为CVE-2017-9791（S2-048）。攻击者可以构造恶意的字段值通过Struts2的struts2-struts1-plugin的插件，远程执行代码</p>
 <h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>(1)    漏洞简介<br>Apache Struts2.3.x系列版本中struts2-struts1-plugin存在远程代码执行漏洞，进而导致任意代码执行。<br>(2)    漏洞分析<br>官方的漏洞描述如下：</p>
 <p>从官方的漏洞描述我们可以知道，这个漏洞本质上是在struts2-struts1-plugin这个jar包上。这个库是用将struts1的action封装成struts2的action以便在strut2上使用。本质原因还是在struts2-struts1-plugin包中Struts1Action.java中execute函数调用了getText函数，这个函数会执行ognl表达式，更可恶的是getText的输入内容还是攻击者可控的。以下分析基于struts2的官方示例struts2-showcase war包。首先Struts1Action的execute方法代码如下，从红框中信息可以看出其实质是调用SaveGangsterAction.execute方法，然后再调用getText(msg.getKey()….)。<br><img src="/images/048-1.png" alt="1"><br>在struts2-showcase的integration模块下有SaveGangsterAction.java的execute方法的实现。具体如下：<br><img src="/images/048-2.png" alt="2"><br>在这个方法中就带入有毒参数gforn.getName()放到了messages结构中，而gform.getName()的值是从客户端获取的。Gangsterform.getName()的实现如下：<br><img src="/images/048-3.png" alt="3"><br>我们这里传入了${1+1}。有毒参数已经带入，就差ognl表达式。继续回到Struts1Action.java的execute方法下半部分，这里有getText()的入口，能清晰看到参数已经被污染，具体如下图：<br><img src="/images/048-4.png" alt="4"><br>下面进入getText的实现函数：这个调用栈比较深，首先我们给出栈图：<br><img src="/images/048-5.png" alt="5"><br>从Struts1action.execute函数开始，到ActionSupport的getText()方法，方法如下：<br><img src="/images/048-6.png" alt="6"><br>接着进入TextProviderSuppport.getText，接着调用其另一个重载类方法getText(),示例如下：<br><img src="/images/048-7.png" alt="7"><br>如图所示，进入LocalizeTextUtil.findText，继续分析其实现：从名字上也能看出其是根据用户的配置做一些本地化的操作。代码如下：<br><img src="/images/048-8.png" alt="8"><br>熟悉struts2的童鞋跟到这一步就能发现这就是一个很典型的ognl表达式入口，先是得到一个valueStack，再继续递归得到ognl表达式的值。这里不再描述，详情可参考官方链接：<a href="https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html" target="_blank" rel="external">https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html</a><br>最后附上一个简单的测试用例图：<br><img src="/images/048-9.png" alt="9"><br><img src="/images/048-10.png" alt="10"></p>
@@ -2197,7 +2218,7 @@ location /static {    #静态配置文件
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">11</span>
+                <span class="site-state-item-count">12</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2207,8 +2228,8 @@ location /static {    #静态配置文件
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">75</span>
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">79</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
