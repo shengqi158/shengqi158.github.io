@@ -331,6 +331,179 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/" itemprop="url">
+                  从escapeshellcmd bypass说起到宽字节注入
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-03-01T15:38:36+08:00">
+                2015-03-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/mysql/" itemprop="url" rel="index">
+                    <span itemprop="name">mysql</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/03/01/从escapeshellcmd bypass说起到宽字节注入/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/" class="leancloud_visitors" data-flag-title="从escapeshellcmd bypass说起到宽字节注入">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-php-多字节绕过escapeshellcmd"><a href="#1-php-多字节绕过escapeshellcmd" class="headerlink" title="1 php 多字节绕过escapeshellcmd"></a>1 php 多字节绕过escapeshellcmd</h1><p>escapeshellcmd()对shell元字符过滤加反斜杠；<br>反斜线（\）会在以下字符之前插入： #&amp;;`|*?~&lt;&gt;^()[]{}$\, \x0A 和 \xFF，但在php5.2.5及之前存在通过输入多字节绕过escapeshellcmd的问题。5.2.6 已经修复了该问题。</p>
+<p>执行 escapeshellcmd(“echo “.chr(0xc0).”;id”);<br>加上反斜杠之后，也就是echo \xc0\x5c;id,在中文环境中\xc0\x5c是会被认为是gbk字符的。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>hex(ord(<span class="string">'\\'</span>))</div><div class="line"><span class="string">'0x5c'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s=<span class="string">'\xc0\x5c'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">print</span> s.decode(<span class="string">'gbk'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">繺</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s.decode(<span class="string">'gbk'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line"><span class="string">'\xe7\xb9\xba'</span></div></pre></td></tr></table></figure></p>
+<p>\被吃掉之后于是就变成了echo 繺;id 了。<br>gbk是宽字节，两个字节，gbk字符范围：8140-FEFE，首字节在81-FE直接，尾字节在40-FE之间，显然5C在尾字节中。考虑0xbf;id,escape之后就变成了0xbf5c;id，0xbf5c是一个合法的GBK编码，那就变成了[0xbf5c];id了。而utf8表示中文一般三个字节。<br>同样受影响的还有escapeshellarg()，源码中的处理是一个字节一个字节来处理的。这种漏洞应该有一定普遍性，在当时来说。下面我们看下修复的源代码：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line">char *php_escape_shell_cmd(char *str) &#123;</div><div class="line">     register int x, y, l;</div><div class="line">     char *cmd;</div><div class="line">     char *p = NULL;</div><div class="line">    </div><div class="line">     TSRMLS_FETCH();</div><div class="line"></div><div class="line">     l = strlen(str);</div><div class="line">     cmd = safe_emalloc(2, l, 1); //申请了2倍字符</div><div class="line">    </div><div class="line">     for (x = 0, y = 0; x &lt; l; x++) &#123;</div><div class="line">          int mb_len = php_mblen(str + x, (l - x));</div><div class="line">          //这一段是5.2.6新加的，就是在处理多字节符号的时候，当多字节字符小于0的时候不处理，大于1的时候跳过，等于1的时候执行过滤动作</div><div class="line">          /* skip non-valid multibyte characters */</div><div class="line">          if (mb_len &lt; 0) &#123;</div><div class="line">               continue;</div><div class="line">          &#125; else if (mb_len &gt; 1) &#123;</div><div class="line">               memcpy(cmd + y, str + x, mb_len);</div><div class="line">               y += mb_len;</div><div class="line">               x += mb_len - 1;</div><div class="line">               continue;</div><div class="line">          &#125;</div><div class="line"></div><div class="line">          switch (str[x]) &#123;</div><div class="line">               case '"':</div><div class="line">               case '\'':</div><div class="line">#ifndef PHP_WIN32</div><div class="line">                    if (!p &amp;&amp; (p = memchr(str + x + 1, str[x], l - x - 1))) &#123;</div><div class="line">                         /* noop */</div><div class="line">                    &#125; else if (p &amp;&amp; *p == str[x]) &#123;</div><div class="line">                         p = NULL;</div><div class="line">                    &#125; else &#123;</div><div class="line">                         cmd[y++] = '\\';</div><div class="line">                    &#125;</div><div class="line">                    cmd[y++] = str[x];</div><div class="line">                    break;</div><div class="line">#endif</div><div class="line">               case '#': /* This is character-set independent */</div><div class="line">               case '&amp;':</div><div class="line">               case ';':</div><div class="line">               case '`':</div><div class="line">               case '|':</div><div class="line">               case '*':</div><div class="line">               case '?':</div><div class="line">               case '~':</div><div class="line">               case '&lt;':</div><div class="line">               case '&gt;':</div><div class="line">               case '^':</div><div class="line">               case '(':</div><div class="line">               case ')':</div><div class="line">               case '[':</div><div class="line">               case ']':</div><div class="line">               case '&#123;':</div><div class="line">               case '&#125;':</div><div class="line">               case '$':</div><div class="line">               case '\\':</div><div class="line">               case '\x0A': /* excluding these two */</div><div class="line">               case '\xFF':</div><div class="line">#ifdef PHP_WIN32</div><div class="line">               /* since Windows does not allow us to escape these chars, just remove them */</div><div class="line">               case '%':</div><div class="line">                    cmd[y++] = ' ';</div><div class="line">                    break;</div><div class="line">#endif</div><div class="line">                    cmd[y++] = '\\';</div><div class="line">                    /* fall-through */</div><div class="line">               default:</div><div class="line">                    cmd[y++] = str[x];</div><div class="line"></div><div class="line">          &#125;</div><div class="line">     &#125;</div><div class="line">     cmd[y] = '\0';</div><div class="line">     return cmd;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这个bypass已经成为过去时了，但是还是有很大的借鉴意义，就是宽字节注入，这种情况不仅仅发生命令注入时，更多的时候在sql注入，下面来分析一下宽字节注入如下三种情况，都是由于宽字节的问题导致的。</p>
+<h1 id="2-宽字节sql注入"><a href="#2-宽字节sql注入" class="headerlink" title="2 宽字节sql注入"></a>2 宽字节sql注入</h1><p>1，一种情况 iconv转换，addslashes之后从gbk转到utf8<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">$user = $_POST[ <span class="string">'username'</span> ];</div><div class="line">$user = addslashes($user);</div><div class="line">$user = iconv(<span class="string">"gbk"</span>, <span class="string">'utf8'</span>, $user);</div><div class="line"></div><div class="line">$pass = $_POST[ <span class="string">'password'</span> ];</div><div class="line">$pass = md5( $pass );</div><div class="line"></div><div class="line">$qry = <span class="string">"SELECT * FROM `users` WHERE user='$user' AND password='$pass';"</span>;</div><div class="line">print_r($qry);</div><div class="line"></div><div class="line">$result = @mysql_query($qry) <span class="keyword">or</span> <span class="keyword">die</span>(<span class="string">'&lt;pre&gt;'</span> . mysql_error() . <span class="string">'&lt;/pre&gt;'</span> );</div><div class="line">var_dump($result);</div></pre></td></tr></table></figure></p>
+<p>处理过程如下：<br>%bf%27—-（addslashes）-&gt;%bf%5c%27—–（utf8）—-&gt;縗’ 这样单引号就放出来了，大体流程是%bf%27经过addslashes之后变成了%bf%5c%27，再经过iconv从gbk转换为utf8的时候，变成了%e7%b8%97%27，也就是縗’。利用的前提是设置了set names utf8。</p>
+<p>2，在php中使用mysql_query(‘set names gbk’),指定了客户端，连接层，结果为gbk编码。构造数据%bf%27，过程和第一种情况类似<br>%bf%27—(addslashes)–&gt;%bf%5c%27—(set names gbk)—&gt;縗’ </p>
+<p>3，iconv转换从utf8到gbk，set names字符集为gbk，构造数据如下%e9%8c%a6带入反斜杠\,注释掉单引号<br>大体数据流程：%e9%8c%a6—–(utf8)—-%e5%5c—-(addslashes)—&gt;%e5%5c%5c<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span>s = <span class="string">'\xe9\x8c\xa6'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s.decode(<span class="string">'utf8'</span>)</div><div class="line"><span class="string">u'\u9326'</span></div><div class="line"><span class="meta">&gt;&gt;&gt; </span>s.decode(<span class="string">'utf8'</span>).encode(<span class="string">'gbk'</span>)</div><div class="line"><span class="string">'\xe5\\'</span></div></pre></td></tr></table></figure></p>
+<p>总之一条，都是打的%5c的注意，要么转义后转utf8吃掉%5c,要么转utf8后再转义放出%5c</p>
+<p>参考：<br><a href="http://seclists.org/bugtraq/2008/May/61" target="_blank" rel="external">http://seclists.org/bugtraq/2008/May/61</a><br><a href="http://www.sektioneins.de/en/advisories/advisory-032008-php-multibyte-shell-command-escaping-bypass-vulnerability.html" target="_blank" rel="external">http://www.sektioneins.de/en/advisories/advisory-032008-php-multibyte-shell-command-escaping-bypass-vulnerability.html</a><br><a href="http://php.net/ChangeLog-5.php" target="_blank" rel="external">http://php.net/ChangeLog-5.php</a><br><a href="http://php.net/releases/" target="_blank" rel="external">http://php.net/releases/</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/01/01/PHP比较操作符带来的安全问题/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -551,7 +724,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">21</span>
+                <span class="site-state-item-count">22</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -562,7 +735,7 @@
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-count">13</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -573,7 +746,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">85</span>
+                <span class="site-state-item-count">89</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2017-09-06T09:26:56.814Z</updated>
+  <updated>2017-09-29T15:39:39.824Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -16,15 +16,43 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析</title>
+    <link href="http://xxlegend.com/2017/09/29/Spring%20Data%20Rest%E6%9C%8D%E5%8A%A1%E5%99%A8PATCH%E8%AF%B7%E6%B1%82%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9ECVE-2017-8046%E8%A1%A5%E5%85%85%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/</id>
+    <published>2017-09-29T15:30:02.738Z</published>
+    <updated>2017-09-29T15:39:39.824Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;1-综述&quot;&gt;&lt;a href=&quot;#1-综述&quot; class=&quot;headerlink&quot; title=&quot;1 综述&quot;&gt;&lt;/a&gt;1 综述&lt;/h2&gt;&lt;p&gt;  近日，Pivotal官方发布通告表示Spring-data-rest服务器在处理PATCH请求时存在一个远程代码执行漏洞
+    
+    </summary>
+    
+      <category term="spring" scheme="http://xxlegend.com/categories/spring/"/>
+    
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="Spring DATA REST" scheme="http://xxlegend.com/tags/Spring-DATA-REST/"/>
+    
+      <category term="CVE-2017-8046" scheme="http://xxlegend.com/tags/CVE-2017-8046/"/>
+    
+      <category term="表达式注入" scheme="http://xxlegend.com/tags/%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5/"/>
+    
+      <category term="PATCH" scheme="http://xxlegend.com/tags/PATCH/"/>
+    
+  </entry>
+  
+  <entry>
     <title>S2-052漏洞分析及官方缓解措施无效验证</title>
     <link href="http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/"/>
     <id>http://xxlegend.com/2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/</id>
     <published>2017-09-06T09:03:38.290Z</published>
-    <updated>2017-09-06T09:26:56.814Z</updated>
+    <updated>2017-09-06T09:33:01.761Z</updated>
     
     <summary type="html">
     
-      &lt;h1 id=&quot;综述&quot;&gt;&lt;a href=&quot;#综述&quot; class=&quot;headerlink&quot; title=&quot;综述&quot;&gt;&lt;/a&gt;综述&lt;/h1&gt;&lt;pre&gt;&lt;code&gt;2017年9月5日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x和2.3.x的RES
+      &lt;h1 id=&quot;综述&quot;&gt;&lt;a href=&quot;#综述&quot; class=&quot;headerlink&quot; title=&quot;综述&quot;&gt;&lt;/a&gt;综述&lt;/h1&gt;&lt;p&gt;2017年9月5日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x和2.3.x的REST插件存在远程代
     
     </summary>
     
@@ -33,8 +61,6 @@
     
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
       <category term="S2-052" scheme="http://xxlegend.com/tags/S2-052/"/>
     
       <category term="CVE-2017-9805" scheme="http://xxlegend.com/tags/CVE-2017-9805/"/>
@@ -42,6 +68,8 @@
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
       <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="xml" scheme="http://xxlegend.com/tags/xml/"/>
     
@@ -121,13 +149,13 @@
       <category term="漏洞分析" scheme="http://xxlegend.com/categories/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
     
     
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
+    
       <category term="WordPress" scheme="http://xxlegend.com/tags/WordPress/"/>
     
       <category term="远程代码执行" scheme="http://xxlegend.com/tags/%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
     
       <category term="VirtualHost" scheme="http://xxlegend.com/tags/VirtualHost/"/>
-    
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
       <category term="exim4" scheme="http://xxlegend.com/tags/exim4/"/>
     
@@ -153,11 +181,11 @@
       <category term="java" scheme="http://xxlegend.com/categories/java/"/>
     
     
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
     
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
       <category term="java" scheme="http://xxlegend.com/tags/java/"/>
     
@@ -277,6 +305,31 @@
   </entry>
   
   <entry>
+    <title>SlemBunk木马浅析</title>
+    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
+    <published>2016-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:39:15.573Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
+&lt;p&gt;#1 恶意
+    
+    </summary>
+    
+      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
+    
+    
+      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
+    
+      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+    
+      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
     <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
     <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
     <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
@@ -303,27 +356,26 @@
   </entry>
   
   <entry>
-    <title>SlemBunk木马浅析</title>
-    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
-    <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:39:15.573Z</updated>
+    <title>如何让Burpsuite监听微信公众号</title>
+    <link href="http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
+    <id>http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/</id>
+    <published>2016-02-01T07:38:36.000Z</published>
+    <updated>2017-05-10T08:06:53.709Z</updated>
     
     <summary type="html">
     
-      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
-&lt;p&gt;#1 恶意
+      &lt;h1 id=&quot;1-目的&quot;&gt;&lt;a href=&quot;#1-目的&quot; class=&quot;headerlink&quot; title=&quot;1 目的&quot;&gt;&lt;/a&gt;1 目的&lt;/h1&gt;&lt;p&gt;通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后
     
     </summary>
     
-      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
+      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
     
     
-      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
+      <category term="Burpsuite" scheme="http://xxlegend.com/tags/Burpsuite/"/>
     
-      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+      <category term="微信公众号" scheme="http://xxlegend.com/tags/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
     
-      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
+      <category term="监听" scheme="http://xxlegend.com/tags/%E7%9B%91%E5%90%AC/"/>
     
   </entry>
   
@@ -359,30 +411,6 @@
       <category term="encryption" scheme="http://xxlegend.com/tags/encryption/"/>
     
       <category term="decryption" scheme="http://xxlegend.com/tags/decryption/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>如何让Burpsuite监听微信公众号</title>
-    <link href="http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
-    <id>http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/</id>
-    <published>2016-02-01T07:38:36.000Z</published>
-    <updated>2017-05-10T08:06:53.709Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-目的&quot;&gt;&lt;a href=&quot;#1-目的&quot; class=&quot;headerlink&quot; title=&quot;1 目的&quot;&gt;&lt;/a&gt;1 目的&lt;/h1&gt;&lt;p&gt;通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后
-    
-    </summary>
-    
-      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
-    
-    
-      <category term="Burpsuite" scheme="http://xxlegend.com/tags/Burpsuite/"/>
-    
-      <category term="微信公众号" scheme="http://xxlegend.com/tags/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
-    
-      <category term="监听" scheme="http://xxlegend.com/tags/%E7%9B%91%E5%90%AC/"/>
     
   </entry>
   
@@ -428,35 +456,13 @@
       <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
     
     
-      <category term="python" scheme="http://xxlegend.com/tags/python/"/>
-    
       <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
+    
+      <category term="python" scheme="http://xxlegend.com/tags/python/"/>
     
       <category term="代码审计" scheme="http://xxlegend.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
     
       <category term="注入" scheme="http://xxlegend.com/tags/%E6%B3%A8%E5%85%A5/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Django安全机制</title>
-    <link href="http://xxlegend.com/2015/04/01/Django%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6/"/>
-    <id>http://xxlegend.com/2015/04/01/Django安全机制/</id>
-    <published>2015-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:36:29.758Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;#1 xss&lt;br&gt;django 已经能防范95%的xss问题，主要原理就是将&amp;lt;,&amp;gt;,&amp;amp;做了转化，但是如下情况还是无能为力&lt;br&gt;（1）属性有动态内容，正确：&lt;code&gt;&amp;lt;img alt=&amp;quot;{{good}}&amp;quot;&amp;gt;&lt;/code
-    
-    </summary>
-    
-      <category term="Django" scheme="http://xxlegend.com/categories/Django/"/>
-    
-    
-      <category term="Django" scheme="http://xxlegend.com/tags/Django/"/>
-    
-      <category term="安全属性" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E5%B1%9E%E6%80%A7/"/>
     
   </entry>
   
@@ -481,6 +487,28 @@
       <category term="SECRET_KEY" scheme="http://xxlegend.com/tags/SECRET-KEY/"/>
     
       <category term="代码执行" scheme="http://xxlegend.com/tags/%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Django安全机制</title>
+    <link href="http://xxlegend.com/2015/04/01/Django%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6/"/>
+    <id>http://xxlegend.com/2015/04/01/Django安全机制/</id>
+    <published>2015-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:36:29.758Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;#1 xss&lt;br&gt;django 已经能防范95%的xss问题，主要原理就是将&amp;lt;,&amp;gt;,&amp;amp;做了转化，但是如下情况还是无能为力&lt;br&gt;（1）属性有动态内容，正确：&lt;code&gt;&amp;lt;img alt=&amp;quot;{{good}}&amp;quot;&amp;gt;&lt;/code
+    
+    </summary>
+    
+      <category term="Django" scheme="http://xxlegend.com/categories/Django/"/>
+    
+    
+      <category term="Django" scheme="http://xxlegend.com/tags/Django/"/>
+    
+      <category term="安全属性" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E5%B1%9E%E6%80%A7/"/>
     
   </entry>
   
@@ -533,32 +561,6 @@
       <category term="信息泄露" scheme="http://xxlegend.com/tags/%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2/"/>
     
       <category term="利用原理" scheme="http://xxlegend.com/tags/%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>从escapeshellcmd bypass说起到宽字节注入</title>
-    <link href="http://xxlegend.com/2015/03/01/%E4%BB%8Eescapeshellcmd%20bypass%E8%AF%B4%E8%B5%B7%E5%88%B0%E5%AE%BD%E5%AD%97%E8%8A%82%E6%B3%A8%E5%85%A5/"/>
-    <id>http://xxlegend.com/2015/03/01/从escapeshellcmd bypass说起到宽字节注入/</id>
-    <published>2015-03-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:44:19.514Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-php-多字节绕过escapeshellcmd&quot;&gt;&lt;a href=&quot;#1-php-多字节绕过escapeshellcmd&quot; class=&quot;headerlink&quot; title=&quot;1 php 多字节绕过escapeshellcmd&quot;&gt;&lt;/a&gt;1 php 多字节绕过
-    
-    </summary>
-    
-      <category term="mysql" scheme="http://xxlegend.com/categories/mysql/"/>
-    
-    
-      <category term="从escapeshellcmd" scheme="http://xxlegend.com/tags/%E4%BB%8Eescapeshellcmd/"/>
-    
-      <category term="宽字节注入" scheme="http://xxlegend.com/tags/%E5%AE%BD%E5%AD%97%E8%8A%82%E6%B3%A8%E5%85%A5/"/>
-    
-      <category term="mysql" scheme="http://xxlegend.com/tags/mysql/"/>
-    
-      <category term="bypass" scheme="http://xxlegend.com/tags/bypass/"/>
     
   </entry>
   
