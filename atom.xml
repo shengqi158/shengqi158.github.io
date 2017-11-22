@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2017-10-02T02:12:14.752Z</updated>
+  <updated>2017-11-22T16:47:21.601Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,39 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Java JSON反序列化之殇-看雪安全开发者峰会</title>
+    <link href="http://xxlegend.com/2017/11/23/Java%20JSON%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8B%E6%AE%87-%E7%9C%8B%E9%9B%AA%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A/"/>
+    <id>http://xxlegend.com/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/</id>
+    <published>2017-11-22T16:36:05.561Z</published>
+    <updated>2017-11-22T16:47:21.601Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;h1 id=&quot;综合&quot;&gt;&lt;a href=&quot;#综合&quot; class=&quot;headerlink&quot; title=&quot;综合&quot;&gt;&lt;/a&gt;综合&lt;/h1&gt;&lt;p&gt;这是我在看雪2017安全开发者峰会的议题《Java JSON反序列之殇》的内容，主要涉及Java JSON常用库GSON，Jack
+    
+    </summary>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/categories/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+    
+      <category term="Java" scheme="http://xxlegend.com/tags/Java/"/>
+    
+      <category term="JSON" scheme="http://xxlegend.com/tags/JSON/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="看雪" scheme="http://xxlegend.com/tags/%E7%9C%8B%E9%9B%AA/"/>
+    
+      <category term="安全开发者峰会" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A/"/>
+    
+      <category term="反序列化防御" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E9%98%B2%E5%BE%A1/"/>
+    
+      <category term="PPT" scheme="http://xxlegend.com/tags/PPT/"/>
+    
+  </entry>
   
   <entry>
     <title>Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析</title>
@@ -59,6 +92,8 @@
       <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
     
     
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
       <category term="S2-052" scheme="http://xxlegend.com/tags/S2-052/"/>
@@ -68,8 +103,6 @@
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
       <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
-    
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="xml" scheme="http://xxlegend.com/tags/xml/"/>
     
@@ -94,9 +127,9 @@
       <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
     
     
-      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
-    
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+    
+      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
     
       <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
     
@@ -149,13 +182,13 @@
       <category term="漏洞分析" scheme="http://xxlegend.com/categories/%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
     
     
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
+    
       <category term="WordPress" scheme="http://xxlegend.com/tags/WordPress/"/>
     
       <category term="远程代码执行" scheme="http://xxlegend.com/tags/%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
     
       <category term="VirtualHost" scheme="http://xxlegend.com/tags/VirtualHost/"/>
-    
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
       <category term="exim4" scheme="http://xxlegend.com/tags/exim4/"/>
     
@@ -183,9 +216,9 @@
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
-    
       <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+    
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
       <category term="java" scheme="http://xxlegend.com/tags/java/"/>
     
@@ -207,11 +240,11 @@
       <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
     
     
+      <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
+    
       <category term="Python" scheme="http://xxlegend.com/tags/Python/"/>
     
       <category term="LDAP注入" scheme="http://xxlegend.com/tags/LDAP%E6%B3%A8%E5%85%A5/"/>
-    
-      <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
     
       <category term="预防注入" scheme="http://xxlegend.com/tags/%E9%A2%84%E9%98%B2%E6%B3%A8%E5%85%A5/"/>
     
@@ -305,6 +338,31 @@
   </entry>
   
   <entry>
+    <title>SlemBunk木马浅析</title>
+    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
+    <published>2016-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:39:15.573Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
+&lt;p&gt;#1 恶意
+    
+    </summary>
+    
+      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
+    
+    
+      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
+    
+      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+    
+      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
     <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
     <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
     <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
@@ -327,31 +385,6 @@
       <category term="mezzanine" scheme="http://xxlegend.com/tags/mezzanine/"/>
     
       <category term="virtualenv" scheme="http://xxlegend.com/tags/virtualenv/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>SlemBunk木马浅析</title>
-    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
-    <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:39:15.573Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
-&lt;p&gt;#1 恶意
-    
-    </summary>
-    
-      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
-    
-    
-      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
-    
-      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    
-      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
     
   </entry>
   
@@ -467,6 +500,32 @@
   </entry>
   
   <entry>
+    <title>SVN和GIT信息泄漏利用原理及现状</title>
+    <link href="http://xxlegend.com/2015/04/01/SVN%E5%92%8CGIT%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86%E5%8F%8A%E7%8E%B0%E7%8A%B6/"/>
+    <id>http://xxlegend.com/2015/04/01/SVN和GIT信息泄漏利用原理及现状/</id>
+    <published>2015-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:43:59.382Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;1，google-hack&quot;&gt;&lt;a href=&quot;#1，google-hack&quot; class=&quot;headerlink&quot; title=&quot;1，google hack&quot;&gt;&lt;/a&gt;1，google hack&lt;/h1&gt;&lt;p&gt;svn 搜索技巧&lt;br&gt;图1&lt;br&gt;git 搜索技巧
+    
+    </summary>
+    
+      <category term="信息泄露" scheme="http://xxlegend.com/categories/%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2/"/>
+    
+    
+      <category term="SVN" scheme="http://xxlegend.com/tags/SVN/"/>
+    
+      <category term="GIT" scheme="http://xxlegend.com/tags/GIT/"/>
+    
+      <category term="信息泄露" scheme="http://xxlegend.com/tags/%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2/"/>
+    
+      <category term="利用原理" scheme="http://xxlegend.com/tags/%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Django安全机制</title>
     <link href="http://xxlegend.com/2015/04/01/Django%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6/"/>
     <id>http://xxlegend.com/2015/04/01/Django安全机制/</id>
@@ -509,58 +568,6 @@
       <category term="SECRET_KEY" scheme="http://xxlegend.com/tags/SECRET-KEY/"/>
     
       <category term="代码执行" scheme="http://xxlegend.com/tags/%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>REST API安全设计指南</title>
-    <link href="http://xxlegend.com/2015/04/01/REST%20API%20%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/"/>
-    <id>http://xxlegend.com/2015/04/01/REST API 安全设计指南/</id>
-    <published>2015-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:36:16.965Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1，REST-API-简介&quot;&gt;&lt;a href=&quot;#1，REST-API-简介&quot; class=&quot;headerlink&quot; title=&quot;1，REST API 简介&quot;&gt;&lt;/a&gt;1，REST API 简介&lt;/h1&gt;&lt;p&gt;REST的全称是REpresentational S
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="REST API" scheme="http://xxlegend.com/tags/REST-API/"/>
-    
-      <category term="安全设计指南" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/"/>
-    
-      <category term="API KEY" scheme="http://xxlegend.com/tags/API-KEY/"/>
-    
-      <category term="授权认证" scheme="http://xxlegend.com/tags/%E6%8E%88%E6%9D%83%E8%AE%A4%E8%AF%81/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>SVN和GIT信息泄漏利用原理及现状</title>
-    <link href="http://xxlegend.com/2015/04/01/SVN%E5%92%8CGIT%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86%E5%8F%8A%E7%8E%B0%E7%8A%B6/"/>
-    <id>http://xxlegend.com/2015/04/01/SVN和GIT信息泄漏利用原理及现状/</id>
-    <published>2015-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:43:59.382Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1，google-hack&quot;&gt;&lt;a href=&quot;#1，google-hack&quot; class=&quot;headerlink&quot; title=&quot;1，google hack&quot;&gt;&lt;/a&gt;1，google hack&lt;/h1&gt;&lt;p&gt;svn 搜索技巧&lt;br&gt;图1&lt;br&gt;git 搜索技巧
-    
-    </summary>
-    
-      <category term="信息泄露" scheme="http://xxlegend.com/categories/%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2/"/>
-    
-    
-      <category term="SVN" scheme="http://xxlegend.com/tags/SVN/"/>
-    
-      <category term="GIT" scheme="http://xxlegend.com/tags/GIT/"/>
-    
-      <category term="信息泄露" scheme="http://xxlegend.com/tags/%E4%BF%A1%E6%81%AF%E6%B3%84%E9%9C%B2/"/>
-    
-      <category term="利用原理" scheme="http://xxlegend.com/tags/%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86/"/>
     
   </entry>
   
