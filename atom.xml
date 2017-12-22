@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2017-12-06T14:28:57.323Z</updated>
+  <updated>2017-12-22T15:59:59.516Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,34 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Weblogic CVE-2017-10271 XMLDecoder RCE分析</title>
+    <link href="http://xxlegend.com/2017/12/22/Weblogic%20CVE-2017-10271%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2017/12/22/Weblogic CVE-2017-10271 XMLDecoder RCE分析/</id>
+    <published>2017-12-22T15:37:47.779Z</published>
+    <updated>2017-12-22T15:59:59.516Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;挖矿确实太火，现在只要存在RCE漏洞就会有矿机的身影，这不weblogic又火了一把。这次矿机使用的PoC是wls wsat模块的RCE漏洞，这个漏洞的核心就是XMLDecoder的反序列化漏洞，关于XMLDecoder反序列化的漏洞在2013年就被广泛传播，这次的漏洞是由
+    
+    </summary>
+    
+      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
+    
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
+    
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+    
+  </entry>
   
   <entry>
     <title>S2-055漏洞环境搭建与分析</title>
@@ -65,9 +93,9 @@
     
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
-      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
-    
       <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
     
       <category term="JdbcRowSetImpl" scheme="http://xxlegend.com/tags/JdbcRowSetImpl/"/>
     
@@ -185,9 +213,9 @@
       <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
     
     
-      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
-    
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+    
+      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
     
       <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
     
@@ -396,6 +424,31 @@
   </entry>
   
   <entry>
+    <title>SlemBunk木马浅析</title>
+    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
+    <published>2016-04-01T07:38:36.000Z</published>
+    <updated>2017-05-01T09:39:15.573Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
+&lt;p&gt;#1 恶意
+    
+    </summary>
+    
+      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
+    
+    
+      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
+    
+      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
+    
+      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
     <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
     <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
     <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
@@ -418,31 +471,6 @@
       <category term="mezzanine" scheme="http://xxlegend.com/tags/mezzanine/"/>
     
       <category term="virtualenv" scheme="http://xxlegend.com/tags/virtualenv/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>SlemBunk木马浅析</title>
-    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
-    <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:39:15.573Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
-&lt;p&gt;#1 恶意
-    
-    </summary>
-    
-      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
-    
-    
-      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
-    
-      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    
-      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
     
   </entry>
   
@@ -554,30 +582,6 @@
       <category term="代码审计" scheme="http://xxlegend.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
     
       <category term="注入" scheme="http://xxlegend.com/tags/%E6%B3%A8%E5%85%A5/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>从Django的SECTET_KEY到代码执行</title>
-    <link href="http://xxlegend.com/2015/04/01/%E4%BB%8EDjango%E7%9A%84SECTET_KEY%E5%88%B0%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
-    <id>http://xxlegend.com/2015/04/01/从Django的SECTET_KEY到代码执行/</id>
-    <published>2015-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:44:07.582Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-背景&quot;&gt;&lt;a href=&quot;#1-背景&quot; class=&quot;headerlink&quot; title=&quot;1 背景&quot;&gt;&lt;/a&gt;1 背景&lt;/h1&gt;&lt;p&gt;最近审查代码发现某些产品在登录的JS代码中泄露了SECRET_KEY,将该值作为密码加密的盐，这样就暴露了加密salt不太好
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="Django" scheme="http://xxlegend.com/tags/Django/"/>
-    
-      <category term="SECRET_KEY" scheme="http://xxlegend.com/tags/SECRET-KEY/"/>
-    
-      <category term="代码执行" scheme="http://xxlegend.com/tags/%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/"/>
     
   </entry>
   

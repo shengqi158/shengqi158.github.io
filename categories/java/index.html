@@ -97,7 +97,7 @@
 <meta name="description" content="分享些安全编码，漏洞分析">
 <meta property="og:type" content="website">
 <meta property="og:title" content="xxlegend">
-<meta property="og:url" content="http://xxlegend.com/categories/Java/index.html">
+<meta property="og:url" content="http://xxlegend.com/categories/java/index.html">
 <meta property="og:site_name" content="xxlegend">
 <meta property="og:description" content="分享些安全编码，漏洞分析">
 <meta name="twitter:card" content="summary">
@@ -130,13 +130,13 @@
 
 
 
-  <link rel="canonical" href="http://xxlegend.com/categories/Java/"/>
+  <link rel="canonical" href="http://xxlegend.com/categories/java/"/>
 
 
 
 
 
-  <title>分类: Java | xxlegend</title>
+  <title>分类: java | xxlegend</title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -322,7 +322,7 @@
   <section id="posts" class="posts-collapse">
     <div class="collection-title">
       <h2 >
-        Java
+        java
         <small>分类</small>
       </h2>
     </div>
@@ -335,9 +335,9 @@
 
       <h1 class="post-title">
         
-            <a class="post-title-link" href="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="url">
+            <a class="post-title-link" href="/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/" itemprop="url">
               
-                <span itemprop="name">基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析</span>
+                <span itemprop="name">fastjson 远程反序列化poc的构造和分析</span>
               
             </a>
         
@@ -345,9 +345,9 @@
 
       <div class="post-meta">
         <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-06T21:41:42+08:00"
-              content="2017-12-06" >
-          12-06
+              datetime="2017-04-29T22:27:22+08:00"
+              content="2017-04-29" >
+          04-29
         </time>
       </div>
 
@@ -402,7 +402,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-count">26</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -423,8 +423,8 @@
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">101</span>
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">103</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1046,6 +1046,43 @@
             newcounter.save(null, {
               success: function(newcounter) {
                 var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
+ocument.getElementById(url));
                 $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
               },
               error: function(newcounter, error) {
