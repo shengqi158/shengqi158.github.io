@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2017-12-23T00:37:05.438Z</updated>
+  <updated>2018-01-25T03:43:05.944Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>2017年反序列化漏洞年度报告</title>
+    <link href="http://xxlegend.com/2018/01/25/2017%E5%B9%B4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
+    <id>http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/</id>
+    <published>2018-01-25T03:39:30.080Z</published>
+    <updated>2018-01-25T03:43:05.944Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;2017年反序列化漏洞年度报告&quot;&gt;&lt;a href=&quot;#2017年反序列化漏洞年度报告&quot; class=&quot;headerlink&quot; title=&quot;2017年反序列化漏洞年度报告&quot;&gt;&lt;/a&gt;2017年反序列化漏洞年度报告&lt;/h1&gt;&lt;p&gt;Jackson,fastjson,X
+    
+    </summary>
+    
+      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
+    
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+    
+      <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
+    
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+    
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+    
+      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
+    
+      <category term="WebLogic" scheme="http://xxlegend.com/tags/WebLogic/"/>
+    
+  </entry>
   
   <entry>
     <title>Weblogic XMLDecoder RCE分析</title>
@@ -475,30 +507,6 @@
   </entry>
   
   <entry>
-    <title>如何让Burpsuite监听微信公众号</title>
-    <link href="http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
-    <id>http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/</id>
-    <published>2016-02-01T07:38:36.000Z</published>
-    <updated>2017-05-10T08:06:53.709Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-目的&quot;&gt;&lt;a href=&quot;#1-目的&quot; class=&quot;headerlink&quot; title=&quot;1 目的&quot;&gt;&lt;/a&gt;1 目的&lt;/h1&gt;&lt;p&gt;通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后
-    
-    </summary>
-    
-      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
-    
-    
-      <category term="Burpsuite" scheme="http://xxlegend.com/tags/Burpsuite/"/>
-    
-      <category term="微信公众号" scheme="http://xxlegend.com/tags/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
-    
-      <category term="监听" scheme="http://xxlegend.com/tags/%E7%9B%91%E5%90%AC/"/>
-    
-  </entry>
-  
-  <entry>
     <title>Burpsuite 插件开发之RSA加解密</title>
     <link href="http://xxlegend.com/2016/02/01/Burpsuite%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B9%8BRSA%E5%8A%A0%E8%A7%A3%E5%AF%86/"/>
     <id>http://xxlegend.com/2016/02/01/Burpsuite插件开发之RSA加解密/</id>
@@ -534,6 +542,30 @@
   </entry>
   
   <entry>
+    <title>如何让Burpsuite监听微信公众号</title>
+    <link href="http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
+    <id>http://xxlegend.com/2016/02/01/如何让Burpsuite监听微信公众号/</id>
+    <published>2016-02-01T07:38:36.000Z</published>
+    <updated>2017-05-10T08:06:53.709Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;1-目的&quot;&gt;&lt;a href=&quot;#1-目的&quot; class=&quot;headerlink&quot; title=&quot;1 目的&quot;&gt;&lt;/a&gt;1 目的&lt;/h1&gt;&lt;p&gt;通过burpsuite代理截获微信公众号的https流量包，做一些重放和自动扫描。这个公众号会利用微信的认证体系，认证完之后
+    
+    </summary>
+    
+      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
+    
+    
+      <category term="Burpsuite" scheme="http://xxlegend.com/tags/Burpsuite/"/>
+    
+      <category term="微信公众号" scheme="http://xxlegend.com/tags/%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/"/>
+    
+      <category term="监听" scheme="http://xxlegend.com/tags/%E7%9B%91%E5%90%AC/"/>
+    
+  </entry>
+  
+  <entry>
     <title>Python eval的常见错误封装及利用原理</title>
     <link href="http://xxlegend.com/2015/07/31/Python%20eval%E7%9A%84%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E5%B0%81%E8%A3%85%E5%8F%8A%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86/"/>
     <id>http://xxlegend.com/2015/07/31/Python eval的常见错误封装及利用原理/</id>
@@ -556,32 +588,6 @@
       <category term="sandbox escape" scheme="http://xxlegend.com/tags/sandbox-escape/"/>
     
       <category term="沙箱绕过" scheme="http://xxlegend.com/tags/%E6%B2%99%E7%AE%B1%E7%BB%95%E8%BF%87/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Python安全编码和代码审计</title>
-    <link href="http://xxlegend.com/2015/07/30/Python%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81%E5%92%8C%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    <id>http://xxlegend.com/2015/07/30/Python安全编码和代码审计/</id>
-    <published>2015-07-30T07:38:36.000Z</published>
-    <updated>2017-05-02T04:26:22.411Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;1-前言&quot;&gt;&lt;a href=&quot;#1-前言&quot; class=&quot;headerlink&quot; title=&quot;1 前言&quot;&gt;&lt;/a&gt;1 前言&lt;/h1&gt;&lt;p&gt;现在一般的web开发框架安全已经做的挺好的了，比如大家常用的django，但是一些不规范的开发方式还是会导致一些常用的安全问
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="python" scheme="http://xxlegend.com/tags/python/"/>
-    
-      <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
-    
-      <category term="代码审计" scheme="http://xxlegend.com/tags/%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/"/>
-    
-      <category term="注入" scheme="http://xxlegend.com/tags/%E6%B3%A8%E5%85%A5/"/>
     
   </entry>
   

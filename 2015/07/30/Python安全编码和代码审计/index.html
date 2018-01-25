@@ -101,7 +101,7 @@
 <meta property="og:url" content="http://xxlegend.com/2015/07/30/Python安全编码和代码审计/index.html">
 <meta property="og:site_name" content="xxlegend">
 <meta property="og:description" content="1 前言现在一般的web开发框架安全已经做的挺好的了，比如大家常用的django，但是一些不规范的开发方式还是会导致一些常用的安全问题，下面就针对这些常用问题做一些总结。代码审计准备部分见《php代码审计》，这篇文档主要讲述各种常用错误场景，基本上都是咱们自己的开发人员犯的错误，敏感信息已经去除。 2 XSS未对输入和输出做过滤，场景：123def xss_test(request):    na">
-<meta property="og:updated_time" content="2017-05-02T04:26:22.411Z">
+<meta property="og:updated_time" content="2017-12-26T13:54:01.538Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python安全编码和代码审计">
 <meta name="twitter:description" content="1 前言现在一般的web开发框架安全已经做的挺好的了，比如大家常用的django，但是一些不规范的开发方式还是会导致一些常用的安全问题，下面就针对这些常用问题做一些总结。代码审计准备部分见《php代码审计》，这篇文档主要讲述各种常用错误场景，基本上都是咱们自己的开发人员犯的错误，敏感信息已经去除。 2 XSS未对输入和输出做过滤，场景：123def xss_test(request):    na">
@@ -463,7 +463,7 @@
 <h2 id="8-2-xml，excel等上传"><a href="#8-2-xml，excel等上传" class="headerlink" title="8.2 xml，excel等上传"></a>8.2 xml，excel等上传</h2><p>在我们的产品中经常用到xml来保存一些配置文件，同时也支持xml文件的导出导入，这样在libxml2.9以下就可能导致xxe漏洞。就拿lxml来说吧：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# cat test.xml</div><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line">&lt;!DOCTYPE xdsec [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd" &gt;</div><div class="line">]&gt;</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid="" /&gt;test&amp;xxe;&lt;/root&gt;</div><div class="line"></div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">&gt;&gt;&gt; tree1 = etree.parse('test.xml')</div><div class="line">&gt;&gt;&gt; print etree.tostring(tree1.getroot())</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid=""/&gt;testroot:x:0:0:root:/root:/bin/bash</div><div class="line">daemon:x:1:1:daemon:/usr/sbin:/bin/sh</div><div class="line">bin:x:2:2:bin:/bin:/bin/sh</div><div class="line">sys:x:3:3:sys:/dev:/bin/sh</div><div class="line">sync:x:4:65534:sync:/bin:/bin/sync</div><div class="line">games:x:5:60:games:/usr/games:/bin/sh</div><div class="line">man:x:6:12:man:/var/cache/man:/bin/sh</div></pre></td></tr></table></figure></p>
 <p>这是因为在lxml中默认采用的XMLParser导致的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">class XMLParser(_FeedParser)</div><div class="line">|  XMLParser(self, encoding=None, attribute_defaults=False, dtd_validation=False, load_dtd=False, no_network=True, ns_clean=False, recover=False, XMLSchema schema=None, remove_blank_text=False, resolve_entities=True, remove_comments=False, remove_pis=False, strip_cdata=True, target=None, compact=True)</div></pre></td></tr></table></figure></p>
 <p>关注其中两个关键参数，其中resolve_entities=True,no_network=True,其中resolve_entities=True会导致解析实体，no_network会为True就导致了该利用条件比较有效，会导致一些ssrf问题，不能将数据带出。在python中xml.dom.minidom,xml.etree.ElementTree不受影响</p>
-<h1 id="9-不安全的封装"><a href="#9-不安全的封装" class="headerlink" title="9 不安全的封装"></a>9 不安全的封装</h1><h2 id="9-1-eval-封装不彻底"><a href="#9-1-eval-封装不彻底" class="headerlink" title="9.1 eval 封装不彻底"></a>9.1 eval 封装不彻底</h2><p>仅仅是将<code>__builtings__</code>置为空，如下方式即可绕过,可参见<a href="http://bugzilla.intra.nsfocus.com/show_bug.cgi?id=84179" target="_blank" rel="external">bug84179</a></p>
+<h1 id="9-不安全的封装"><a href="#9-不安全的封装" class="headerlink" title="9 不安全的封装"></a>9 不安全的封装</h1><h2 id="9-1-eval-封装不彻底"><a href="#9-1-eval-封装不彻底" class="headerlink" title="9.1 eval 封装不彻底"></a>9.1 eval 封装不彻底</h2><p>仅仅是将<code>__builtings__</code>置为空，如下方式即可绕过,可参见<a href="">bug84179</a></p>
 <pre><code class="python"><span class="meta">&gt;&gt;&gt; </span>s2=<span class="string">"""
 <span class="meta">... </span>[x for x in ().__class__.__bases__[0].__subclasses__()
 <span class="meta">... </span>   if x.__name__ == "zipimporter"][0](
@@ -474,7 +474,7 @@
 Linux
 <span class="number">0</span>
 </code></pre>
-<h2 id="9-2-执行命令接口封装不彻底"><a href="#9-2-执行命令接口封装不彻底" class="headerlink" title="9.2 执行命令接口封装不彻底"></a>9.2 执行命令接口封装不彻底</h2><p>在底层封装函数没有过滤shell元字符，仅仅是限定一些命令，但是其参数未做控制，可参见<a href="http://bugzilla.intra.nsfocus.com/show_bug.cgi?id=86011" target="_blank" rel="external">bug86011</a> </p>
+<h2 id="9-2-执行命令接口封装不彻底"><a href="#9-2-执行命令接口封装不彻底" class="headerlink" title="9.2 执行命令接口封装不彻底"></a>9.2 执行命令接口封装不彻底</h2><p>在底层封装函数没有过滤shell元字符，仅仅是限定一些命令，但是其参数未做控制，可参见<a href="">bug86011</a> </p>
 <h1 id="10-总结"><a href="#10-总结" class="headerlink" title="10 总结"></a>10 总结</h1><p>一切输入都是不可靠的，做好严格过滤。</p>
 
       
@@ -524,8 +524,8 @@ Linux
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/04/01/REST API 安全设计指南/" rel="next" title="REST API安全设计指南">
-                <i class="fa fa-chevron-left"></i> REST API安全设计指南
+              <a href="/2015/04/01/从Django的SECTET_KEY到代码执行/" rel="next" title="从Django的SECTET_KEY到代码执行">
+                <i class="fa fa-chevron-left"></i> 从Django的SECTET_KEY到代码执行
               </a>
             
           </div>
@@ -615,7 +615,7 @@ Linux
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-count">27</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -637,7 +637,7 @@ Linux
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">103</span>
+                <span class="site-state-item-count">105</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -731,7 +731,7 @@ Linux
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

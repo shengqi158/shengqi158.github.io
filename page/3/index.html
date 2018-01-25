@@ -331,7 +331,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/REST API 安全设计指南/">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/07/30/Python安全编码和代码审计/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="廖新喜">
@@ -353,8 +353,8 @@
             
               
                 
-                <a class="post-title-link" href="/2015/04/01/REST API 安全设计指南/" itemprop="url">
-                  REST API安全设计指南
+                <a class="post-title-link" href="/2015/07/30/Python安全编码和代码审计/" itemprop="url">
+                  Python安全编码和代码审计
                 </a>
               
             
@@ -370,8 +370,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
-                2015-04-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-07-30T15:38:36+08:00">
+                2015-07-30
               </time>
             
 
@@ -411,9 +411,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2015/04/01/REST API 安全设计指南/#comments" itemprop="discussionUrl">
+                <a href="/2015/07/30/Python安全编码和代码审计/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2015/04/01/REST API 安全设计指南/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2015/07/30/Python安全编码和代码审计/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -421,7 +421,7 @@
 
           
           
-             <span id="/2015/04/01/REST API 安全设计指南/" class="leancloud_visitors" data-flag-title="REST API安全设计指南">
+             <span id="/2015/07/30/Python安全编码和代码审计/" class="leancloud_visitors" data-flag-title="Python安全编码和代码审计">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -451,25 +451,36 @@
       
         
           
-            <h1 id="1，REST-API-简介"><a href="#1，REST-API-简介" class="headerlink" title="1，REST API 简介"></a>1，REST API 简介</h1><p>REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">==========  =====================  ========================</div><div class="line">HTTP 方法   行为                   示例</div><div class="line">==========  =====================  ========================</div><div class="line">GET         获取资源的信息         http://xx.com/api/orders</div><div class="line">GET         获取某个特定资源的信息 http://xx.com/api/orders/123</div><div class="line">POST        创建新资源             http://xx.com/api/orders</div><div class="line">PUT         更新资源               http://xx.com/api/orders/123</div><div class="line">DELETE      删除资源               http://xx.com/api/orders/123</div><div class="line">==========  ====================== =======================</div></pre></td></tr></table></figure></p>
-<p> 对于请求的数据一般用json或者xml形式来表示，推荐使用json。</p>
-<h1 id="2，身份认证"><a href="#2，身份认证" class="headerlink" title="2，身份认证"></a>2，身份认证</h1><p>身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下：</p>
-<p>##2.1 HTTP Basic<br>REST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">base64编码前：Basic admin:admin</div><div class="line">base64编码后：Basic YWRtaW46YWRtaW4=</div><div class="line">放到Header中：Authorization: Basic YWRtaW46YWRtaW4=</div></pre></td></tr></table></figure></p>
-<p>正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。<br>在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。</p>
-<p>##2.2 API KEY<br>API Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：<a href="http://example.com/api?key=dfkaj134,一般的处理流程如下：" target="_blank" rel="external">http://example.com/api?key=dfkaj134,一般的处理流程如下：</a><br>一个简单的设计示例如下：<br>client端：<img src="clint.png" alt="clint端"></p>
-<p>server端：<img src="server.png" alt="server端"></p>
-<p>client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。<br>服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。<br>通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。</p>
-<h2 id="2-3-Oauth1-0a或者Oauth2"><a href="#2-3-Oauth1-0a或者Oauth2" class="headerlink" title="2.3 Oauth1.0a或者Oauth2"></a>2.3 Oauth1.0a或者Oauth2</h2><p>OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。</p>
-<h2 id="2-4-JWT"><a href="#2-4-JWT" class="headerlink" title="2.4 JWT"></a>2.4 JWT</h2><p>JWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图<img src="jwt.png" alt="jwt组成图"></p>
-<h1 id="3-授权"><a href="#3-授权" class="headerlink" title="3 授权"></a>3 授权</h1><p>身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$roles = <span class="keyword">array</span>(</div><div class="line"><span class="string">'ADMIN'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device)$/'</span>), <span class="comment">// 允许访问哪些URL的正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>) <span class="comment">// 禁止访问哪些URL的正则表达式</span></div><div class="line">),</div><div class="line"><span class="string">'AUDIT'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>),<span class="comment">//允许访问的URL正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device).*)$/'</span>)</div><div class="line">)</div><div class="line">);</div></pre></td></tr></table></figure></p>
-<p>上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。</p>
-<h1 id="4-URL过滤"><a href="#4-URL过滤" class="headerlink" title="4 URL过滤"></a>4 URL过滤</h1><p>在进入逻辑处理之前，加入对URL的参数过滤，如<code>/site/{num}/policy</code> 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。</p>
-<h1 id="5-重要功能加密传输"><a href="#5-重要功能加密传输" class="headerlink" title="5 重要功能加密传输"></a>5 重要功能加密传输</h1><p>第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。</p>
-<h1 id="6-速率限制"><a href="#6-速率限制" class="headerlink" title="6 速率限制"></a>6 速率限制</h1><p>请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Route::filter(<span class="string">'api.limit'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">$key = sprintf(<span class="string">'api:%s'</span>, Auth::user()-&gt;api_key);</div><div class="line"><span class="comment">// Create the key if it doesn't exist</span></div><div class="line">Cache::add($key, <span class="number">0</span>, <span class="number">60</span>);</div><div class="line"><span class="comment">// Increment by 1</span></div><div class="line">$count = Cache::increment($key);</div><div class="line"><span class="comment">// Fail if hourly requests exceeded</span></div><div class="line"><span class="keyword">if</span> ($count &gt; Config::get(<span class="string">'api.requests_per_hour'</span>))</div><div class="line">&#123;</div><div class="line">App::abort(<span class="number">403</span>, <span class="string">'Hourly request limit exceeded'</span>);</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
-<h1 id="7-错误处理"><a href="#7-错误处理" class="headerlink" title="7 错误处理"></a>7 错误处理</h1><p>对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:<code>{&quot;result&quot;:&quot;Invalid URL!&quot;}</code>,错误的请求参数<code>{&quot;result&quot;:&quot;json format error&quot;}</code>,不允许的方法：<code>{&quot;result&quot;:&quot;Method Not Allowed&quot;}</code>，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 207 Multi-Status</div><div class="line">Content-Type: application/json; charset=&quot;UTF-8&quot;</div><div class="line">Content-Length: XXXX</div><div class="line"></div><div class="line">&#123;</div><div class="line">&quot;OPT_STATUS&quot;: 207</div><div class="line">&quot;DATA&quot;: &#123;</div><div class="line">    &quot;IP_ADDRESS&quot;: [&#123;</div><div class="line">        &quot;INTERFACE&quot;: &quot;eth0&quot;,</div><div class="line">        &quot;IP_LIST&quot;:[&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.168.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 200,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;created successfully&quot;</div><div class="line">        &#125;,&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.167.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 409,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;</div><div class="line">&#125;]</div><div class="line">&#125;]</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
-<h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
-<h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
-<p>总之，尽量使用SSL。</p>
+            <h1 id="1-前言"><a href="#1-前言" class="headerlink" title="1 前言"></a>1 前言</h1><p>现在一般的web开发框架安全已经做的挺好的了，比如大家常用的django，但是一些不规范的开发方式还是会导致一些常用的安全问题，下面就针对这些常用问题做一些总结。代码审计准备部分见《php代码审计》，这篇文档主要讲述各种常用错误场景，基本上都是咱们自己的开发人员犯的错误，敏感信息已经去除。</p>
+<h1 id="2-XSS"><a href="#2-XSS" class="headerlink" title="2 XSS"></a>2 XSS</h1><p>未对输入和输出做过滤，场景：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">xss_test</span><span class="params">(request)</span>:</span></div><div class="line">    name = request.GET[<span class="string">'name'</span>]</div><div class="line">    <span class="keyword">return</span> HttpResponse(<span class="string">'hello %s'</span> %(name))</div></pre></td></tr></table></figure></p>
+<p>在代码中一搜，发现有大量地方使用，比较正确的使用方式如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">xss_test</span><span class="params">(request)</span>:</span></div><div class="line">    name = request.GET[<span class="string">'name'</span>]</div><div class="line">    <span class="comment">#return HttpResponse('hello %s' %(name))</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">'hello.html'</span>, &#123;<span class="string">'name'</span>:name&#125;)</div></pre></td></tr></table></figure></p>
+<p>更好的就是对输入做限制，比如说一个正则范围，输出使用正确的api或者做好过滤。  </p>
+<h1 id="3-CSRF"><a href="#3-CSRF" class="headerlink" title="3 CSRF"></a>3 CSRF</h1><p>对系统中一些重要的操作要做CSRF防护，比如登录，关机，扫描等。django 提供CSRF中间件<code>django.middleware.csrf.CsrfViewMiddleware</code>,写入到settings.py的中间件即可。<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></p>
+<h1 id="4-命令注入"><a href="#4-命令注入" class="headerlink" title="4 命令注入"></a>4 命令注入</h1><p>审计代码过程中发现了一些编写代码的不好的习惯，体现最严重的就是在命令注入方面，本来python自身的一些函数库就能完成的功能，偏偏要调用os.system来通过shell 命令执行来完成，老实说最烦这种写代码的啦。下面举个简单的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">def</span> <span class="title">myserve</span><span class="params">(request, filename, dirname)</span>:</span></div><div class="line">    re = serve(request=request,path=filename,document_root=dirname,show_indexes=<span class="keyword">True</span>)</div><div class="line">    filestr=<span class="string">'authExport.dat'</span> </div><div class="line">    re[<span class="string">'Content-Disposition'</span>] = <span class="string">'attachment; filename="'</span> + urlquote(filestr) +<span class="string">'"'</span>fullname=os.path.join(dirname,filename)</div><div class="line">    os.system(<span class="string">'sudo rm -f %s'</span>%fullname)</div><div class="line">    <span class="keyword">return</span> re</div></pre></td></tr></table></figure></p>
+<p>很显然这段代码是存在问题的，因为fullname是用户可控的。正确的做法是不使用os.system接口，改成python自有的库函数，这样就能避免命令注入。python的三种删除文件方式：<br>（1）shutil.rmtree 删除一个文件夹及所有文件<br>（2）os.rmdir 删除一个空目录<br>（3）os.remove，unlink 删除一个文件</p>
+<p>使用了上述接口之后还得注意不能穿越目录，不然整个系统都有可能被删除了。常见的存在命令执行风险的函数如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">os.system,os.popen,os.spaw*,os.<span class="keyword">exec</span>*,os.open,os.popen*,commands.call,commands.getoutput,Popen*</div></pre></td></tr></table></figure></p>
+<p>推荐使用subprocess模块，同时确保shell=True未设置，否则也是存在注入风险的。</p>
+<h1 id="5-sql注入"><a href="#5-sql注入" class="headerlink" title="5 sql注入"></a>5 sql注入</h1><p>如果是使用django的api去操作数据库就应该不会有sql注入了，但是因为一些其他原因使用了拼接sql，就会有sql注入风险。下面贴一个有注入风险的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">getUsers</span><span class="params">(user_id=None)</span>:</span></div><div class="line">    conn = psycopg2.connect(<span class="string">"dbname='××' user='××' host='' password=''"</span>)</div><div class="line">    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)</div><div class="line">    <span class="keyword">if</span> user_id==<span class="keyword">None</span>:</div><div class="line">        str = <span class="string">'select distinct * from auth_user'</span></div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        str=<span class="string">'select distinct * from auth_user where id=%s'</span>%user_id</div><div class="line">    res = cur.execute(str)</div><div class="line">    res = cur.fetchall()</div><div class="line">    conn.close()</div><div class="line">    <span class="keyword">return</span> res</div><div class="line">```  </div><div class="line">像这种sql拼接就有sql注入问题，正常情况下应该使用django的数据库api，如果实在有这方面的需求，可以按照如下方式写：  </div><div class="line">```python</div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">  user = request.GET[<span class="string">'username'</span>]</div><div class="line">  sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">  cursor = connection.cursor()</div><div class="line">  cursor.execute(sql, [user])</div><div class="line"><span class="comment"># do something with the results</span></div><div class="line">  results = cursor.fetchone()   <span class="comment">#or  results = cursor.fetchall()</span></div><div class="line">  cursor.close()</div><div class="line">```  </div><div class="line">直接拼接的是万万不可的，如果采用ModelInstance.objects.raw(sql,[]),或者connection.objects.execute(sql,[]) ,通过列表传进去的参数是没有注入风险的，因为django会有处理。</div><div class="line"></div><div class="line"><span class="comment"># 6 代码执行  </span></div><div class="line">一般是由于eval和pickle.loads的滥用造成的，特别是eval，大家都没有意识到这方面的问题。下面举个代码中的例子：</div><div class="line">```python</div><div class="line"><span class="meta">@login_required</span></div><div class="line"><span class="meta">@permission_required("accounts.newTask_assess")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">targetLogin</span><span class="params">(request)</span>:</span></div><div class="line">    req = simplejson.loads(request.POST[<span class="string">'loginarray'</span>])</div><div class="line">    req=unicode(req).encode(<span class="string">"utf-8"</span>)</div><div class="line">    loginarray=eval(req)</div><div class="line">    ip=_e(request,<span class="string">'ipList'</span>)</div><div class="line">    <span class="comment">#targets=base64.b64decode(targets)</span></div><div class="line">    (iplist1,iplist2)=getIPTwoList(ip)</div><div class="line">    iplist1=list(set(iplist1))</div><div class="line">    iplist2=list(set(iplist2))</div><div class="line">    loginlist=[]</div><div class="line">    delobjs=[]</div><div class="line">    holdobjs=[]</div></pre></td></tr></table></figure></p>
+<p>这一段代码就是就是因为eval的参数不可控，导致任意代码执行，正确的做法就是literal.eval接口。再取个pickle.loads的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> cPickle</div><div class="line"><span class="meta">&gt;&gt;&gt; </span>cPickle.loads(<span class="string">"cos\nsystem\n(S'uname -a'\ntR."</span>)</div><div class="line">Linux RCM-RSAS-V6-Dev <span class="number">3.9</span><span class="number">.0</span>-aurora <span class="comment">#4 SMP PREEMPT Fri Jun 7 14:50:52 CST 2013 i686 Intel(R) Core(TM) i7-2600 CPU @ 3.40GHz GenuineIntel GNU/Linux</span></div><div class="line"><span class="number">0</span></div></pre></td></tr></table></figure></p>
+<h1 id="7-文件操作"><a href="#7-文件操作" class="headerlink" title="7 文件操作"></a>7 文件操作</h1><p>文件操作主要包含任意文件下载，删除，写入，覆盖等，如果能达到写入的目的时基本上就能写一个webshell了。下面举个任意文件下载的例子：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@login_required</span></div><div class="line"><span class="meta">@permission_required("accounts.newTask_assess")</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">exportLoginCheck</span><span class="params">(request,filename)</span>:</span></div><div class="line">    <span class="keyword">if</span> re.match(r“*.lic”，filename):</div><div class="line">        fullname = filename</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        fullname = <span class="string">"/tmp/test.lic"</span></div><div class="line">    <span class="keyword">print</span> fullname</div><div class="line">    <span class="keyword">return</span> HttpResponse(fullname)</div></pre></td></tr></table></figure></p>
+<p>这段代码就存在着任意.lic文件下载的问题，没有做好限制目录穿越，同理</p>
+<h1 id="8-文件上传"><a href="#8-文件上传" class="headerlink" title="8 文件上传"></a>8 文件上传</h1><h2 id="8-1-任意文件上传"><a href="#8-1-任意文件上传" class="headerlink" title="8.1 任意文件上传"></a>8.1 任意文件上传</h2><p>这里主要是未限制文件大小，可能导致ddos，未限制文件后缀，导致任意文件上传，未给文件重命名，可能导致目录穿越，文件覆盖等问题。</p>
+<h2 id="8-2-xml，excel等上传"><a href="#8-2-xml，excel等上传" class="headerlink" title="8.2 xml，excel等上传"></a>8.2 xml，excel等上传</h2><p>在我们的产品中经常用到xml来保存一些配置文件，同时也支持xml文件的导出导入，这样在libxml2.9以下就可能导致xxe漏洞。就拿lxml来说吧：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# cat test.xml</div><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line">&lt;!DOCTYPE xdsec [ &lt;!ENTITY xxe SYSTEM "file:///etc/passwd" &gt;</div><div class="line">]&gt;</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid="" /&gt;test&amp;xxe;&lt;/root&gt;</div><div class="line"></div><div class="line">&gt;&gt;&gt; from lxml import etree</div><div class="line">&gt;&gt;&gt; tree1 = etree.parse('test.xml')</div><div class="line">&gt;&gt;&gt; print etree.tostring(tree1.getroot())</div><div class="line">&lt;root&gt;</div><div class="line">    &lt;node id="11" name="bb" net="192.168.0.2-192.168.0.37" ltd="" gid=""/&gt;testroot:x:0:0:root:/root:/bin/bash</div><div class="line">daemon:x:1:1:daemon:/usr/sbin:/bin/sh</div><div class="line">bin:x:2:2:bin:/bin:/bin/sh</div><div class="line">sys:x:3:3:sys:/dev:/bin/sh</div><div class="line">sync:x:4:65534:sync:/bin:/bin/sync</div><div class="line">games:x:5:60:games:/usr/games:/bin/sh</div><div class="line">man:x:6:12:man:/var/cache/man:/bin/sh</div></pre></td></tr></table></figure></p>
+<p>这是因为在lxml中默认采用的XMLParser导致的：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">class XMLParser(_FeedParser)</div><div class="line">|  XMLParser(self, encoding=None, attribute_defaults=False, dtd_validation=False, load_dtd=False, no_network=True, ns_clean=False, recover=False, XMLSchema schema=None, remove_blank_text=False, resolve_entities=True, remove_comments=False, remove_pis=False, strip_cdata=True, target=None, compact=True)</div></pre></td></tr></table></figure></p>
+<p>关注其中两个关键参数，其中resolve_entities=True,no_network=True,其中resolve_entities=True会导致解析实体，no_network会为True就导致了该利用条件比较有效，会导致一些ssrf问题，不能将数据带出。在python中xml.dom.minidom,xml.etree.ElementTree不受影响</p>
+<h1 id="9-不安全的封装"><a href="#9-不安全的封装" class="headerlink" title="9 不安全的封装"></a>9 不安全的封装</h1><h2 id="9-1-eval-封装不彻底"><a href="#9-1-eval-封装不彻底" class="headerlink" title="9.1 eval 封装不彻底"></a>9.1 eval 封装不彻底</h2><p>仅仅是将<code>__builtings__</code>置为空，如下方式即可绕过,可参见<a href="">bug84179</a></p>
+<pre><code class="python"><span class="meta">&gt;&gt;&gt; </span>s2=<span class="string">"""
+<span class="meta">... </span>[x for x in ().__class__.__bases__[0].__subclasses__()
+<span class="meta">... </span>   if x.__name__ == "zipimporter"][0](
+<span class="meta">... </span>     "/home/xxlegend/eval_test/configobj-4.4.0-py2.5.egg").load_module(
+<span class="meta">... </span>     "configobj").os.system("uname")
+<span class="meta">... </span>"""</span>
+<span class="meta">&gt;&gt;&gt; </span>eval(s2,{<span class="string">'__builtins__'</span>:{}})
+Linux
+<span class="number">0</span>
+</code></pre>
+<h2 id="9-2-执行命令接口封装不彻底"><a href="#9-2-执行命令接口封装不彻底" class="headerlink" title="9.2 执行命令接口封装不彻底"></a>9.2 执行命令接口封装不彻底</h2><p>在底层封装函数没有过滤shell元字符，仅仅是限定一些命令，但是其参数未做控制，可参见<a href="">bug86011</a> </p>
+<h1 id="10-总结"><a href="#10-总结" class="headerlink" title="10 总结"></a>10 总结</h1><p>一切输入都是不可靠的，做好严格过滤。</p>
 
           
         
@@ -818,6 +829,188 @@
 Subject: hello
 cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
 <p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/REST API 安全设计指南/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/REST API 安全设计指南/" itemprop="url">
+                  REST API安全设计指南
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/REST API 安全设计指南/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/REST API 安全设计指南/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/REST API 安全设计指南/" class="leancloud_visitors" data-flag-title="REST API安全设计指南">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，REST-API-简介"><a href="#1，REST-API-简介" class="headerlink" title="1，REST API 简介"></a>1，REST API 简介</h1><p>REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">==========  =====================  ========================</div><div class="line">HTTP 方法   行为                   示例</div><div class="line">==========  =====================  ========================</div><div class="line">GET         获取资源的信息         http://xx.com/api/orders</div><div class="line">GET         获取某个特定资源的信息 http://xx.com/api/orders/123</div><div class="line">POST        创建新资源             http://xx.com/api/orders</div><div class="line">PUT         更新资源               http://xx.com/api/orders/123</div><div class="line">DELETE      删除资源               http://xx.com/api/orders/123</div><div class="line">==========  ====================== =======================</div></pre></td></tr></table></figure></p>
+<p> 对于请求的数据一般用json或者xml形式来表示，推荐使用json。</p>
+<h1 id="2，身份认证"><a href="#2，身份认证" class="headerlink" title="2，身份认证"></a>2，身份认证</h1><p>身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下：</p>
+<p>##2.1 HTTP Basic<br>REST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">base64编码前：Basic admin:admin</div><div class="line">base64编码后：Basic YWRtaW46YWRtaW4=</div><div class="line">放到Header中：Authorization: Basic YWRtaW46YWRtaW4=</div></pre></td></tr></table></figure></p>
+<p>正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。<br>在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。</p>
+<p>##2.2 API KEY<br>API Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：<a href="http://example.com/api?key=dfkaj134,一般的处理流程如下：" target="_blank" rel="external">http://example.com/api?key=dfkaj134,一般的处理流程如下：</a><br>一个简单的设计示例如下：<br>client端：<img src="clint.png" alt="clint端"></p>
+<p>server端：<img src="server.png" alt="server端"></p>
+<p>client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。<br>服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。<br>通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。</p>
+<h2 id="2-3-Oauth1-0a或者Oauth2"><a href="#2-3-Oauth1-0a或者Oauth2" class="headerlink" title="2.3 Oauth1.0a或者Oauth2"></a>2.3 Oauth1.0a或者Oauth2</h2><p>OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。</p>
+<h2 id="2-4-JWT"><a href="#2-4-JWT" class="headerlink" title="2.4 JWT"></a>2.4 JWT</h2><p>JWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图<img src="jwt.png" alt="jwt组成图"></p>
+<h1 id="3-授权"><a href="#3-授权" class="headerlink" title="3 授权"></a>3 授权</h1><p>身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">$roles = <span class="keyword">array</span>(</div><div class="line"><span class="string">'ADMIN'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device)$/'</span>), <span class="comment">// 允许访问哪些URL的正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>) <span class="comment">// 禁止访问哪些URL的正则表达式</span></div><div class="line">),</div><div class="line"><span class="string">'AUDIT'</span>=&gt;<span class="keyword">array</span>(</div><div class="line"><span class="string">'permit'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^(\/system\/audit)$/'</span>),<span class="comment">//允许访问的URL正则表达式</span></div><div class="line"><span class="string">'deny'</span>=&gt;<span class="keyword">array</span>(<span class="string">'/^((\/system\/(clouds|device).*)$/'</span>)</div><div class="line">)</div><div class="line">);</div></pre></td></tr></table></figure></p>
+<p>上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。</p>
+<h1 id="4-URL过滤"><a href="#4-URL过滤" class="headerlink" title="4 URL过滤"></a>4 URL过滤</h1><p>在进入逻辑处理之前，加入对URL的参数过滤，如<code>/site/{num}/policy</code> 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。</p>
+<h1 id="5-重要功能加密传输"><a href="#5-重要功能加密传输" class="headerlink" title="5 重要功能加密传输"></a>5 重要功能加密传输</h1><p>第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。</p>
+<h1 id="6-速率限制"><a href="#6-速率限制" class="headerlink" title="6 速率限制"></a>6 速率限制</h1><p>请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">Route::filter(<span class="string">'api.limit'</span>, <span class="function"><span class="keyword">function</span><span class="params">()</span></span></div><div class="line">&#123;</div><div class="line">$key = sprintf(<span class="string">'api:%s'</span>, Auth::user()-&gt;api_key);</div><div class="line"><span class="comment">// Create the key if it doesn't exist</span></div><div class="line">Cache::add($key, <span class="number">0</span>, <span class="number">60</span>);</div><div class="line"><span class="comment">// Increment by 1</span></div><div class="line">$count = Cache::increment($key);</div><div class="line"><span class="comment">// Fail if hourly requests exceeded</span></div><div class="line"><span class="keyword">if</span> ($count &gt; Config::get(<span class="string">'api.requests_per_hour'</span>))</div><div class="line">&#123;</div><div class="line">App::abort(<span class="number">403</span>, <span class="string">'Hourly request limit exceeded'</span>);</div><div class="line">&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
+<h1 id="7-错误处理"><a href="#7-错误处理" class="headerlink" title="7 错误处理"></a>7 错误处理</h1><p>对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:<code>{&quot;result&quot;:&quot;Invalid URL!&quot;}</code>,错误的请求参数<code>{&quot;result&quot;:&quot;json format error&quot;}</code>,不允许的方法：<code>{&quot;result&quot;:&quot;Method Not Allowed&quot;}</code>，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 207 Multi-Status</div><div class="line">Content-Type: application/json; charset=&quot;UTF-8&quot;</div><div class="line">Content-Length: XXXX</div><div class="line"></div><div class="line">&#123;</div><div class="line">&quot;OPT_STATUS&quot;: 207</div><div class="line">&quot;DATA&quot;: &#123;</div><div class="line">    &quot;IP_ADDRESS&quot;: [&#123;</div><div class="line">        &quot;INTERFACE&quot;: &quot;eth0&quot;,</div><div class="line">        &quot;IP_LIST&quot;:[&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.168.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 200,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;created successfully&quot;</div><div class="line">        &#125;,&#123;</div><div class="line">             &quot;IP&quot;: &quot;192.167.1.1&quot;,</div><div class="line">             &quot;MASK&quot;: &quot;255.255.0.0&quot;,</div><div class="line">&quot;MULTI_STATUS&quot;: 409,</div><div class="line">             &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;</div><div class="line">&#125;]</div><div class="line">&#125;]</div><div class="line">&#125;,</div></pre></td></tr></table></figure></p>
+<h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
+<h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
+<p>总之，尽量使用SSL。</p>
 
           
         
@@ -1427,7 +1620,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">26</span>
+                <span class="site-state-item-count">27</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -1449,7 +1642,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">103</span>
+                <span class="site-state-item-count">105</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1527,7 +1720,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2017</span>
+  <span itemprop="copyrightYear">2018</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
