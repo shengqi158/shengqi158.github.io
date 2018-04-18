@@ -2,6 +2,13 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
+    <loc>http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/</loc>
+    
+    <lastmod>2018-04-18T10:00:16.429Z</lastmod>
+    
+  </url>
+  
+  <url>
     <loc>http://xxlegend.com/2018/04/12/CVE-2018-1273-%20RCE%20with%20Spring%20Data%20Commons%20%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/</loc>
     
     <lastmod>2018-04-12T11:41:00.209Z</lastmod>

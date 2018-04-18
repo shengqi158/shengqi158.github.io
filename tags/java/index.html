@@ -97,7 +97,7 @@
 <meta name="description" content="分享些安全编码，漏洞分析">
 <meta property="og:type" content="website">
 <meta property="og:title" content="xxlegend">
-<meta property="og:url" content="http://xxlegend.com/tags/java/index.html">
+<meta property="og:url" content="http://xxlegend.com/tags/Java/index.html">
 <meta property="og:site_name" content="xxlegend">
 <meta property="og:description" content="分享些安全编码，漏洞分析">
 <meta name="twitter:card" content="summary">
@@ -130,13 +130,13 @@
 
 
 
-  <link rel="canonical" href="http://xxlegend.com/tags/java/"/>
+  <link rel="canonical" href="http://xxlegend.com/tags/Java/"/>
 
 
 
 
 
-  <title>标签: java | xxlegend</title>
+  <title>标签: Java | xxlegend</title>
 
 
 </head>
@@ -325,7 +325,7 @@
   <div id="posts" class="posts-collapse">
     <div class="collection-title">
       <h2 >
-        java
+        Java
         <small>标签</small>
       </h2>
     </div>
@@ -338,9 +338,9 @@
 
       <h1 class="post-title">
         
-            <a class="post-title-link" href="/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/" itemprop="url">
+            <a class="post-title-link" href="/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/" itemprop="url">
               
-                <span itemprop="name">fastjson 远程反序列化poc的构造和分析</span>
+                <span itemprop="name">Java JSON反序列化之殇-看雪安全开发者峰会</span>
               
             </a>
         
@@ -348,9 +348,9 @@
 
       <div class="post-meta">
         <time class="post-time" itemprop="dateCreated"
-              datetime="2017-04-29T22:27:22+08:00"
-              content="2017-04-29" >
-          04-29
+              datetime="2017-11-23T00:36:05+08:00"
+              content="2017-11-23" >
+          11-23
         </time>
       </div>
 
@@ -404,7 +404,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">28</span>
+                <span class="site-state-item-count">29</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -426,7 +426,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">108</span>
+                <span class="site-state-item-count">109</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -1085,4 +1085,39 @@
 
 </body>
 </html>
-/html>
+                $element.find('.leancloud-visitors-count').text(newcounter.get('time'));
+              },
+              error: function(newcounter, error) {
+                console.log('Failed to create');
+              }
+            });
+          }
+        },
+        error: function(error) {
+          console.log('Error:' + error.code + " " + error.message);
+        }
+      });
+    }
+
+    $(function() {
+      var Counter = AV.Object.extend("Counter");
+      if ($('.leancloud_visitors').length == 1) {
+        addCount(Counter);
+      } else if ($('.post-title-link').length > 1) {
+        showTime(Counter);
+      }
+    });
+  </script>
+
+
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
