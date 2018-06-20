@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2018-04-18T10:00:16.429Z</updated>
+  <updated>2018-06-20T11:00:01.576Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -16,11 +16,38 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>先知议题 Java反序列化实战 解读</title>
+    <link href="http://xxlegend.com/2018/06/20/%E5%85%88%E7%9F%A5%E8%AE%AE%E9%A2%98%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98%20%E8%A7%A3%E8%AF%BB/"/>
+    <id>http://xxlegend.com/2018/06/20/先知议题 Java反序列化实战 解读/</id>
+    <published>2018-06-20T09:05:27.724Z</published>
+    <updated>2018-06-20T11:00:01.576Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;h1 id=&quot;1-议题和个人介绍&quot;&gt;&lt;a href=&quot;#1-议题和个人介绍&quot; class=&quot;headerlink&quot; title=&quot;1 议题和个人介绍&quot;&gt;&lt;/a&gt;1 议题和个人介绍&lt;/h1&gt;&lt;h2 id=&quot;1-1-议题概述&quot;&gt;&lt;a href=&quot;#1-1-议题概述&quot; cl
+    
+    </summary>
+    
+      <category term="java" scheme="http://xxlegend.com/categories/java/"/>
+    
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+    
+      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
+    
+      <category term="java" scheme="http://xxlegend.com/tags/java/"/>
+    
+  </entry>
+  
+  <entry>
     <title>CVE-2018-2628 简单复现与分析</title>
     <link href="http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/"/>
     <id>http://xxlegend.com/2018/04/18/CVE-2018-2628 简单复现和分析/</id>
     <published>2018-04-18T09:38:05.878Z</published>
-    <updated>2018-04-18T10:00:16.429Z</updated>
+    <updated>2018-06-20T09:07:18.343Z</updated>
     
     <summary type="html">
     
@@ -32,13 +59,13 @@
       <category term="java" scheme="http://xxlegend.com/categories/java/"/>
     
     
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
       <category term="CVE-2018-2628" scheme="http://xxlegend.com/tags/CVE-2018-2628/"/>
     
       <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
     
       <category term="java" scheme="http://xxlegend.com/tags/java/"/>
-    
-      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
   </entry>
   
@@ -58,11 +85,11 @@
       <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
     
     
-      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
-    
       <category term="Spring" scheme="http://xxlegend.com/tags/Spring/"/>
     
       <category term="表达式注入" scheme="http://xxlegend.com/tags/%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5/"/>
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
       <category term="分析" scheme="http://xxlegend.com/tags/%E5%88%86%E6%9E%90/"/>
     
@@ -86,19 +113,19 @@
       <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
     
     
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
     
-      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
     
       <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
     
       <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
     
-      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
-    
-      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="WebLogic" scheme="http://xxlegend.com/tags/WebLogic/"/>
+    
+      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
   </entry>
   
@@ -118,15 +145,15 @@
       <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
     
     
-      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
-    
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
     
-      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
     
   </entry>
   
@@ -205,11 +232,11 @@
       <category term="反序列化" scheme="http://xxlegend.com/categories/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
     
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
       <category term="Java" scheme="http://xxlegend.com/tags/Java/"/>
     
       <category term="JSON" scheme="http://xxlegend.com/tags/JSON/"/>
-    
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="看雪" scheme="http://xxlegend.com/tags/%E7%9C%8B%E9%9B%AA/"/>
     
@@ -237,9 +264,9 @@
       <category term="spring" scheme="http://xxlegend.com/categories/spring/"/>
     
     
-      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
-    
       <category term="表达式注入" scheme="http://xxlegend.com/tags/%E8%A1%A8%E8%BE%BE%E5%BC%8F%E6%B3%A8%E5%85%A5/"/>
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
       <category term="Spring DATA REST" scheme="http://xxlegend.com/tags/Spring-DATA-REST/"/>
     
@@ -267,6 +294,8 @@
     
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
+      <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
+    
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
@@ -274,8 +303,6 @@
       <category term="S2-052" scheme="http://xxlegend.com/tags/S2-052/"/>
     
       <category term="CVE-2017-9805" scheme="http://xxlegend.com/tags/CVE-2017-9805/"/>
-    
-      <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
     
       <category term="xml" scheme="http://xxlegend.com/tags/xml/"/>
     
@@ -300,9 +327,9 @@
       <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
     
     
-      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
-    
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+    
+      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
     
       <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
     
@@ -387,13 +414,13 @@
       <category term="java" scheme="http://xxlegend.com/categories/java/"/>
     
     
-      <category term="java" scheme="http://xxlegend.com/tags/java/"/>
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
+      <category term="java" scheme="http://xxlegend.com/tags/java/"/>
     
-      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+      <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
     
   </entry>
   
@@ -558,41 +585,6 @@
       <category term="mezzanine" scheme="http://xxlegend.com/tags/mezzanine/"/>
     
       <category term="virtualenv" scheme="http://xxlegend.com/tags/virtualenv/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Burpsuite 插件开发之RSA加解密</title>
-    <link href="http://xxlegend.com/2016/02/01/Burpsuite%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B9%8BRSA%E5%8A%A0%E8%A7%A3%E5%AF%86/"/>
-    <id>http://xxlegend.com/2016/02/01/Burpsuite插件开发之RSA加解密/</id>
-    <published>2016-02-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:39:44.925Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;burpsuit extention 插件 RSA encryption decryption&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;#1，简介&lt;/p&gt;
-&lt;p&gt; burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一
-    
-    </summary>
-    
-      <category term="Burp" scheme="http://xxlegend.com/categories/Burp/"/>
-    
-    
-      <category term="burpsuite" scheme="http://xxlegend.com/tags/burpsuite/"/>
-    
-      <category term="extention" scheme="http://xxlegend.com/tags/extention/"/>
-    
-      <category term="插件" scheme="http://xxlegend.com/tags/%E6%8F%92%E4%BB%B6/"/>
-    
-      <category term="RSA" scheme="http://xxlegend.com/tags/RSA/"/>
-    
-      <category term="加解密" scheme="http://xxlegend.com/tags/%E5%8A%A0%E8%A7%A3%E5%AF%86/"/>
-    
-      <category term="encryption" scheme="http://xxlegend.com/tags/encryption/"/>
-    
-      <category term="decryption" scheme="http://xxlegend.com/tags/decryption/"/>
     
   </entry>
   

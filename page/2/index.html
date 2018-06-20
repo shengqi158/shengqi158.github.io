@@ -334,6 +334,178 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/07/08/S2-048 动态分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/07/08/S2-048 动态分析/" itemprop="url">
+                  S2-048 动态分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-08T03:26:42+08:00">
+                2017-07-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Struts2/" itemprop="url" rel="index">
+                    <span itemprop="name">Struts2</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/07/08/S2-048 动态分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/07/08/S2-048 动态分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/07/08/S2-048 动态分析/" class="leancloud_visitors" data-flag-title="S2-048 动态分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>2017年7月7日，Apache Struts发布最新的安全公告，Apache Structs2的strus1插件存在远程代码执行的高危漏洞，漏洞编号为CVE-2017-9791（S2-048）。攻击者可以构造恶意的字段值通过Struts2的struts2-struts1-plugin的插件，远程执行代码</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>(1)    漏洞简介<br>Apache Struts2.3.x系列版本中struts2-struts1-plugin存在远程代码执行漏洞，进而导致任意代码执行。<br>(2)    漏洞分析<br>官方的漏洞描述如下：</p>
+<p>从官方的漏洞描述我们可以知道，这个漏洞本质上是在struts2-struts1-plugin这个jar包上。这个库是用将struts1的action封装成struts2的action以便在strut2上使用。本质原因还是在struts2-struts1-plugin包中Struts1Action.java中execute函数调用了getText函数，这个函数会执行ognl表达式，更可恶的是getText的输入内容还是攻击者可控的。以下分析基于struts2的官方示例struts2-showcase war包。首先Struts1Action的execute方法代码如下，从红框中信息可以看出其实质是调用SaveGangsterAction.execute方法，然后再调用getText(msg.getKey()….)。<br><img src="/images/048-1.png" alt="1"><br>在struts2-showcase的integration模块下有SaveGangsterAction.java的execute方法的实现。具体如下：<br><img src="/images/048-2.png" alt="2"><br>在这个方法中就带入有毒参数gforn.getName()放到了messages结构中，而gform.getName()的值是从客户端获取的。Gangsterform.getName()的实现如下：<br><img src="/images/048-3.png" alt="3"><br>我们这里传入了${1+1}。有毒参数已经带入，就差ognl表达式。继续回到Struts1Action.java的execute方法下半部分，这里有getText()的入口，能清晰看到参数已经被污染，具体如下图：<br><img src="/images/048-4.png" alt="4"><br>下面进入getText的实现函数：这个调用栈比较深，首先我们给出栈图：<br><img src="/images/048-5.png" alt="5"><br>从Struts1action.execute函数开始，到ActionSupport的getText()方法，方法如下：<br><img src="/images/048-6.png" alt="6"><br>接着进入TextProviderSuppport.getText，接着调用其另一个重载类方法getText(),示例如下：<br><img src="/images/048-7.png" alt="7"><br>如图所示，进入LocalizeTextUtil.findText，继续分析其实现：从名字上也能看出其是根据用户的配置做一些本地化的操作。代码如下：<br><img src="/images/048-8.png" alt="8"><br>熟悉struts2的童鞋跟到这一步就能发现这就是一个很典型的ognl表达式入口，先是得到一个valueStack，再继续递归得到ognl表达式的值。这里不再描述，详情可参考官方链接：<a href="https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html" target="_blank" rel="external">https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html</a><br>最后附上一个简单的测试用例图：<br><img src="/images/048-9.png" alt="9"><br><img src="/images/048-10.png" alt="10"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2039,246 +2211,6 @@ location /static {    #静态配置文件
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/02/01/Burpsuite插件开发之RSA加解密/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/02/01/Burpsuite插件开发之RSA加解密/" itemprop="url">
-                  Burpsuite 插件开发之RSA加解密
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-02-01T15:38:36+08:00">
-                2016-02-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burp/" itemprop="url" rel="index">
-                    <span itemprop="name">Burp</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/02/01/Burpsuite插件开发之RSA加解密/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/02/01/Burpsuite插件开发之RSA加解密/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/02/01/Burpsuite插件开发之RSA加解密/" class="leancloud_visitors" data-flag-title="Burpsuite 插件开发之RSA加解密">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>burpsuit extention 插件 RSA encryption decryption</p>
-<hr>
-<p>#1，简介</p>
-<p> burpsuit是一款非常好用的工具，目前我自己也是重度用户，所以就上手了burpsuit的插件接口开发，这篇文档主要记录了一个解密请求包，插入payload，再加密的插件开发过程。详细的代码见<a href="https://github.com/shengqi158/RSA-Crypto-Burp-Extention" target="_blank" rel="external">github代码</a>，代码中除了burpsuit的接口实现，还包括各种加解密处理代码。在文档中数据首先是以rsa方式加密des的key得到encryptKey，然后使用des的key加密数据包得到data，再组装成一个JSON格式串，这是加密过程，当然解密过程就是逆向的。插件应用场景主要是用于通过分析apk的实现，或者泄露的密钥，获取其加解密算法，在解密后的数据包中插入payload，发现注入问题等。如下则是加密后的数据包：<br> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">c=&#123;</div><div class="line">&quot;data&quot;:&quot;21BhviedgtbwK6rdlK7vzltqxOLxUmU2g5qaO5LWPYTha5fXslmL6jrMkFnJBwpZPZMNl5foxTUHw2Mae++zkWwtzWkKXI9WJ/CJqxO9uORT5I6iUmIG7bBcgnHpmlSNKfFwBvnr9vj3v5ByvW2s2/pL9rSaeD+/8XsX01NA96mC4g5pVBeU5IY9F4tdxH9yobXfN6GzEVhLeiEd30xzMA\u003d\u003d&quot;,</div><div class="line">&quot;encryptKey&quot;:&quot;bjWZgigAW/ZaAA55v7Yi9AGt2qsP7BfZZISu70qc/xVUVfh5L/Mw/mMbzxkcZ6uXb1vvgXvF7hHYwjsVzvEkRK0rIfIwkcYzn160fvQ/8+F8YBMDLzTEhf8r0KjOLlJV+HgOsS4QG/G9lOU5mnupfrVA9sf54b3OvXHU0TQVG7U\u003d&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p> 从数据库包能看到大的数据是一个json格式，里面有data，和encryptKey值，encryptKey就是使用RSA加密des 的key得到的，RSA的工作方式和pem文件可通过界面设置，再接着用这个key采用des方式解密data中的内容。操作界面如下：<br><img src="burp_rsa.png" alt="操作界面图"></p>
-<p>#2，InsertPoint 接口</p>
-<p>InsertPoint顾名思义就是注入点，就是payload插入的地方，比如request中的cookie，参数等位置。为了对一些burpsuit不支持的参数格式进行支持就必须实现该接口，可以用在Active Scanner和Intruder中.</p>
-<p>##2.1 基础开发知识</p>
-<p>最好的方式就是在原有插件的基础上修改，这样能省很多精力，当然如果要一步一步来的话，步骤如下：<br>（1）包含burp的接口文件<br>（2）创建一个包名为burp，在里面创建BurpExtender类，实现IBurpExtender接口，这个BurpExtender类是所有接口的心脏，注意这里涉及到名字都不能改动，burp插件就这么规定的。<br>（3）实现唯一的接口函数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public void registerExtenderCallbacks(final IBurpExtenderCallbacks callbacks) &#123;</div><div class="line">        this. callbacks = callbacks ;</div><div class="line">       &#125;</div></pre></td></tr></table></figure></p>
-<p>通过callbacks获取核心基础库能力,像日志，请求，返回值修改等。<br>（4）日志接口</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">PrintWriter stdout = new PrintWriter(callbacks.getStdout(), true);</div><div class="line">PrintWriter stderr = new PrintWriter(callbacks.getStderr(), true);</div><div class="line">//输出到插件的output</div><div class="line">stdout.println(&quot;Hello output&quot;);</div><div class="line">// 输出到alerts tab</div><div class="line">callbacks.issueAlert(&quot;Hello alerts&quot;);</div><div class="line">//打印调用栈</div><div class="line">e.printStackTrace(stderr)</div><div class="line">```    </div><div class="line">有了这些日志接口就能比较好的调试代码了，如果要很好的跟踪请求的，可以在BApp Store中添加&quot;Custom Logger&quot;这个插件，能够记录所有的请求和返回信息。</div><div class="line"></div><div class="line">##2.2 getInsertionPoints</div><div class="line"></div><div class="line">下面我们就来讲讲如何实现一个`InsertionPoints`接口。</div><div class="line">第一步继承`IScannerInsertionPointProvider`接口，实现getInsertionPoints()方法，同时通过`callbacks.registerScannerInsertionPointProvider(this)`方法注册成为insertion point provider。下面我们就来看看`getInsertionPoints()`的实现。</div></pre></td></tr></table></figure>
-<pre><code> @Override
-public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestResponse baseRequestResponse)
-{
-    // 生成insertPoints数组
-    List&lt;IScannerInsertionPoint&gt; insertionPoints = new ArrayList&lt;IScannerInsertionPoint&gt;();
-    // 获取请求参数
-    IRequestInfo requestInfo = helpers.analyzeRequest(baseRequestResponse.getRequest());
-    List&lt;IParameter&gt; requestParams = requestInfo.getParameters();
-
-
-    for (IParameter parameter : requestParams) {
-        String value = parameter.getValue();
-        value = helpers.urlDecode(value).trim();
-        EncryptBean encryptBean = new EncryptBean();
-        if (parameter.getName().trim().equals(&quot;c&quot;)){//参数中含有c参数表示要加密的内容
-            encryptBean = JSON.parseObject(value, EncryptBean.class);
-            stdout.println(&quot;private key: &quot; + key.privateKey + &quot; public key &quot; + key.publicKey);
-            try {
-                value = decryptRSAAndDES(key, encryptBean);
-                stdout.println(&quot;after decrypted:Will scan  data at parameter &quot; + parameter + &quot; with value decrypted &quot; + value);
-
-            } catch (Exception e) {
-                e.printStackTrace(stderr);
-            }
-
-            if (value.isEmpty()) continue;
-
-            try {
-                String basename = parameter.getName();
-                //insertionPoints.add(new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value));
-                JSONObject jsonObj = JSON.parseObject(value);
-                String basevalue = &quot;&quot;;
-                for(Map.Entry&lt;String, Object&gt; entry: jsonObj.entrySet()){
-                    basename = entry.getKey();
-                    basevalue = entry.getValue().toString();
-                    //在这里传入总的value值以便在InsertionPoint进行分解，构造加密后的request请求，构造InsertionPoint时传入的value为总的value值
-                    insertionPoints.add(0,new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value));
-                    stdout.println(&quot;in for:Will scan AES encrypted data at parameter &quot; + basename + &quot; with value &quot; + value);
-                }
-
-            } catch(Exception e) {
-            }
-
-        }
-
-    }
-
-    return insertionPoints;
-}
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">这一段代码的大体意思就是通过helper.analyzeRequest方法获取所有请求信息，遍历其中的参数信息，当发现参数名等于&quot;c&quot;时就会调用解密过程，这块的代码需要根据参数格式自定义解析参数过程。调用解密的过程大体就是先解析JSON格式，然后解密，得到解密数据的内容后调用`new InsertionPoint(this, baseRequestResponse.getRequest(), basename, value)`实例化一个注入点。一般情况下basename和value是一一对应的，如param1=phoneNum，但是这里我们basename传入param1，value值则是解密后的值如`&#123;&quot;userid&quot;:&quot;51ba27cb-514d-3d86-0000-2f7515a40613&quot;,&quot;task_id&quot;:&quot;1450147269&quot;,&quot;param1&quot;:&quot;000000000000000&quot;,&quot;m&quot;:&quot;https&quot;&#125;`，这么传递是为了方便实例化插入点。接着我们看下InsertionPoint的参数构造。</div><div class="line"></div><div class="line">##2.3 InsertionPoint</div></pre></td></tr></table></figure>
-<p>InsertionPoint(BurpExtender newParent, byte[] baseRequest, String basename, String basevalue)<br>    {<br>        this.parent = newParent;<br>        this.baseRequest = baseRequest;<br>        this.baseName = basename;<br>        //this.baseValue = basevalue;<br>        this.value = basevalue;<br>        this.baseValue = JSON.parseObject(basevalue).getString(basename);</p>
-<pre><code>}
-</code></pre><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">在InsertionPoint的代码中有一个很重要的接口就是buildRequest，这个函数就是用来添加payload。</div></pre></td></tr></table></figure>
-<p>  @Override<br>    public byte[] buildRequest(byte[] payload)<br>    {<br>        String payloadPlain = parent.helpers.bytesToString(payload);<br>        String payloadEncrypted = “”;<br>        String tmpAESKey = “0123456789abcdef”;<br>        parent.stdout.println(“payloadPlain:” + payloadPlain);<br>        parent.callbacks.issueAlert(“payloadPlain:” + payloadPlain);<br>        try {<br>            Map<string,string> map = JSON.parseObject(this.value, new TypeReference<map<string, string="">&gt;(){}.getType());<br>            map.put(this.baseName, getBaseValue() + payloadPlain );<br>            String allPayloadPlain = JSON.toJSONString(map);<br>            payloadEncrypted = parent.encryptRSAAndDES(allPayloadPlain, tmpAESKey, parent.key);<br>        } catch(Exception e) {<br>            parent.callbacks.issueAlert(e.toString());<br>        }<br>        parent.stdout.println(“Inserting “ + payloadPlain + “ [“ + payloadEncrypted + “] in parameter “ + baseName);<br>        // TODO: Only URL parameters, must change to support POST parameters, cookies, etc.<br>        //“c” 解密数据格式包一致<br>        return parent.helpers.updateParameter(baseRequest, parent.helpers.buildParameter(“c”, payloadEncrypted, IParameter.PARAM_BODY));<br>    }<br><code>``
-这段代码就是获取payload，然后嵌入到解密后的请求包，然后将请求加密，最后调用updateParameter更新参数信息。在这里要注意</code>parent.helpers.buildParameter(“c”, payloadEncrypted, IParameter.PARAM_BODY)<code>c是body中的请求参数，和我们的数据格式对应，</code>IParameter.PARAM_BODY<code>这个参数则表明是Body中的请求参数，如果是URl中的则是</code>PARAM_URL`</map<string,></string,string></p>
-<p>##2.4 接口关系</p>
-<p>知道了上述接口的作用，感觉还糊里糊涂的。那就是这些接口是怎么串起来的，数据包是如何流动的，下面我们来看下active scanning的流程。<br><img src="burp-active-scan.png" alt="active scan流程"><br>ActiveScanner引擎从InsertionPoints Provider获取Insertion Points，然后调用BuildRequest发送Request，Requst再经过HttpListener的处理到达webServer。</p>
-<p>参考文献：</p>
-<p><a href="http://drops.wooyun.org/papers/3962" target="_blank" rel="external">http://drops.wooyun.org/papers/3962</a></p>
-<p><a href="http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf" target="_blank" rel="external">http://2015.zeronights.ru/assets/files/42-Elkin-Bulatenko.pdf</a></p>
-<p><a href="https://github.com/lgrangeia/aesburp" target="_blank" rel="external">https://github.com/lgrangeia/aesburp</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2328,7 +2260,7 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">29</span>
+                <span class="site-state-item-count">30</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2349,7 +2281,7 @@ public List&lt;IScannerInsertionPoint&gt; getInsertionPoints(IHttpRequestRespons
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
+              <a href="/tags/index.html">
                 <span class="site-state-item-count">109</span>
                 <span class="site-state-item-name">标签</span>
               </a>

