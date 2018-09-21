@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2018-06-20T11:00:01.576Z</updated>
+  <updated>2018-09-21T08:33:35.576Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -16,11 +16,39 @@
   <generator uri="http://hexo.io/">Hexo</generator>
   
   <entry>
+    <title>S2-057 技术分析</title>
+    <link href="http://xxlegend.com/2018/09/21/S2-057%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2018/09/21/S2-057技术分析/</id>
+    <published>2018-09-21T08:33:35.576Z</published>
+    <updated>2018-09-21T08:33:35.576Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;h1 id=&quot;漏洞公告&quot;&gt;&lt;a href=&quot;#漏洞公告&quot; class=&quot;headerlink&quot; title=&quot;漏洞公告&quot;&gt;&lt;/a&gt;漏洞公告&lt;/h1&gt;&lt;p&gt;文章从公众号转移过来，在博客上做个记录。&lt;/p&gt;
+&lt;p&gt;北京时间8月22日13时，Apache官方发布通告公布了S
+    
+    </summary>
+    
+      <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
+    
+    
+      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+    
+      <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="S2-057" scheme="http://xxlegend.com/tags/S2-057/"/>
+    
+      <category term="CVE-2017-11776" scheme="http://xxlegend.com/tags/CVE-2017-11776/"/>
+    
+  </entry>
+  
+  <entry>
     <title>先知议题 Java反序列化实战 解读</title>
     <link href="http://xxlegend.com/2018/06/20/%E5%85%88%E7%9F%A5%E8%AE%AE%E9%A2%98%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98%20%E8%A7%A3%E8%AF%BB/"/>
     <id>http://xxlegend.com/2018/06/20/先知议题 Java反序列化实战 解读/</id>
-    <published>2018-06-20T09:05:27.724Z</published>
-    <updated>2018-06-20T11:00:01.576Z</updated>
+    <published>2018-06-20T11:00:00.000Z</published>
+    <updated>2018-06-20T11:00:00.000Z</updated>
     
     <summary type="html">
     
@@ -34,20 +62,20 @@
     
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
-      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
-    
       <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
     
       <category term="java" scheme="http://xxlegend.com/tags/java/"/>
+    
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
     
   </entry>
   
   <entry>
     <title>CVE-2018-2628 简单复现与分析</title>
-    <link href="http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/"/>
-    <id>http://xxlegend.com/2018/04/18/CVE-2018-2628 简单复现和分析/</id>
-    <published>2018-04-18T09:38:05.878Z</published>
-    <updated>2018-06-20T09:07:18.343Z</updated>
+    <link href="http://xxlegend.com/2018/06/20/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2018/06/20/CVE-2018-2628 简单复现和分析/</id>
+    <published>2018-06-20T09:07:18.000Z</published>
+    <updated>2018-06-20T09:07:18.000Z</updated>
     
     <summary type="html">
     
@@ -73,8 +101,8 @@
     <title>CVE-2018-1273 RCE with Spring Data Commons 分析报告</title>
     <link href="http://xxlegend.com/2018/04/12/CVE-2018-1273-%20RCE%20with%20Spring%20Data%20Commons%20%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/"/>
     <id>http://xxlegend.com/2018/04/12/CVE-2018-1273- RCE with Spring Data Commons 分析报告/</id>
-    <published>2018-04-12T11:25:47.163Z</published>
-    <updated>2018-04-12T11:41:00.209Z</updated>
+    <published>2018-04-12T11:41:00.000Z</published>
+    <updated>2018-04-12T11:41:00.000Z</updated>
     
     <summary type="html">
     
@@ -101,8 +129,8 @@
     <title>2017年反序列化漏洞年度报告</title>
     <link href="http://xxlegend.com/2018/01/25/2017%E5%B9%B4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
     <id>http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/</id>
-    <published>2018-01-25T03:39:30.080Z</published>
-    <updated>2018-01-25T03:49:22.046Z</updated>
+    <published>2018-01-25T03:49:22.000Z</published>
+    <updated>2018-01-25T03:49:22.000Z</updated>
     
     <summary type="html">
     
@@ -113,19 +141,19 @@
       <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
     
     
-      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
       <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
     
       <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
     
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+    
+      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
     
       <category term="WebLogic" scheme="http://xxlegend.com/tags/WebLogic/"/>
-    
-      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
   </entry>
   
@@ -133,8 +161,8 @@
     <title>Weblogic XMLDecoder RCE分析</title>
     <link href="http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/"/>
     <id>http://xxlegend.com/2017/12/23/Weblogic XMLDecoder RCE分析/</id>
-    <published>2017-12-22T16:22:24.807Z</published>
-    <updated>2017-12-23T00:37:05.438Z</updated>
+    <published>2017-12-23T00:37:04.000Z</published>
+    <updated>2017-12-23T00:37:04.000Z</updated>
     
     <summary type="html">
     
@@ -147,13 +175,13 @@
     
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
-      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
-    
       <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
     
   </entry>
   
@@ -161,8 +189,8 @@
     <title>S2-055漏洞环境搭建与分析</title>
     <link href="http://xxlegend.com/2017/12/06/S2-055%E6%BC%8F%E6%B4%9E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E5%88%86%E6%9E%90/"/>
     <id>http://xxlegend.com/2017/12/06/S2-055漏洞环境搭建与分析/</id>
-    <published>2017-12-06T14:29:22.901Z</published>
-    <updated>2017-12-06T14:28:57.323Z</updated>
+    <published>2017-12-06T14:28:56.000Z</published>
+    <updated>2017-12-06T14:28:56.000Z</updated>
     
     <summary type="html">
     
@@ -191,8 +219,8 @@
     <title>基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析</title>
     <link href="http://xxlegend.com/2017/12/06/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/"/>
     <id>http://xxlegend.com/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/</id>
-    <published>2017-12-06T13:41:42.060Z</published>
-    <updated>2017-12-06T13:49:34.433Z</updated>
+    <published>2017-12-06T13:49:34.000Z</published>
+    <updated>2017-12-06T13:49:34.000Z</updated>
     
     <summary type="html">
     
@@ -219,8 +247,8 @@
     <title>Java JSON反序列化之殇-看雪安全开发者峰会</title>
     <link href="http://xxlegend.com/2017/11/23/Java%20JSON%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8B%E6%AE%87-%E7%9C%8B%E9%9B%AA%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A/"/>
     <id>http://xxlegend.com/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/</id>
-    <published>2017-11-22T16:36:05.561Z</published>
-    <updated>2017-11-22T17:26:49.675Z</updated>
+    <published>2017-11-22T17:26:48.000Z</published>
+    <updated>2017-11-22T17:26:48.000Z</updated>
     
     <summary type="html">
     
@@ -232,11 +260,11 @@
       <category term="反序列化" scheme="http://xxlegend.com/categories/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
     
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
       <category term="Java" scheme="http://xxlegend.com/tags/Java/"/>
     
       <category term="JSON" scheme="http://xxlegend.com/tags/JSON/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="看雪" scheme="http://xxlegend.com/tags/%E7%9C%8B%E9%9B%AA/"/>
     
@@ -250,10 +278,10 @@
   
   <entry>
     <title>Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析</title>
-    <link href="http://xxlegend.com/2017/09/29/Spring%20Data%20Rest%E6%9C%8D%E5%8A%A1%E5%99%A8PATCH%E8%AF%B7%E6%B1%82%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9ECVE-2017-8046%E8%A1%A5%E5%85%85%E5%88%86%E6%9E%90/"/>
-    <id>http://xxlegend.com/2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/</id>
-    <published>2017-09-29T15:30:02.738Z</published>
-    <updated>2017-10-02T02:12:14.752Z</updated>
+    <link href="http://xxlegend.com/2017/10/02/Spring%20Data%20Rest%E6%9C%8D%E5%8A%A1%E5%99%A8PATCH%E8%AF%B7%E6%B1%82%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9ECVE-2017-8046%E8%A1%A5%E5%85%85%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/</id>
+    <published>2017-10-02T02:12:14.000Z</published>
+    <updated>2017-10-02T02:12:14.000Z</updated>
     
     <summary type="html">
     
@@ -278,10 +306,10 @@
   
   <entry>
     <title>S2-052漏洞分析及官方缓解措施无效验证</title>
-    <link href="http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/"/>
-    <id>http://xxlegend.com/2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/</id>
-    <published>2017-09-06T09:03:38.290Z</published>
-    <updated>2017-09-29T15:34:45.420Z</updated>
+    <link href="http://xxlegend.com/2017/09/29/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/"/>
+    <id>http://xxlegend.com/2017/09/29/S2-052漏洞分析及官方缓解措施无效验证/</id>
+    <published>2017-09-29T15:34:44.000Z</published>
+    <updated>2017-09-29T15:34:44.000Z</updated>
     
     <summary type="html">
     
@@ -294,8 +322,6 @@
     
       <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
     
-      <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
-    
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
@@ -303,6 +329,8 @@
       <category term="S2-052" scheme="http://xxlegend.com/tags/S2-052/"/>
     
       <category term="CVE-2017-9805" scheme="http://xxlegend.com/tags/CVE-2017-9805/"/>
+    
+      <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
     
       <category term="xml" scheme="http://xxlegend.com/tags/xml/"/>
     
@@ -314,8 +342,8 @@
     <title>S2-048 动态分析</title>
     <link href="http://xxlegend.com/2017/07/08/S2-048%20%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
     <id>http://xxlegend.com/2017/07/08/S2-048 动态分析/</id>
-    <published>2017-07-07T19:26:42.000Z</published>
-    <updated>2017-07-07T20:22:47.763Z</updated>
+    <published>2017-07-07T20:22:46.000Z</published>
+    <updated>2017-07-07T20:22:46.000Z</updated>
     
     <summary type="html">
     
@@ -327,9 +355,9 @@
       <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
     
     
-      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
-    
       <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
+    
+      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
       <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
     
@@ -341,8 +369,8 @@
     <title>PhpStorm Xdebug远程调试环境搭建原理分析及问题排查</title>
     <link href="http://xxlegend.com/2017/05/23/PhpStorm%20Xdebug%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/"/>
     <id>http://xxlegend.com/2017/05/23/PhpStorm Xdebug远程调试环境搭建原理分析及问题排查/</id>
-    <published>2017-05-23T03:26:59.321Z</published>
-    <updated>2017-05-23T03:33:56.413Z</updated>
+    <published>2017-05-23T03:33:56.000Z</published>
+    <updated>2017-05-23T03:33:56.000Z</updated>
     
     <summary type="html">
     
@@ -370,8 +398,8 @@
     <title>WordPress远程代码执行环境构造和VirtualHost环境验证</title>
     <link href="http://xxlegend.com/2017/05/05/WordPress%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83%E6%9E%84%E9%80%A0%E5%92%8CVirtualHost%E7%8E%AF%E5%A2%83%E9%AA%8C%E8%AF%81/"/>
     <id>http://xxlegend.com/2017/05/05/WordPress远程代码执行环境构造和VirtualHost环境验证/</id>
-    <published>2017-05-05T01:41:26.542Z</published>
-    <updated>2017-05-05T01:43:57.327Z</updated>
+    <published>2017-05-05T01:43:56.000Z</published>
+    <updated>2017-05-05T01:43:56.000Z</updated>
     
     <summary type="html">
     
@@ -398,10 +426,10 @@
   
   <entry>
     <title>fastjson 远程反序列化poc的构造和分析</title>
-    <link href="http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/"/>
-    <id>http://xxlegend.com/2017/04/29/title- fastjson 远程反序列化poc的构造和分析/</id>
-    <published>2017-04-29T14:27:22.490Z</published>
-    <updated>2017-05-03T04:17:55.191Z</updated>
+    <link href="http://xxlegend.com/2017/05/03/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2017/05/03/title- fastjson 远程反序列化poc的构造和分析/</id>
+    <published>2017-05-03T04:17:54.000Z</published>
+    <updated>2017-05-03T04:17:54.000Z</updated>
     
     <summary type="html">
     
@@ -414,13 +442,13 @@
       <category term="java" scheme="http://xxlegend.com/categories/java/"/>
     
     
-      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+      <category term="java" scheme="http://xxlegend.com/tags/java/"/>
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="java" scheme="http://xxlegend.com/tags/java/"/>
-    
       <category term="poc" scheme="http://xxlegend.com/tags/poc/"/>
+    
+      <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
     
   </entry>
   
@@ -429,7 +457,7 @@
     <link href="http://xxlegend.com/2016/12/01/Python%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81%E4%B9%8B%E9%A2%84%E9%98%B2LDAP%E6%B3%A8%E5%85%A5/"/>
     <id>http://xxlegend.com/2016/12/01/Python安全编码之预防LDAP注入/</id>
     <published>2016-12-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:37:01.284Z</updated>
+    <updated>2017-05-01T09:37:00.000Z</updated>
     
     <summary type="html">
     
@@ -440,11 +468,11 @@
       <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
     
     
-      <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
-    
       <category term="Python" scheme="http://xxlegend.com/tags/Python/"/>
     
       <category term="LDAP注入" scheme="http://xxlegend.com/tags/LDAP%E6%B3%A8%E5%85%A5/"/>
+    
+      <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
     
       <category term="预防注入" scheme="http://xxlegend.com/tags/%E9%A2%84%E9%98%B2%E6%B3%A8%E5%85%A5/"/>
     
@@ -455,7 +483,7 @@
     <link href="http://xxlegend.com/2016/11/01/%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7IP%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF/"/>
     <id>http://xxlegend.com/2016/11/01/获取用户IP的正确姿势/</id>
     <published>2016-11-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:37:41.451Z</updated>
+    <updated>2017-05-01T09:37:40.000Z</updated>
     
     <summary type="html">
     
@@ -486,7 +514,7 @@
     <link href="http://xxlegend.com/2016/08/01/PhpWind%20%E5%88%A9%E7%94%A8hash%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E4%BF%AE%E6%94%B9%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81getshell/"/>
     <id>http://xxlegend.com/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/</id>
     <published>2016-08-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:38:23.847Z</updated>
+    <updated>2017-05-01T09:38:22.000Z</updated>
     
     <summary type="html">
     
@@ -515,7 +543,7 @@
     <link href="http://xxlegend.com/2016/05/01/%E5%B0%8F%E5%BF%83%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8F%92%E4%BB%B6%E7%AA%83%E5%8F%96%E4%BD%A0%E7%9A%84%E9%9A%90%E7%A7%81/"/>
     <id>http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/</id>
     <published>2016-05-01T07:38:36.000Z</published>
-    <updated>2017-05-02T01:51:56.085Z</updated>
+    <updated>2017-05-02T01:51:56.000Z</updated>
     
     <summary type="html">
     
@@ -538,36 +566,11 @@
   </entry>
   
   <entry>
-    <title>SlemBunk木马浅析</title>
-    <link href="http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    <id>http://xxlegend.com/2016/04/01/SlemBunk木马浅析/</id>
-    <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:39:15.573Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。&lt;/p&gt;
-&lt;p&gt;#1 恶意
-    
-    </summary>
-    
-      <category term="木马" scheme="http://xxlegend.com/categories/%E6%9C%A8%E9%A9%AC/"/>
-    
-    
-      <category term="[object Object]" scheme="http://xxlegend.com/tags/object-Object/"/>
-    
-      <category term="木马浅析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/"/>
-    
-      <category term="木马分析" scheme="http://xxlegend.com/tags/%E6%9C%A8%E9%A9%AC%E5%88%86%E6%9E%90/"/>
-    
-  </entry>
-  
-  <entry>
     <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
     <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
     <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
     <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:44:28.856Z</updated>
+    <updated>2017-05-01T09:44:28.000Z</updated>
     
     <summary type="html">
     

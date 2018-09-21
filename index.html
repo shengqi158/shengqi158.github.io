@@ -334,6 +334,185 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/09/21/S2-057技术分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/09/21/S2-057技术分析/" itemprop="url">
+                  S2-057 技术分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-21T16:33:35+08:00">
+                2018-09-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Struts2/" itemprop="url" rel="index">
+                    <span itemprop="name">Struts2</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/21/S2-057技术分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/21/S2-057技术分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/21/S2-057技术分析/" class="leancloud_visitors" data-flag-title="S2-057 技术分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h1 id="漏洞公告"><a href="#漏洞公告" class="headerlink" title="漏洞公告"></a>漏洞公告</h1><p>文章从公众号转移过来，在博客上做个记录。</p>
+<p>北京时间8月22日13时，Apache官方发布通告公布了Struts2中一个远程代码执行漏洞（CVE-2018-11776）。该漏洞在两种情况下存在，第一，在xml配置中未设置namespace值，且上层动作配置（upper action(s) configurations）中未设置或用通配符namespace值。第二，使用未设置 value和action值的url标签，且上层动作配置（upper action(s) configurations）中未设置或用通配符namespace值。</p>
+<h1 id="补丁对比"><a href="#补丁对比" class="headerlink" title="补丁对比"></a>补丁对比</h1><p><img src="/images/057-0.png" alt="0"><br>如图所示，补丁主要添加了cleanNamespaceName方法，该方法通过白名单的方式来验证namespace是否合法，从官方描述和漏洞修复方式来看，该漏洞应该是一个Ognl的表达式注入漏洞</p>
+<h1 id="动态分析"><a href="#动态分析" class="headerlink" title="动态分析"></a>动态分析</h1><p>漏洞发布几个小时之后，漏洞发现作者公布了整个发现过程，并且详细分析了一种漏洞情形：<a href="https://lgtm.com/blog/apache_struts_CVE-2018-11776" target="_blank" rel="external">https://lgtm.com/blog/apache_struts_CVE-2018-11776</a><br>按照该博客的说法，拉取struts2-showcase项目作为示例，修改struts-actionchaining.xml，具体如下：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">struts</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">package</span> <span class="attr">name</span>=<span class="string">"actionchaining"</span> <span class="attr">extends</span>=<span class="string">"struts-default"</span> &gt;</span></div><div class="line">		<span class="tag">&lt;<span class="name">action</span> <span class="attr">name</span>=<span class="string">"actionChain1"</span> <span class="attr">class</span>=<span class="string">"org.apache.struts2.showcase.actionchaining.ActionChain1"</span>&gt;</span></div><div class="line">			<span class="tag">&lt;<span class="name">result</span> <span class="attr">type</span>=<span class="string">"redirectAction"</span>&gt;</span></div><div class="line">				<span class="tag">&lt;<span class="name">param</span> <span class="attr">name</span> = <span class="string">"actionName"</span>&gt;</span>register2<span class="tag">&lt;/<span class="name">param</span>&gt;</span></div><div class="line">			<span class="tag">&lt;/<span class="name">result</span>&gt;</span></div><div class="line">		<span class="tag">&lt;/<span class="name">action</span>&gt;</span></div><div class="line">	<span class="tag">&lt;/<span class="name">package</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">struts</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>在这种情况下，所有到actionChain1.action的请求的返回结果都会指向register2，并且执行链会到ServletActionRedirectResult.execute方法中，具体如下：<br><img src="/images/057-1.png" alt="1"></p>
+<p>从上图可以看出，通过namespace字段，污染了tmpLocation字典，并且设置为了预期的执行的PoC，这也是补丁中为什么要净化namespace的原因，继续跟踪namespace的去向,执行链会到ServletActionRedirectResult的父类的父类StrutsResultSupport.execute方法中，具体如下图<br><img src="/images/057-2.png" alt="2"><br>这里有个conditionParse方法，这个方式就是使用Ognl表达式来计算数据值，在系统中用得非常多，而且在一些历史漏洞中，也应该由它来背锅，当然最大的锅还是struts官方，每次漏洞出在哪就修在哪，典型的头痛医头，脚痛医脚。方法实现如下图所示<br><img src="/images/057-3.png" alt="3"><br>在这个方法中会使用到TextParseUtil.translateVariables方法，继续跟踪，调用栈进入OgnlTextParser中的evaluate方法,首先会判断传入的表达式是否合法，比如是否能找到${}或者%{}对，接着调用evaluator.evaluate求值，求值过程非常复杂，总得来说就是链式执行过程，具体如下调用栈：<br><img src="/images/057-4.png" alt="4"><br>从上图也可以看出最顶层就是通过反射的方式来调用ProcessBuilder的构造函数，中间部分就是链式执行过程中牵涉到一些操作。<br>我们可以看下求值过程中参数的一些情况。来查看Ognl安全加固的一些变化，具体如下图：<br><img src="/images/057-5.png" alt="5"><br>主要是黑名单上又添加了一些类，分别是<br><code>class ognl.DefaultMemberAccess
+class com.opensymphony.xwork2.ognl.SecurityMemberAccess
+class java.lang.ProcessBuilder</code></p>
+<p>分析就结束了，计算器还是要弹的，如下图：<br><img src="/images/057-6.png" alt="6"></p>
+<h1 id="PoC-构造"><a href="#PoC-构造" class="headerlink" title="PoC 构造"></a>PoC 构造</h1><p>这块是最难的，也是最不好调试的，利用showcase项目很早就能执行${(1+1)}=2的效果，但是要弹出计算器，并不容易，其实就是新的沙箱的绕过，当时在调试的时候就发现，每次的返回结果都是空，没办法，只能耐着性子，将原先的PoC进行拆分，一个单元的一个单元的测试。测试获取#context的时候总为空，后来发现导致无法获取OgnlUtil的实例，怎么获取context，有多种方式，从代码结构来看可以从ognl表达式一些固有表达式来获取，如#root,#request等。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/06/20/先知议题 Java反序列化实战 解读/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -373,7 +552,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-20T17:05:27+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-20T19:00:00+08:00">
                 2018-06-20
               </time>
             
@@ -538,7 +717,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/04/18/CVE-2018-2628 简单复现和分析/">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/06/20/CVE-2018-2628 简单复现和分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="廖新喜">
@@ -560,7 +739,7 @@
             
               
                 
-                <a class="post-title-link" href="/2018/04/18/CVE-2018-2628 简单复现和分析/" itemprop="url">
+                <a class="post-title-link" href="/2018/06/20/CVE-2018-2628 简单复现和分析/" itemprop="url">
                   CVE-2018-2628 简单复现与分析
                 </a>
               
@@ -577,8 +756,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-18T17:38:05+08:00">
-                2018-04-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-06-20T17:07:18+08:00">
+                2018-06-20
               </time>
             
 
@@ -618,9 +797,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2018/04/18/CVE-2018-2628 简单复现和分析/#comments" itemprop="discussionUrl">
+                <a href="/2018/06/20/CVE-2018-2628 简单复现和分析/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/04/18/CVE-2018-2628 简单复现和分析/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/06/20/CVE-2018-2628 简单复现和分析/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -628,7 +807,7 @@
 
           
           
-             <span id="/2018/04/18/CVE-2018-2628 简单复现和分析/" class="leancloud_visitors" data-flag-title="CVE-2018-2628 简单复现与分析">
+             <span id="/2018/06/20/CVE-2018-2628 简单复现和分析/" class="leancloud_visitors" data-flag-title="CVE-2018-2628 简单复现与分析">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -760,7 +939,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T19:25:47+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-04-12T19:41:00+08:00">
                 2018-04-12
               </time>
             
@@ -972,7 +1151,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-25T11:39:30+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-25T11:49:22+08:00">
                 2018-01-25
               </time>
             
@@ -1186,7 +1365,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T00:22:24+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T08:37:04+08:00">
                 2017-12-23
               </time>
             
@@ -1369,7 +1548,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T22:29:22+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T22:28:56+08:00">
                 2017-12-06
               </time>
             
@@ -1551,7 +1730,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T21:41:42+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T21:49:34+08:00">
                 2017-12-06
               </time>
             
@@ -1738,7 +1917,7 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-23T00:36:05+08:00">
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-23T01:26:48+08:00">
                 2017-11-23
               </time>
             
@@ -1876,7 +2055,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="廖新喜">
@@ -1898,7 +2077,7 @@
             
               
                 
-                <a class="post-title-link" href="/2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" itemprop="url">
+                <a class="post-title-link" href="/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" itemprop="url">
                   Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析
                 </a>
               
@@ -1915,8 +2094,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-29T23:30:02+08:00">
-                2017-09-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-02T10:12:14+08:00">
+                2017-10-02
               </time>
             
 
@@ -1956,9 +2135,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/#comments" itemprop="discussionUrl">
+                <a href="/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -1966,7 +2145,7 @@
 
           
           
-             <span id="/2017/09/29/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" class="leancloud_visitors" data-flag-title="Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析">
+             <span id="/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" class="leancloud_visitors" data-flag-title="Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -2067,190 +2246,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/" itemprop="url">
-                  S2-052漏洞分析及官方缓解措施无效验证
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-09-06T17:03:38+08:00">
-                2017-09-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Struts2/" itemprop="url" rel="index">
-                    <span itemprop="name">Struts2</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/09/06/S2-052漏洞分析及官方缓解措施无效验证/" class="leancloud_visitors" data-flag-title="S2-052漏洞分析及官方缓解措施无效验证">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>2017年9月5日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x和2.3.x的REST插件存在远程代码执行的高危漏洞，漏洞编号为CVE-2017-9805（S2-052）。漏洞的成因是由于使用XStreamHandler反序列化XStream实例的时候没有任何类型过滤导致远程代码执行。<br>相关链接如下：<br><a href="https://cwiki.apache.org/confluence/display/WW/S2-052" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/WW/S2-052</a><br>影响版本：<br>Struts 2.1.2 - Struts 2.3.33, Struts 2.5 - Struts 2.5.12<br>规避方案<br>立即升级到Struts 2.5.13 or Struts 2.3.34</p>
-<h1 id="技术分析"><a href="#技术分析" class="headerlink" title="技术分析"></a>技术分析</h1><p>根据官方的描述信息来看，是REST插件使用到XStreamHandler处理xml数据的时候，由于未对xml数据做任何过滤，在进行反序列将xml数据转换成Object时导致的RCE。</p>
-<h2 id="0x01-环境搭建"><a href="#0x01-环境搭建" class="headerlink" title="0x01 环境搭建"></a>0x01 环境搭建</h2><p>从官方地址（<a href="https://archive.apache.org/dist/struts/2.5/struts-2.5-all.zip）下载所有源码包，找到其中的struts2-rest-showcase.war直接部署到tomcat就行，当然我更喜欢手动编译，直接通过Maven编译即可。具体的部署过程这里就不详细描述，不过有点是需要注意的，由于javax.imageio的依赖关系，我们的环境的jdk版本需要是jdk8以上，jdk8某些低版本也是不行的，本文作者的版本是jdk8_102，后续的一些验证都是在这个版本上做的" target="_blank" rel="external">https://archive.apache.org/dist/struts/2.5/struts-2.5-all.zip）下载所有源码包，找到其中的struts2-rest-showcase.war直接部署到tomcat就行，当然我更喜欢手动编译，直接通过Maven编译即可。具体的部署过程这里就不详细描述，不过有点是需要注意的，由于javax.imageio的依赖关系，我们的环境的jdk版本需要是jdk8以上，jdk8某些低版本也是不行的，本文作者的版本是jdk8_102，后续的一些验证都是在这个版本上做的</a></p>
-<h2 id="0x02-补丁分析"><a href="#0x02-补丁分析" class="headerlink" title="0x02 补丁分析"></a>0x02 补丁分析</h2><p>环境搭建好了之后，首先我们来看下rest插件的相关配置<br><img src="/images/052-1.png" alt="1"></p>
-<p>从这个文件中就可以看出XStreamHanler就是Content-Type:xml的默认处理句柄，而且可以看出xml是默认支持格式，这也就是说存在rest插件就会存在XStream的反序列化漏洞。<br>接着看看官方的修复方案，补丁地址：<a href="https://github.com/apache/struts/commit/19494718865f2fb7da5ea363de3822f87fbda264" target="_blank" rel="external">https://github.com/apache/struts/commit/19494718865f2fb7da5ea363de3822f87fbda264</a><br>在官方的修复方案中,主要就是将xml中的数据白名单化，把Collection和Map，一些基础类，时间类放在白名单中，这样就能阻止XStream反序列化的过程中带入一些有害类。<br> <img src="/images/052-2.png" alt="2"></p>
-<h2 id="0x03-POC的生成"><a href="#0x03-POC的生成" class="headerlink" title="0x03 POC的生成"></a>0x03 POC的生成</h2><p>目前公开的Poc是基于javax.imageio的，这是能直接本地执行命令，但是marshelsec提供了11个XStream反序列化库，其中大部分都是基于JNDI，具体包含：<code>CommonsConfiguration, Rome, CommonsBeanutils, ServiceLoader, ImageIO,
-  BindingEnumeration, LazySearchEnumeration, SpringAbstractBeanFactoryPointcutAdvisor, SpringPartiallyComparableAdvisorHolder, Resin, XBean</code><br>从外部请求类完成反序列化。</p>
-<h2 id="0x04-漏洞验证及简单分析"><a href="#0x04-漏洞验证及简单分析" class="headerlink" title="0x04 漏洞验证及简单分析"></a>0x04 漏洞验证及简单分析</h2><p>下图是一个简单的验证分析图，从Poc中可以看出，请求是PUT，请求的url后缀带xml，请求的Content-Type为delicious/bookmark+xml，请求的xml的前缀是<code>&lt;set&gt;</code>.<br> <img src="/images/052-3-poc1.png" alt="3"><br>接着我们看下触发的执行调用栈：</p>
-<p>在XStreamHanler.toObject调用了XStream的fromXml，从而进入反序列化流程。<br><img src="/images/052-4.png" alt="4"></p>
-<h2 id="0x05-官方临时缓解措施不起作用"><a href="#0x05-官方临时缓解措施不起作用" class="headerlink" title="0x05 官方临时缓解措施不起作用"></a>0x05 官方临时缓解措施不起作用</h2><p>官方给出的缓解措施<code>&lt;constant name=&quot;struts.action.extension&quot; value=&quot;xhtml,,,json&quot; /&gt;</code>，从字面意思也能看出来，这个是针对action的后缀的，也就是说如果后缀不带xml也就可以绕过。下面给出测试用例，从我们的poc中也可以看出，POST请求不带xml的后缀直接忽视这个缓解措施。所以说Struts的官方也不怎么复制，没测试过的东西就直接放出来。XStream只跟Content-Type有关，如果Content-Type中含有xml，则会交给XStream处理，所以poc该怎么使还怎么使，并且目前最大的问题就是国内的解决都是使用的这个无效的官方解决方案，下面看下我们的验证：<br> <img src="/images/052-5.png" alt="5"><br>从图上可以看出，我们已经去除了xml的支持，下面来看看Payload的执行效果：<br> <img src="/images/052-6-poc2.png" alt="6"></p>
-<p>成功弹出计算器，这也就验证了我们的想法。同时通过两个不同poc的比较，我们也能发现一些端倪，Content-Type支持xml的几种格式，POST请求，PUT请求，GET请求甚至是自定义请求都是能触发漏洞，我们可以将poc中<code>&lt;map&gt;&lt;entry&gt;</code>换成<code>&lt;set&gt;</code>也能触发漏洞。同时由于XStream本身的Poc多大十一种，做好安全防御确实比较艰难。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -2295,7 +2295,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">30</span>
+                <span class="site-state-item-count">31</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2316,8 +2316,8 @@
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">109</span>
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">111</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

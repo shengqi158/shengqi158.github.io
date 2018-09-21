@@ -2,233 +2,240 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   
   <url>
-    <loc>http://xxlegend.com/2018/06/20/%E5%85%88%E7%9F%A5%E8%AE%AE%E9%A2%98%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98%20%E8%A7%A3%E8%AF%BB/</loc>
+    <loc>http://xxlegend.com/2018/09/21/S2-057%E6%8A%80%E6%9C%AF%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2018-06-20T11:00:01.576Z</lastmod>
+    <lastmod>2018-09-21T08:33:35.576Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://xxlegend.com/2018/04/18/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/</loc>
+    <loc>http://xxlegend.com/2018/06/20/%E5%85%88%E7%9F%A5%E8%AE%AE%E9%A2%98%20Java%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E5%AE%9E%E6%88%98%20%E8%A7%A3%E8%AF%BB/</loc>
     
-    <lastmod>2018-06-20T09:07:18.343Z</lastmod>
+    <lastmod>2018-06-20T11:00:00.000Z</lastmod>
+    
+  </url>
+  
+  <url>
+    <loc>http://xxlegend.com/2018/06/20/CVE-2018-2628%20%E7%AE%80%E5%8D%95%E5%A4%8D%E7%8E%B0%E5%92%8C%E5%88%86%E6%9E%90/</loc>
+    
+    <lastmod>2018-06-20T09:07:18.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2018/04/12/CVE-2018-1273-%20RCE%20with%20Spring%20Data%20Commons%20%E5%88%86%E6%9E%90%E6%8A%A5%E5%91%8A/</loc>
     
-    <lastmod>2018-04-12T11:41:00.209Z</lastmod>
+    <lastmod>2018-04-12T11:41:00.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2018/01/25/2017%E5%B9%B4%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/</loc>
     
-    <lastmod>2018-01-25T03:49:22.046Z</lastmod>
+    <lastmod>2018-01-25T03:49:22.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/07/30/Python%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81%E5%92%8C%E4%BB%A3%E7%A0%81%E5%AE%A1%E8%AE%A1/</loc>
     
-    <lastmod>2017-12-26T13:54:01.538Z</lastmod>
+    <lastmod>2017-12-26T13:54:00.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2017-12-23T00:37:05.438Z</lastmod>
+    <lastmod>2017-12-23T00:37:04.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/12/06/S2-055%E6%BC%8F%E6%B4%9E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2017-12-06T14:28:57.323Z</lastmod>
+    <lastmod>2017-12-06T14:28:56.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/12/06/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2017-12-06T13:49:34.433Z</lastmod>
+    <lastmod>2017-12-06T13:49:34.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/11/23/Java%20JSON%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8B%E6%AE%87-%E7%9C%8B%E9%9B%AA%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A/</loc>
     
-    <lastmod>2017-11-22T17:26:49.675Z</lastmod>
+    <lastmod>2017-11-22T17:26:48.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://xxlegend.com/2017/09/29/Spring%20Data%20Rest%E6%9C%8D%E5%8A%A1%E5%99%A8PATCH%E8%AF%B7%E6%B1%82%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9ECVE-2017-8046%E8%A1%A5%E5%85%85%E5%88%86%E6%9E%90/</loc>
+    <loc>http://xxlegend.com/2017/10/02/Spring%20Data%20Rest%E6%9C%8D%E5%8A%A1%E5%99%A8PATCH%E8%AF%B7%E6%B1%82%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E6%BC%8F%E6%B4%9ECVE-2017-8046%E8%A1%A5%E5%85%85%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2017-10-02T02:12:14.752Z</lastmod>
+    <lastmod>2017-10-02T02:12:14.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/</loc>
+    <loc>http://xxlegend.com/2017/09/29/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/</loc>
     
-    <lastmod>2017-09-29T15:34:45.420Z</lastmod>
+    <lastmod>2017-09-29T15:34:44.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/07/08/S2-048%20%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2017-07-07T20:22:47.763Z</lastmod>
+    <lastmod>2017-07-07T20:22:46.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/05/23/PhpStorm%20Xdebug%E8%BF%9C%E7%A8%8B%E8%B0%83%E8%AF%95%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8E%9F%E7%90%86%E5%88%86%E6%9E%90%E5%8F%8A%E9%97%AE%E9%A2%98%E6%8E%92%E6%9F%A5/</loc>
     
-    <lastmod>2017-05-23T03:33:56.413Z</lastmod>
+    <lastmod>2017-05-23T03:33:56.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/02/01/%E5%A6%82%E4%BD%95%E8%AE%A9Burpsuite%E7%9B%91%E5%90%AC%E5%BE%AE%E4%BF%A1%E5%85%AC%E4%BC%97%E5%8F%B7/</loc>
     
-    <lastmod>2017-05-10T08:06:53.709Z</lastmod>
+    <lastmod>2017-05-10T08:06:52.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2017/05/05/WordPress%E8%BF%9C%E7%A8%8B%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C%E7%8E%AF%E5%A2%83%E6%9E%84%E9%80%A0%E5%92%8CVirtualHost%E7%8E%AF%E5%A2%83%E9%AA%8C%E8%AF%81/</loc>
     
-    <lastmod>2017-05-05T01:43:57.327Z</lastmod>
+    <lastmod>2017-05-05T01:43:56.000Z</lastmod>
     
   </url>
   
   <url>
-    <loc>http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</loc>
+    <loc>http://xxlegend.com/2017/05/03/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</loc>
     
-    <lastmod>2017-05-03T04:17:55.191Z</lastmod>
+    <lastmod>2017-05-03T04:17:54.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/05/01/%E5%B0%8F%E5%BF%83%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8F%92%E4%BB%B6%E7%AA%83%E5%8F%96%E4%BD%A0%E7%9A%84%E9%9A%90%E7%A7%81/</loc>
     
-    <lastmod>2017-05-02T01:51:56.085Z</lastmod>
+    <lastmod>2017-05-02T01:51:56.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/</loc>
     
-    <lastmod>2017-05-01T09:44:28.856Z</lastmod>
+    <lastmod>2017-05-01T09:44:28.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/03/01/%E4%BB%8Eescapeshellcmd%20bypass%E8%AF%B4%E8%B5%B7%E5%88%B0%E5%AE%BD%E5%AD%97%E8%8A%82%E6%B3%A8%E5%85%A5/</loc>
     
-    <lastmod>2017-05-01T09:44:19.514Z</lastmod>
+    <lastmod>2017-05-01T09:44:18.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/04/01/%E4%BB%8EDjango%E7%9A%84SECTET_KEY%E5%88%B0%E4%BB%A3%E7%A0%81%E6%89%A7%E8%A1%8C/</loc>
     
-    <lastmod>2017-05-01T09:44:07.582Z</lastmod>
+    <lastmod>2017-05-01T09:44:06.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/04/01/SVN%E5%92%8CGIT%E4%BF%A1%E6%81%AF%E6%B3%84%E6%BC%8F%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86%E5%8F%8A%E7%8E%B0%E7%8A%B6/</loc>
     
-    <lastmod>2017-05-01T09:43:59.382Z</lastmod>
+    <lastmod>2017-05-01T09:43:58.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/07/31/Python%20eval%E7%9A%84%E5%B8%B8%E8%A7%81%E9%94%99%E8%AF%AF%E5%B0%81%E8%A3%85%E5%8F%8A%E5%88%A9%E7%94%A8%E5%8E%9F%E7%90%86/</loc>
     
-    <lastmod>2017-05-01T09:43:07.043Z</lastmod>
+    <lastmod>2017-05-01T09:43:06.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/01/01/PHP%E6%AF%94%E8%BE%83%E6%93%8D%E4%BD%9C%E7%AC%A6%E5%B8%A6%E6%9D%A5%E7%9A%84%E5%AE%89%E5%85%A8%E9%97%AE%E9%A2%98/</loc>
     
-    <lastmod>2017-05-01T09:41:17.100Z</lastmod>
+    <lastmod>2017-05-01T09:41:16.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/02/01/Burpsuite%E6%8F%92%E4%BB%B6%E5%BC%80%E5%8F%91%E4%B9%8BRSA%E5%8A%A0%E8%A7%A3%E5%AF%86/</loc>
     
-    <lastmod>2017-05-01T09:39:44.925Z</lastmod>
+    <lastmod>2017-05-01T09:39:44.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/04/01/SlemBunk%E6%9C%A8%E9%A9%AC%E6%B5%85%E6%9E%90/</loc>
     
-    <lastmod>2017-05-01T09:39:15.573Z</lastmod>
+    <lastmod>2017-05-01T09:39:14.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/08/01/PhpWind%20%E5%88%A9%E7%94%A8hash%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E4%BF%AE%E6%94%B9%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81getshell/</loc>
     
-    <lastmod>2017-05-01T09:38:23.847Z</lastmod>
+    <lastmod>2017-05-01T09:38:22.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/11/01/%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7IP%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF/</loc>
     
-    <lastmod>2017-05-01T09:37:41.451Z</lastmod>
+    <lastmod>2017-05-01T09:37:40.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2016/12/01/Python%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81%E4%B9%8B%E9%A2%84%E9%98%B2LDAP%E6%B3%A8%E5%85%A5/</loc>
     
-    <lastmod>2017-05-01T09:37:01.284Z</lastmod>
+    <lastmod>2017-05-01T09:37:00.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/04/01/Django%E5%AE%89%E5%85%A8%E6%9C%BA%E5%88%B6/</loc>
     
-    <lastmod>2017-05-01T09:36:29.758Z</lastmod>
+    <lastmod>2017-05-01T09:36:28.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/2015/04/01/REST%20API%20%E5%AE%89%E5%85%A8%E8%AE%BE%E8%AE%A1%E6%8C%87%E5%8D%97/</loc>
     
-    <lastmod>2017-05-01T09:36:16.965Z</lastmod>
+    <lastmod>2017-05-01T09:36:16.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/tags/index.html</loc>
     
-    <lastmod>2017-05-01T06:08:38.857Z</lastmod>
+    <lastmod>2017-05-01T06:08:38.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/categories/index.html</loc>
     
-    <lastmod>2017-05-01T06:08:04.506Z</lastmod>
+    <lastmod>2017-05-01T06:08:04.000Z</lastmod>
     
   </url>
   
   <url>
     <loc>http://xxlegend.com/about/index.html</loc>
     
-    <lastmod>2017-05-01T03:02:26.238Z</lastmod>
+    <lastmod>2017-05-01T03:02:26.000Z</lastmod>
     
   </url>
   
