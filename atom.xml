@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2018-09-21T08:33:35.576Z</updated>
+  <updated>2018-10-23T06:54:40.910Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,91 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Weblogic CVE-2018-3191分析</title>
+    <link href="http://xxlegend.com/2018/10/23/Weblogic%20CVE-2018-3191%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2018/10/23/Weblogic CVE-2018-3191分析/</id>
+    <published>2018-10-23T06:54:40.910Z</published>
+    <updated>2018-10-23T06:54:40.910Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;已经在公众号发表，链接地址：&lt;a href=&quot;https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg&quot; target=&quot;_blank&quot; rel=&quot;external&quot;&gt;https://mp.weixin.qq.com/s/ebKHj
+    
+    </summary>
+    
+      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
+    
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="CVE-2018-3191" scheme="http://xxlegend.com/tags/CVE-2018-3191/"/>
+    
+      <category term="CPU" scheme="http://xxlegend.com/tags/CPU/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析</title>
+    <link href="http://xxlegend.com/2018/10/15/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/</id>
+    <published>2018-10-15T07:11:33.612Z</published>
+    <updated>2018-10-15T07:11:33.612Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h1&gt;&lt;p&gt;这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastj
+    
+    </summary>
+    
+      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
+    
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
+    
+      <category term="JdbcRowSetImpl" scheme="http://xxlegend.com/tags/JdbcRowSetImpl/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>S2-048 动态分析</title>
+    <link href="http://xxlegend.com/2018/09/21/S2-048%20%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2018/09/21/S2-048 动态分析/</id>
+    <published>2018-09-21T08:33:37.733Z</published>
+    <updated>2018-09-21T08:33:37.733Z</updated>
+    
+    <summary type="html">
+    
+      &lt;hr&gt;
+&lt;h1 id=&quot;综述&quot;&gt;&lt;a href=&quot;#综述&quot; class=&quot;headerlink&quot; title=&quot;综述&quot;&gt;&lt;/a&gt;综述&lt;/h1&gt;&lt;p&gt;2017年7月7日，Apache Struts发布最新的安全公告，Apache Structs2的strus1插件存在远程代码执行
+    
+    </summary>
+    
+      <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
+    
+    
+      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
+    
+      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
+    
+      <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="CVE-2017-9791" scheme="http://xxlegend.com/tags/CVE-2017-9791/"/>
+    
+  </entry>
   
   <entry>
     <title>S2-057 技术分析</title>
@@ -216,34 +301,6 @@
   </entry>
   
   <entry>
-    <title>基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析</title>
-    <link href="http://xxlegend.com/2017/12/06/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/"/>
-    <id>http://xxlegend.com/2017/12/06/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/</id>
-    <published>2017-12-06T13:49:34.000Z</published>
-    <updated>2017-12-06T13:49:34.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h1&gt;&lt;p&gt;这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastj
-    
-    </summary>
-    
-      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
-    
-    
-      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
-    
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
-      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
-    
-      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
-    
-      <category term="JdbcRowSetImpl" scheme="http://xxlegend.com/tags/JdbcRowSetImpl/"/>
-    
-  </entry>
-  
-  <entry>
     <title>Java JSON反序列化之殇-看雪安全开发者峰会</title>
     <link href="http://xxlegend.com/2017/11/23/Java%20JSON%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B9%8B%E6%AE%87-%E7%9C%8B%E9%9B%AA%E5%AE%89%E5%85%A8%E5%BC%80%E5%8F%91%E8%80%85%E5%B3%B0%E4%BC%9A/"/>
     <id>http://xxlegend.com/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/</id>
@@ -335,33 +392,6 @@
       <category term="xml" scheme="http://xxlegend.com/tags/xml/"/>
     
       <category term="imageio" scheme="http://xxlegend.com/tags/imageio/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>S2-048 动态分析</title>
-    <link href="http://xxlegend.com/2017/07/08/S2-048%20%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
-    <id>http://xxlegend.com/2017/07/08/S2-048 动态分析/</id>
-    <published>2017-07-07T20:22:46.000Z</published>
-    <updated>2017-07-07T20:22:46.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;hr&gt;
-&lt;h1 id=&quot;综述&quot;&gt;&lt;a href=&quot;#综述&quot; class=&quot;headerlink&quot; title=&quot;综述&quot;&gt;&lt;/a&gt;综述&lt;/h1&gt;&lt;p&gt;2017年7月7日，Apache Struts发布最新的安全公告，Apache Structs2的strus1插件存在远程代码执行
-    
-    </summary>
-    
-      <category term="Struts2" scheme="http://xxlegend.com/categories/Struts2/"/>
-    
-    
-      <category term="S2-048" scheme="http://xxlegend.com/tags/S2-048/"/>
-    
-      <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
-    
-      <category term="动态分析" scheme="http://xxlegend.com/tags/%E5%8A%A8%E6%80%81%E5%88%86%E6%9E%90/"/>
-    
-      <category term="CVE-2017-9791" scheme="http://xxlegend.com/tags/CVE-2017-9791/"/>
     
   </entry>
   
@@ -562,32 +592,6 @@
       <category term="手势插件" scheme="http://xxlegend.com/tags/%E6%89%8B%E5%8A%BF%E6%8F%92%E4%BB%B6/"/>
     
       <category term="隐私" scheme="http://xxlegend.com/tags/%E9%9A%90%E7%A7%81/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>基于mezzanine的攻防比赛环境搭建及XXE漏洞构造</title>
-    <link href="http://xxlegend.com/2016/04/01/%E5%9F%BA%E4%BA%8Emezzanine%E7%9A%84%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E5%8F%8AXXE%E6%BC%8F%E6%B4%9E%E6%9E%84%E9%80%A0/"/>
-    <id>http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/</id>
-    <published>2016-04-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:44:28.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;虚拟部署&quot;&gt;&lt;a href=&quot;#虚拟部署&quot; class=&quot;headerlink&quot; title=&quot;虚拟部署&quot;&gt;&lt;/a&gt;虚拟部署&lt;/h1&gt;&lt;p&gt;virtualenv是python环境配置和切换工具，进入该虚拟环境后，pip安装的软件不影响当前主环境，这样就能很好的安装
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="攻防比赛" scheme="http://xxlegend.com/tags/%E6%94%BB%E9%98%B2%E6%AF%94%E8%B5%9B/"/>
-    
-      <category term="xxe" scheme="http://xxlegend.com/tags/xxe/"/>
-    
-      <category term="mezzanine" scheme="http://xxlegend.com/tags/mezzanine/"/>
-    
-      <category term="virtualenv" scheme="http://xxlegend.com/tags/virtualenv/"/>
     
   </entry>
   
