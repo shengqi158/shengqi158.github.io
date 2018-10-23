@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2018-10-23T06:54:40.910Z</updated>
+  <updated>2018-10-23T07:12:17.252Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,35 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析</title>
+    <link href="http://xxlegend.com/2018/10/23/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/</id>
+    <published>2018-10-23T07:12:17.252Z</published>
+    <updated>2018-10-23T07:12:17.252Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;发表于2017年11月22日，修改于2018年10月23日&lt;/p&gt;
+&lt;h1 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h1&gt;&lt;p&gt;这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和
+    
+    </summary>
+    
+      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
+    
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
+    
+      <category term="JdbcRowSetImpl" scheme="http://xxlegend.com/tags/JdbcRowSetImpl/"/>
+    
+  </entry>
   
   <entry>
     <title>Weblogic CVE-2018-3191分析</title>
@@ -37,39 +66,11 @@
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
-    
       <category term="CVE-2018-3191" scheme="http://xxlegend.com/tags/CVE-2018-3191/"/>
     
       <category term="CPU" scheme="http://xxlegend.com/tags/CPU/"/>
     
-  </entry>
-  
-  <entry>
-    <title>基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析</title>
-    <link href="http://xxlegend.com/2018/10/15/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/"/>
-    <id>http://xxlegend.com/2018/10/15/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/</id>
-    <published>2018-10-15T07:11:33.612Z</published>
-    <updated>2018-10-15T07:11:33.612Z</updated>
-    
-    <summary type="html">
-    
-      &lt;h1 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h1&gt;&lt;p&gt;这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastj
-    
-    </summary>
-    
-      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
-    
-    
-      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
-    
-      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
-    
       <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
-    
-      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
-    
-      <category term="JdbcRowSetImpl" scheme="http://xxlegend.com/tags/JdbcRowSetImpl/"/>
     
   </entry>
   

