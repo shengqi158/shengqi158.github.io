@@ -334,6 +334,184 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/SVN和GIT信息泄漏利用原理及现状/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/SVN和GIT信息泄漏利用原理及现状/" itemprop="url">
+                  SVN和GIT信息泄漏利用原理及现状
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/信息泄露/" itemprop="url" rel="index">
+                    <span itemprop="name">信息泄露</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/SVN和GIT信息泄漏利用原理及现状/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/SVN和GIT信息泄漏利用原理及现状/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/SVN和GIT信息泄漏利用原理及现状/" class="leancloud_visitors" data-flag-title="SVN和GIT信息泄漏利用原理及现状">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="1，google-hack"><a href="#1，google-hack" class="headerlink" title="1，google hack"></a>1，google hack</h1><p>svn 搜索技巧<br>图1<br>git 搜索技巧<br>图2</p>
+<h1 id="2，svn信息利用原理"><a href="#2，svn信息利用原理" class="headerlink" title="2，svn信息利用原理"></a>2，svn信息利用原理</h1><h2 id="2-1-svn-lt-1-6"><a href="#2-1-svn-lt-1-6" class="headerlink" title="2.1 svn&lt;=1.6"></a>2.1 svn&lt;=1.6</h2><p>从svn的结构图可以看到一个目录text-base,这里有我们源文件的备份,比如要下载somedomain/phpinfo.php,直接访问目录somedomain/.svn/text-base/phpinfo.php.text-base,一般的服务器既不会阻止该目录也不会解释该后缀，我们就可以直接读到本地来。现在只是访问最顶层的文件信息，那怎么遍历呢？这里面就有.svn/entries，这个文件包含着该基础目录下所有的文件和目录，直接递推查找就行。</p>
+<h2 id="2-2-svn-gt-1-6"><a href="#2-2-svn-gt-1-6" class="headerlink" title="2.2 svn&gt;1.6"></a>2.2 svn&gt;1.6</h2><p>svn在1.6之后引入了wc.db来管理文件，该文件位于.svn/wc.db。普通文件位置：somedomain/.svn/pristine/“XX”/“CHECKSUM”.svn-base,CHECKSUM是文件的sha1值，xx则是他的前两位。那这个CHECKSUM去哪找呢？就是我们刚才提到的wc.db，这是一个sqlite数据库。数据库的大体结构如下：<br><figure class="highlight shell"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">$</span> sqlite3 wc.db .tables</div><div class="line">ACTUAL_NODE    NODES          PRISTINE       WC_LOCK</div><div class="line">EXTERNALS      NODES_BASE     REPOSITORY     WORK_QUEUE</div><div class="line">LOCK           NODES_CURRENT  WCROOT</div><div class="line"><span class="meta">$</span> sqlite3 wc.db 'select local_relpath, checksum from NODES'</div><div class="line">index.php|$sha1$4e6a225331f9ae872db25a8f85ae7be05cea6d51</div><div class="line">scripts/menu.js|$sha1$fabeb3ba6a96cf0cbcad1308abdbe0c2427eeebf</div><div class="line">style/style.js|$sha1$2cc5590e0ba024c3db77a13896da09b39ea74799</div><div class="line"><span class="meta">$</span> sqlite3 wc.db 'select local_relpath, ".svn/pristine/" || substr(checksum,7,2) || "/" || substr(checksum,7) || ".svn-base" as alpha from NODES;'</div><div class="line">index.php|.svn/pristine/4e/4e6a225331f9ae872db25a8f85ae7be05cea6d51.svn-base</div><div class="line">scripts/menu.js|.svn/pristine/fa/fabeb3ba6a96cf0cbcad1308abdbe0c2427eeebf.svn-base</div><div class="line">style/style.js|.svn/pristine/2s/2cc5590e0ba024c3db77a13896da09b39ea74799.svn-base</div></pre></td></tr></table></figure></p>
+<p>第一步下载wc.db,然后从NODES表中找到文件名和其sha1值，最后构造下载链接。</p>
+<h1 id="3，git-信息利用原理"><a href="#3，git-信息利用原理" class="headerlink" title="3，git 信息利用原理"></a>3，git 信息利用原理</h1><p>首先从git/config信息里面可以得到仓库地址<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">[core]</div><div class="line">	repositoryformatversion = 0</div><div class="line">	filemode = true</div><div class="line">	bare = false</div><div class="line">	logallrefupdates = true</div><div class="line">[remote &quot;origin&quot;]</div><div class="line">	fetch = +refs/heads/*:refs/remotes/origin/*</div><div class="line">	url = git@git.jingdigital.net:root/pcb001.git</div><div class="line">[branch &quot;master&quot;]</div><div class="line">	remote = origin</div><div class="line">	merge = refs/heads/master</div></pre></td></tr></table></figure></p>
+<p>基本上三步走：<br>（1）下载.git/index文件，这是一种git特有的格式，在该文件中包含着文件名和文件SHA1值。<br>（2）根据该文件SHA1值到objects目录下载相应文件，具体路径somedomain/.git/objects/“XX”/“CHECKSUM”<br>（3）zlib解压文件，按照原始目录写入源代码。</p>
+<h1 id="4，对国内80端口的简单扫描"><a href="#4，对国内80端口的简单扫描" class="headerlink" title="4，对国内80端口的简单扫描"></a>4，对国内80端口的简单扫描</h1><p>有了前面这些基础，就可以通过泄漏的信息来还原代码，能还原代码的话就可以干很多事了。最常见就是代码中泄漏email地址，数据库连接方式，调试接口，一些第三方key的泄漏。另外还可以对你感兴趣的目标进行代码审计，发现注入，命令执行等等。</p>
+<h2 id="4-1-扫描实现"><a href="#4-1-扫描实现" class="headerlink" title="4.1 扫描实现"></a>4.1 扫描实现</h2><p>（1）从文件读取80ip段数据，设最大并发16，最大连接数60，这个时候的带宽基本控制在600KB，利用周末时间跑了一天即可跑完。<br>（2）设置pycurl的一些参数，如PROXY,MAXREDIRS=0，这样就不跳转了，nosignal=1 这个参数必须为1，这是pycurl的一个bug，中间测试的过程中就是因为参数未加，导致跑了半天结果中途挂了。<br>（3）请求/.git/config信息，如果200，返回的类型为text/plain并且存在repositoryformatversion字段。请求/.svn/entries,如果200，Content-Type为text/plain,并且dir存在于返回值。其实这个是有误的，因为在svn大于1.6的情况下，在返回值中只有一个简单的数字，并不存在dir，所以扫描结果中基本上没有1.6以上的结果。</p>
+<h2 id="4-2-结果过滤"><a href="#4-2-结果过滤" class="headerlink" title="4.2 结果过滤"></a>4.2 结果过滤</h2><p>在扫描的结果中分析出现的url，有些.svn/entries返回200，但是首页确是有问题，还有发现某些ip不在中国。于是写了脚本去请求这些url的首页，并且从一个ip查询网站去查询ip地址归属。</p>
+<h2 id="4-3-初步结果"><a href="#4-3-初步结果" class="headerlink" title="4.3 初步结果"></a>4.3 初步结果</h2><p>在525万80端口数据中，跑出6000条结果，相当于千分之一的概率，另外还未包括前面对svn 1.6判断有误的分析，所以这个概率还是很高的。<br>简单的分析了git信息的泄漏，总共有接近600条数据，去除在国外的和首页不正常的，能达到250多，其中差不多一半的都是在阿里云的ip上，这些公司一般都是创业公司。在这些泄漏的代码中sql注入一般很少。<br>svn的话，一般都是一些比较老的网站，这主要可能还是我前面的判断逻辑有点小问题。注入问题比较严重。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/Django安全机制/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -916,7 +1094,7 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">33</span>
+                <span class="site-state-item-count">34</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -937,8 +1115,8 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/categories/index.html">
-                <span class="site-state-item-count">120</span>
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">123</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>

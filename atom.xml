@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2019-04-19T10:41:44.857Z</updated>
+  <updated>2019-04-30T11:03:53.930Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,40 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>CVE-2019-2725 分析</title>
+    <link href="http://xxlegend.com/2019/04/30/CVE-2019-2725%E5%88%86%E6%9E%90/"/>
+    <id>http://xxlegend.com/2019/04/30/CVE-2019-2725分析/</id>
+    <published>2019-04-30T11:03:53.930Z</published>
+    <updated>2019-04-30T11:03:53.930Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;背景&quot;&gt;&lt;a href=&quot;#背景&quot; class=&quot;headerlink&quot; title=&quot;背景&quot;&gt;&lt;/a&gt;背景&lt;/h2&gt;&lt;p&gt;这个漏洞最先由某厂商报给某银行，某银行再将该信息报给CNVD，后CNVD通告：国家信息安全漏洞共享平台（CNVD）收录了由中国民生银行股份有
+    
+    </summary>
+    
+      <category term="Java" scheme="http://xxlegend.com/categories/Java/"/>
+    
+    
+      <category term="RCE" scheme="http://xxlegend.com/tags/RCE/"/>
+    
+      <category term="Weblogic" scheme="http://xxlegend.com/tags/Weblogic/"/>
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
+      <category term="CVE-2019-2725" scheme="http://xxlegend.com/tags/CVE-2019-2725/"/>
+    
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+    
+      <category term="CNVD-C-2019-48814" scheme="http://xxlegend.com/tags/CNVD-C-2019-48814/"/>
+    
+      <category term="async" scheme="http://xxlegend.com/tags/async/"/>
+    
+  </entry>
   
   <entry>
     <title>weblogic CVE-2019-2647等相关XXE漏洞分析</title>
@@ -69,11 +103,11 @@
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
+    
       <category term="CVE-2018-3191" scheme="http://xxlegend.com/tags/CVE-2018-3191/"/>
     
       <category term="CPU" scheme="http://xxlegend.com/tags/CPU/"/>
-    
-      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
     
   </entry>
   
@@ -261,15 +295,15 @@
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+    
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
       <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
     
-      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
     
       <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
-    
-      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
     
       <category term="WebLogic" scheme="http://xxlegend.com/tags/WebLogic/"/>
     
@@ -569,35 +603,6 @@
       <category term="反向代理" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/"/>
     
       <category term="HTTP_X_FORWARDED_FOR" scheme="http://xxlegend.com/tags/HTTP-X-FORWARDED-FOR/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>Phpwind利用hash长度扩展攻击修改后台密码getshell</title>
-    <link href="http://xxlegend.com/2016/08/01/PhpWind%20%E5%88%A9%E7%94%A8hash%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB%E4%BF%AE%E6%94%B9%E5%90%8E%E5%8F%B0%E5%AF%86%E7%A0%81getshell/"/>
-    <id>http://xxlegend.com/2016/08/01/PhpWind 利用hash长度扩展攻击修改后台密码getshell/</id>
-    <published>2016-08-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:38:22.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;#1 哈希长度扩展攻击&lt;/p&gt;
-&lt;p&gt;##1.1 简介&lt;br&gt;哈希长度扩张攻击（hash length attack）是一类针对某些哈希函数可以额外添加一些信息的攻击手段，适用于已经确定哈希值和密钥长度的情况。哈希值基本表示如下H（密钥||消息），即知道了哈希值和密钥的长度
-    
-    </summary>
-    
-      <category term="Php" scheme="http://xxlegend.com/categories/Php/"/>
-    
-    
-      <category term="php" scheme="http://xxlegend.com/tags/php/"/>
-    
-      <category term="hash length attack" scheme="http://xxlegend.com/tags/hash-length-attack/"/>
-    
-      <category term="hashpump" scheme="http://xxlegend.com/tags/hashpump/"/>
-    
-      <category term="getshell" scheme="http://xxlegend.com/tags/getshell/"/>
-    
-      <category term="哈希长度扩展攻击" scheme="http://xxlegend.com/tags/%E5%93%88%E5%B8%8C%E9%95%BF%E5%BA%A6%E6%89%A9%E5%B1%95%E6%94%BB%E5%87%BB/"/>
     
   </entry>
   
