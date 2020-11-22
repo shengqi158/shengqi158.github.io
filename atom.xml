@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://xxlegend.com/"/>
-  <updated>2019-04-30T11:03:53.930Z</updated>
+  <updated>2020-11-22T14:49:00.111Z</updated>
   <id>http://xxlegend.com/</id>
   
   <author>
@@ -14,6 +14,33 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>看快手如何干掉Fastjson</title>
+    <link href="http://xxlegend.com/2020/11/22/%E7%9C%8B%E5%BF%AB%E6%89%8B%E5%A6%82%E4%BD%95%E5%B9%B2%E6%8E%89Fastjson/"/>
+    <id>http://xxlegend.com/2020/11/22/看快手如何干掉Fastjson/</id>
+    <published>2020-11-22T14:49:00.111Z</published>
+    <updated>2020-11-22T14:49:00.111Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;#看快手如何干掉Fastjson&lt;/p&gt;
+&lt;p&gt;##1.Fastjson 漏洞史&lt;br&gt;文章从公众号转移过来，在博客上做个记录。&lt;br&gt;Fastjson是一个阿里巴巴开发的java高性能JSON库，应用范围非常广，在github上star数已经超过2.2万。从2017年1月
+    
+    </summary>
+    
+      <category term="Fastjson" scheme="http://xxlegend.com/categories/Fastjson/"/>
+    
+    
+      <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
+    
+      <category term="Fastjson" scheme="http://xxlegend.com/tags/Fastjson/"/>
+    
+      <category term="Jackson" scheme="http://xxlegend.com/tags/Jackson/"/>
+    
+      <category term="gson" scheme="http://xxlegend.com/tags/gson/"/>
+    
+  </entry>
   
   <entry>
     <title>CVE-2019-2725 分析</title>
@@ -39,9 +66,9 @@
     
       <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
     
-      <category term="CVE-2019-2725" scheme="http://xxlegend.com/tags/CVE-2019-2725/"/>
-    
       <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
+    
+      <category term="CVE-2019-2725" scheme="http://xxlegend.com/tags/CVE-2019-2725/"/>
     
       <category term="CNVD-C-2019-48814" scheme="http://xxlegend.com/tags/CNVD-C-2019-48814/"/>
     
@@ -103,11 +130,11 @@
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
-    
       <category term="CVE-2018-3191" scheme="http://xxlegend.com/tags/CVE-2018-3191/"/>
     
       <category term="CPU" scheme="http://xxlegend.com/tags/CPU/"/>
+    
+      <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
     
   </entry>
   
@@ -295,15 +322,15 @@
     
       <category term="反序列化" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96/"/>
     
-      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
-    
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
       <category term="XStream" scheme="http://xxlegend.com/tags/XStream/"/>
     
-      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
     
       <category term="fastjson" scheme="http://xxlegend.com/tags/fastjson/"/>
+    
+      <category term="Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告" scheme="http://xxlegend.com/tags/Jackson-fastjson-XStream-XMLDecoder-WebLogic-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E6%BC%8F%E6%B4%9E%EF%BC%8C%E5%B9%B4%E5%BA%A6%E6%8A%A5%E5%91%8A/"/>
     
       <category term="WebLogic" scheme="http://xxlegend.com/tags/WebLogic/"/>
     
@@ -359,11 +386,11 @@
     
       <category term="Struts2" scheme="http://xxlegend.com/tags/Struts2/"/>
     
+      <category term="Jackson" scheme="http://xxlegend.com/tags/Jackson/"/>
+    
       <category term="S2-055" scheme="http://xxlegend.com/tags/S2-055/"/>
     
       <category term="CVE-2017-7525" scheme="http://xxlegend.com/tags/CVE-2017-7525/"/>
-    
-      <category term="Jackson" scheme="http://xxlegend.com/tags/Jackson/"/>
     
   </entry>
   
@@ -572,37 +599,6 @@
       <category term="安全编码" scheme="http://xxlegend.com/tags/%E5%AE%89%E5%85%A8%E7%BC%96%E7%A0%81/"/>
     
       <category term="预防注入" scheme="http://xxlegend.com/tags/%E9%A2%84%E9%98%B2%E6%B3%A8%E5%85%A5/"/>
-    
-  </entry>
-  
-  <entry>
-    <title>获取用户IP的正确姿势</title>
-    <link href="http://xxlegend.com/2016/11/01/%E8%8E%B7%E5%8F%96%E7%94%A8%E6%88%B7IP%E7%9A%84%E6%AD%A3%E7%A1%AE%E5%A7%BF%E5%8A%BF/"/>
-    <id>http://xxlegend.com/2016/11/01/获取用户IP的正确姿势/</id>
-    <published>2016-11-01T07:38:36.000Z</published>
-    <updated>2017-05-01T09:37:40.000Z</updated>
-    
-    <summary type="html">
-    
-      &lt;p&gt;如何获取用户的IP，这个需求简直是太常见了，像登录入口，注册入口，投票，日志记录，api接口中判断同一个ip单位时间内的请求数，可是怎么去获取用户的真实IP呢？网上的代码很多，好多人直接拿来就用，却没有想到带来了很大的安全问题。&lt;/p&gt;
-&lt;h2 id=&quot;1-代码示例&quot;&gt;&lt;a
-    
-    </summary>
-    
-      <category term="Python" scheme="http://xxlegend.com/categories/Python/"/>
-    
-    
-      <category term="X-Forward-For" scheme="http://xxlegend.com/tags/X-Forward-For/"/>
-    
-      <category term="REMOTE_ADDR" scheme="http://xxlegend.com/tags/REMOTE-ADDR/"/>
-    
-      <category term="用户IP" scheme="http://xxlegend.com/tags/%E7%94%A8%E6%88%B7IP/"/>
-    
-      <category term="nginx" scheme="http://xxlegend.com/tags/nginx/"/>
-    
-      <category term="反向代理" scheme="http://xxlegend.com/tags/%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86/"/>
-    
-      <category term="HTTP_X_FORWARDED_FOR" scheme="http://xxlegend.com/tags/HTTP-X-FORWARDED-FOR/"/>
     
   </entry>
   

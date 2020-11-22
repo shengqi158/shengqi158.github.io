@@ -4,6 +4,32 @@
 
     
   <url>
+    <loc>http://xxlegend.com/2020/11/22/%E7%9C%8B%E5%BF%AB%E6%89%8B%E5%A6%82%E4%BD%95%E5%B9%B2%E6%8E%89Fastjson/</loc>
+    <lastmod>2020-11-22T14:49:00.111Z</lastmod>
+    <data>
+        <display>
+        <title>看快手如何干掉Fastjson</title>
+        <pubTime>2020-11-22T14:49:00.111Z</pubTime>
+        
+        <tag>反序列化</tag>
+         
+        <tag>Fastjson</tag>
+         
+        <tag>Jackson</tag>
+         
+        <tag>gson</tag>
+         
+         
+           
+             
+              <breadCrumb title="Fastjson" url="http://xxlegend.com/categories/Fastjson/"/>
+          
+        </display>
+    </data>
+    </url>
+
+    
+  <url>
     <loc>http://xxlegend.com/2019/04/30/CVE-2019-2725%E5%88%86%E6%9E%90/</loc>
     <lastmod>2019-04-30T11:03:53.930Z</lastmod>
     <data>
@@ -19,9 +45,9 @@
          
         <tag>PoC</tag>
          
-        <tag>CVE-2019-2725</tag>
-         
         <tag>XMLDecoder</tag>
+         
+        <tag>CVE-2019-2725</tag>
          
         <tag>CNVD-C-2019-48814</tag>
          
@@ -83,11 +109,11 @@
          
         <tag>反序列化</tag>
          
-        <tag>PoC</tag>
-         
         <tag>CVE-2018-3191</tag>
          
         <tag>CPU</tag>
+         
+        <tag>PoC</tag>
          
          
            
@@ -269,15 +295,15 @@
         
         <tag>反序列化</tag>
          
-        <tag>XMLDecoder</tag>
-         
         <tag>Struts2</tag>
          
         <tag>XStream</tag>
          
-        <tag>Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</tag>
+        <tag>XMLDecoder</tag>
          
         <tag>fastjson</tag>
+         
+        <tag>Jackson,fastjson,XStream,XMLDecoder,WebLogic,反序列化漏洞，年度报告</tag>
          
         <tag>WebLogic</tag>
          
@@ -359,11 +385,11 @@
          
         <tag>Struts2</tag>
          
+        <tag>Jackson</tag>
+         
         <tag>S2-055</tag>
          
         <tag>CVE-2017-7525</tag>
-         
-        <tag>Jackson</tag>
          
          
            
