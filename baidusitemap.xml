@@ -45,9 +45,9 @@
          
         <tag>PoC</tag>
          
-        <tag>XMLDecoder</tag>
-         
         <tag>CVE-2019-2725</tag>
+         
+        <tag>XMLDecoder</tag>
          
         <tag>CNVD-C-2019-48814</tag>
          

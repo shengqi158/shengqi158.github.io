@@ -334,185 +334,6 @@
   
 
   <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/Django安全机制/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="廖新喜">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.png">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="xxlegend">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/04/01/Django安全机制/" itemprop="url">
-                  Django安全机制
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
-                2015-04-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Django/" itemprop="url" rel="index">
-                    <span itemprop="name">Django</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                <span class="post-meta-divider">|</span>
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-comment-o"></i>
-                </span>
-                <a href="/2015/04/01/Django安全机制/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count disqus-comment-count"
-                        data-disqus-identifier="2015/04/01/Django安全机制/" itemprop="commentCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-          
-             <span id="/2015/04/01/Django安全机制/" class="leancloud_visitors" data-flag-title="Django安全机制">
-               <span class="post-meta-divider">|</span>
-               <span class="post-meta-item-icon">
-                 <i class="fa fa-eye"></i>
-               </span>
-               
-                 <span class="post-meta-item-text">阅读次数 </span>
-               
-                 <span class="leancloud-visitors-count"></span>
-             </span>
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>#1 xss<br>django 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力<br>（1）属性有动态内容，正确：<code>&lt;img alt=&quot;{{good}}&quot;&gt;</code>,错误：<code>&lt;img alt={{bad}}&gt;</code>,请确保加上双引号。<br>（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.<br>（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。<br>（4）涉及到dom类型的xss，如document.write等<br>（5）HttpResponse返回动态内容<br>另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp)</p>
-<p>#2 csrf<br>1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。<br>2，在所有的post表单中中添加了csrf_token，如<form action="." method="post">{% csrf_token %}<br>3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> render_to_response</div><div class="line"><span class="keyword">from</span> django.template.context_processors <span class="keyword">import</span> csrf</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></form></p>
-<p>@csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.<br>最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的.</p>
-<p>#3 sql注入<br>直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：<br>（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；<br>extra的正确用法：<br><code>Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])</code><br>错误用法：<br><code>Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])</code><br>（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤<br>在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.db <span class="keyword">import</span> connection</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">    user = request.GET[<span class="string">'username'</span>]</div><div class="line">    sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">    cursor = connection.cursor()</div><div class="line">    cursor.execute(sql, [user])</div><div class="line">    <span class="comment"># ... do something with the results</span></div></pre></td></tr></table></figure></p>
-<p>#4 点击劫持<br>django已经有X-Frame-Options middleware来处理，强烈建议添加</p>
-<p>#5 host头验证<br>使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果</p>
-<p>#6 文件上传<br>django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。<br>（1）另建一个文件服务器<br>（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小<br>（3）确保文件不可执行<br>（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上<br>（5）限制文件上传的类型</p>
-<p>#7 email头注入<br>用于发送垃圾邮件，hacker发送如下：<code>hello\ncc:spamvictim@example.com</code> 就转变成了<br><code>To: hardcoded@example.com
-Subject: hello
-cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
-<p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-    <! -- 添加微信图标 -->
-    
-      
-    
-    
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
     <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/SVN和GIT信息泄漏利用原理及现状/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -822,6 +643,185 @@ cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不
 <p>通过序列化Run类，实现创建一个文件的操作，在反序列化的时候执行这个操作。执行代码完成可看到在/tmp目录创建xxlegend.log文件，同时web报500错误。</p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>利用条件总结起来就是这么几句话，首先泄露了SECRET_KEY,其次session引擎采用了signed_cookies,django版本小于1.6即存在代码执行问题。同样的问题也存在于python的其他web框架中，如flask，bottle。</p>
 <p><a href="https://github.com/danghvu/pwp/blob/master/exploit.py" target="_blank" rel="external">https://github.com/danghvu/pwp/blob/master/exploit.py</a><br><a href="https://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.html" target="_blank" rel="external">https://fail0verflow.com/blog/2014/plaidctf2014-web200-reeekeeeeee.html</a><br><a href="https://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/" target="_blank" rel="external">https://systemoverlord.com/blog/2014/04/14/plaidctf-2014-reekeeeee/</a><br><a href="http://www.shysecurity.com/post/Reekee" target="_blank" rel="external">http://www.shysecurity.com/post/Reekee</a><br><a href="http://python.usyiyi.cn/django/topics/http/sessions.html" target="_blank" rel="external">http://python.usyiyi.cn/django/topics/http/sessions.html</a><br><a href="https://github.com/django/django/blob/stable/1.5.x/django/core/signing.py" target="_blank" rel="external">https://github.com/django/django/blob/stable/1.5.x/django/core/signing.py</a><br><a href="http://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766" target="_blank" rel="external">http://stackoverflow.com/questions/15170637/effects-of-changing-djangos-secret-key/15383766?noredirect=1#comment21743494_15383766</a></p>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+    <! -- 添加微信图标 -->
+    
+      
+    
+    
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://xxlegend.com/2015/04/01/Django安全机制/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="廖新喜">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.png">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="xxlegend">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2015/04/01/Django安全机制/" itemprop="url">
+                  Django安全机制
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2015-04-01T15:38:36+08:00">
+                2015-04-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Django/" itemprop="url" rel="index">
+                    <span itemprop="name">Django</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2015/04/01/Django安全机制/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count disqus-comment-count"
+                        data-disqus-identifier="2015/04/01/Django安全机制/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+             <span id="/2015/04/01/Django安全机制/" class="leancloud_visitors" data-flag-title="Django安全机制">
+               <span class="post-meta-divider">|</span>
+               <span class="post-meta-item-icon">
+                 <i class="fa fa-eye"></i>
+               </span>
+               
+                 <span class="post-meta-item-text">阅读次数 </span>
+               
+                 <span class="leancloud-visitors-count"></span>
+             </span>
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>#1 xss<br>django 已经能防范95%的xss问题，主要原理就是将&lt;,&gt;,&amp;做了转化，但是如下情况还是无能为力<br>（1）属性有动态内容，正确：<code>&lt;img alt=&quot;{{good}}&quot;&gt;</code>,错误：<code>&lt;img alt={{bad}}&gt;</code>,请确保加上双引号。<br>（2）插入到CSS中的数据(style 标签和属性),以及javascript(script标签,事件处理器,onclick等其他属性),在这些标签内请手动escape.<br>（3）还有就是使用了mark_safe跳过了template默认机制或者autoescape关闭了。<br>（4）涉及到dom类型的xss，如document.write等<br>（5）HttpResponse返回动态内容<br>另外注意属性中包含url(href,img src)时验证url协议在白名单内(如http,https,mailto,ftp)</p>
+<p>#2 csrf<br>1，确保django.middleware.csrf.CsrfViewMiddleware已经开启 在settings.py中，默认是存在的。<br>2，在所有的post表单中中添加了csrf_token，如<form action="." method="post">{% csrf_token %}<br>3，在相应的view函数中，使用了django.template.context_processors.csrf，用法有两种，一个是RequestContext,另外就是手工引入,如下是手工引入:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.shortcuts <span class="keyword">import</span> render_to_response</div><div class="line"><span class="keyword">from</span> django.template.context_processors <span class="keyword">import</span> csrf</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">my_view</span><span class="params">(request)</span>:</span></div><div class="line">    c = &#123;&#125;</div><div class="line">    c.update(csrf(request))</div><div class="line">    <span class="comment"># ... view code here</span></div><div class="line">    <span class="keyword">return</span> render_to_response(<span class="string">"a_template.html"</span>, c)</div></pre></td></tr></table></figure></form></p>
+<p>@csrf_exempt装饰器是去除csrf防护,另外内置的CSRF保护机制对子域也是无能为力,比如应用在example.com,有一个子域alice.example.com放置用户可控制的内容,这个时候csrf机制是不起作用的.<br>最后注意不要使用get请求去做增删改操作,否则内置的CSRF机制也是无效的.</p>
+<p>#3 sql注入<br>直接拼接的sql会有注入风险，那如何避免呢？使用django的数据库api，会根据对应的数据库加过滤，但是有两个例外：<br>（1）extra方法中的where参数处,这个参数是故意设计成接受原始SQL；<br>extra的正确用法：<br><code>Entry.objects.extra(where=[&#39;headline=%s&#39;], params=[&#39;Lennon&#39;])</code><br>错误用法：<br><code>Entry.objects.extra(where=[&quot;headline=&#39;Lennon&#39;&quot;])</code><br>（2）直接使用低层次的数据库api，如execute，raw，可以采用cursor.execute(sql, [user])方式避免，但是部分时候是失效的，如表的位置，列的位置，这种情况下可以使用django.db.connection.ops.quote_name来自己手工加过滤<br>在有params的情况下，django会正确的转义，没有params的情况则不行。正确做法:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">from</span> django.db <span class="keyword">import</span> connection</div><div class="line"> </div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">user_contacts</span><span class="params">(request)</span>:</span></div><div class="line">    user = request.GET[<span class="string">'username'</span>]</div><div class="line">    sql = <span class="string">"SELECT * FROM user_contacts WHERE username = %s"</span></div><div class="line">    cursor = connection.cursor()</div><div class="line">    cursor.execute(sql, [user])</div><div class="line">    <span class="comment"># ... do something with the results</span></div></pre></td></tr></table></figure></p>
+<p>#4 点击劫持<br>django已经有X-Frame-Options middleware来处理，强烈建议添加</p>
+<p>#5 host头验证<br>使用django.http.HttpRequest.get_host() 可以获取到host，有伪造的话直接报错了，如果直接访问request.META则没有这效果</p>
+<p>#6 文件上传<br>django的imageField只会判断上传的文件是否有一个合法的png头，所以基本上无法限制有害文件的上传。<br>（1）另建一个文件服务器<br>（2）限制文件大小，防止dos攻击，如设置apache的LimitRequestBody大小<br>（3）确保文件不可执行<br>（4）传到二级域名上，比如说传到usercontent-example.com上而不是usercontent.example.com上<br>（5）限制文件上传的类型</p>
+<p>#7 email头注入<br>用于发送垃圾邮件，hacker发送如下：<code>hello\ncc:spamvictim@example.com</code> 就转变成了<br><code>To: hardcoded@example.com
+Subject: hello
+cc: spamvictim@example.com</code> 可使用djaong.core.mail来发送，他是不允许任意字段中包含newlines</p>
+<p>#8 目录遍历<br>目录遍历也算一种注入,主要是突破目录限制读取或者写入文件,django中内置的静态内容视图就是一个做转义很好的例子(django.views.static),相关代码如下:<br><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> os</div><div class="line"><span class="keyword">import</span> posixpath</div><div class="line"> </div><div class="line">path = posixpath.normpath(urllib.unquote(path))</div><div class="line">newpath = <span class="string">''</span></div><div class="line"><span class="keyword">for</span> part <span class="keyword">in</span> path.split(<span class="string">'/'</span>):</div><div class="line">    <span class="keyword">if</span> <span class="keyword">not</span> part:</div><div class="line">        <span class="comment"># strip empty path components</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    drive, part = os.path.splitdrive(part)</div><div class="line">    head, part = os.path.split(part)</div><div class="line">    <span class="keyword">if</span> part <span class="keyword">in</span> (os.curdir, os.pardir):</div><div class="line">        <span class="comment"># strip '.' and '..' in path</span></div><div class="line">        <span class="keyword">continue</span></div><div class="line"> </div><div class="line">    newpath = os.path.join(newpath, part).replace(<span class="string">'\\'</span>, <span class="string">'/'</span>)</div></pre></td></tr></table></figure></p>
 
           
         

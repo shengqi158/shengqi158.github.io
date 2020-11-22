@@ -66,9 +66,9 @@
     
       <category term="PoC" scheme="http://xxlegend.com/tags/PoC/"/>
     
-      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
-    
       <category term="CVE-2019-2725" scheme="http://xxlegend.com/tags/CVE-2019-2725/"/>
+    
+      <category term="XMLDecoder" scheme="http://xxlegend.com/tags/XMLDecoder/"/>
     
       <category term="CNVD-C-2019-48814" scheme="http://xxlegend.com/tags/CNVD-C-2019-48814/"/>
     
